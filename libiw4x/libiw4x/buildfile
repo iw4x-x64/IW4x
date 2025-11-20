@@ -1,10 +1,12 @@
+source buildfile-cli
+
 intf_libs = # Interface dependencies.
 impl_libs = # Implementation dependencies.
 
 import intf_libs += libiw4x-utility%lib{iw4x-utility}
 
-lib{iw4x}: {hxx cxx}{** -version} \
-           {hxx    }{    version} \
+lib{iw4x}: {hxx cxx}{** -pregenerated/** -options -version} \
+           {hxx    }{                              version} \
            $impl_libs $intf_libs
 
 hxx{version}: in{version} $src_root/manifest

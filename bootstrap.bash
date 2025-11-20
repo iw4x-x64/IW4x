@@ -59,12 +59,8 @@ if test -n "$recreate"; then
     rm -rf .bdep >/dev/null 2>&1 || true
   fi
 
-  if test -d "../${project}-mingw32-debug-host"; then
-    rm -rf "../${project}-mingw32-debug-host" >/dev/null 2>&1 || true
-  fi
-
-  if test -d "../${project}-mingw32-release-host"; then
-    rm -rf "../${project}-mingw32-release-host" >/dev/null 2>&1 || true
+  if test -d "../${project}-host"; then
+    rm -rf "../${project}-host" >/dev/null 2>&1 || true
   fi
 fi
 
