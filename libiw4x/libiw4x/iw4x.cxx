@@ -10,6 +10,7 @@ extern "C"
 
 #include <libiw4x/frame/init.hxx>
 #include <libiw4x/menu/init.hxx>
+#include <libiw4x/dedicated/init.hxx>
 
 using namespace std;
 
@@ -239,6 +240,7 @@ namespace iw4x
         //
         frame::init (s);
         menu::init (s);
+        dedicated::init ();
 
         // __scrt_common_main_seh
         //

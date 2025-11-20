@@ -764,7 +764,8 @@ namespace iw4x
   : build2_metadata_ (),
     build2_metadata_specified_ (false),
     help_ (),
-    version_ ()
+    version_ (),
+    dedicated_ ()
   {
   }
 
@@ -777,7 +778,8 @@ namespace iw4x
   : build2_metadata_ (),
     build2_metadata_specified_ (false),
     help_ (),
-    version_ ()
+    version_ (),
+    dedicated_ ()
   {
     ::iw4x::cli::argv_scanner s (argc, argv, erase);
     _parse (s, opt, arg);
@@ -793,7 +795,8 @@ namespace iw4x
   : build2_metadata_ (),
     build2_metadata_specified_ (false),
     help_ (),
-    version_ ()
+    version_ (),
+    dedicated_ ()
   {
     ::iw4x::cli::argv_scanner s (start, argc, argv, erase);
     _parse (s, opt, arg);
@@ -809,7 +812,8 @@ namespace iw4x
   : build2_metadata_ (),
     build2_metadata_specified_ (false),
     help_ (),
-    version_ ()
+    version_ (),
+    dedicated_ ()
   {
     ::iw4x::cli::argv_scanner s (argc, argv, erase);
     _parse (s, opt, arg);
@@ -827,7 +831,8 @@ namespace iw4x
   : build2_metadata_ (),
     build2_metadata_specified_ (false),
     help_ (),
-    version_ ()
+    version_ (),
+    dedicated_ ()
   {
     ::iw4x::cli::argv_scanner s (start, argc, argv, erase);
     _parse (s, opt, arg);
@@ -841,7 +846,8 @@ namespace iw4x
   : build2_metadata_ (),
     build2_metadata_specified_ (false),
     help_ (),
-    version_ ()
+    version_ (),
+    dedicated_ ()
   {
     _parse (s, opt, arg);
   }
@@ -854,9 +860,11 @@ namespace iw4x
     if (p == ::iw4x::cli::usage_para::text)
       os << ::std::endl;
 
-    os << "--help    Print usage information and exit." << ::std::endl;
+    os << "--help      Print usage information and exit." << ::std::endl;
 
-    os << "--version Print version and exit." << ::std::endl;
+    os << "--version   Print version and exit." << ::std::endl;
+
+    os << "--dedicated Start the client in dedicated server mode." << ::std::endl;
 
     p = ::iw4x::cli::usage_para::option;
 
@@ -880,6 +888,8 @@ namespace iw4x
       &::iw4x::cli::thunk< options, &options::help_ >;
       _cli_options_map_["--version"] =
       &::iw4x::cli::thunk< options, &options::version_ >;
+      _cli_options_map_["--dedicated"] =
+      &::iw4x::cli::thunk< options, &options::dedicated_ >;
     }
   };
 

@@ -15,5 +15,10 @@ namespace iw4x
     {
       "Print version and exit."
     };
+
+    bool --dedicated
+    {
+      "Start the client in dedicated server mode."
+    }
   };
 }

@@ -304,6 +304,12 @@ namespace iw4x
   {
     return this->version_;
   }
+
+  inline const bool& options::
+  dedicated () const
+  {
+    return this->dedicated_;
+  }
 }
 
 // Begin epilogue.

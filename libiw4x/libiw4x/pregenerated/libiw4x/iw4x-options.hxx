@@ -482,6 +482,9 @@ namespace iw4x
     const bool&
     version () const;
 
+    const bool&
+    dedicated () const;
+
     // Print usage information.
     //
     static ::iw4x::cli::usage_para
@@ -505,6 +508,7 @@ namespace iw4x
     bool build2_metadata_specified_;
     bool help_;
     bool version_;
+    bool dedicated_;
   };
 }
 
