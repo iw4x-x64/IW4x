@@ -12,10 +12,12 @@
 #  define WIN32_LEAN_AND_MEAN
 #  ifndef NOMINMAX
 #    define NOMINMAX
+#    include <winsock2.h>
 #    include <windows.h>
 #    include <psapi.h>
 #    undef NOMINMAX
 #  else
+#    include <winsock2.h>
 #    include <windows.h>
 #    include <psapi.h>
 #  endif
@@ -23,11 +25,15 @@
 #else
 #  ifndef NOMINMAX
 #    define NOMINMAX
+#    include <winsock2.h>
 #    include <windows.h>
 #    include <psapi.h>
 #    undef NOMINMAX
 #  else
+#    include <winsock2.h>
 #    include <windows.h>
 #    include <psapi.h>
 #  endif
 #endif
+
+#include <d3d9.h>
