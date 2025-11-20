@@ -8,17 +8,7 @@ extern "C"
   #include <io.h>
 }
 
-#include <libiw4x/mod/frame.hxx>
-#include <libiw4x/mod/menu.hxx>
-#include <libiw4x/utility/minhook/hook.hxx>
-#include <libiw4x/utility/scheduler.hxx>
-#include <libiw4x/windows/process-threads-api.hxx>
-
 using namespace std;
-
-using namespace iw4x::windows;
-using namespace iw4x::utility;
-using namespace iw4x::mod;
 
 namespace iw4x
 {
@@ -114,16 +104,9 @@ namespace iw4x
       if (fdwReason != DLL_PROCESS_ATTACH)
         return TRUE;
 
-      // DllMain executes while the process loader lock is held.
-      //
-      // This is one of the few contexts where the operating system invokes our
-      // code under a low-level synchronization primitive. Any attempt to
-      // perform nontrivial work here risks deadlock or subtle ordering
-      // violations.
-      //
-      // To avoid this, we do not initialize directly in DllMain. Instead, we
-      // patch the executable's startup routine so that our setup runs later on
-      // IW4's main thread, outside the constraints imposed by the loader lock.
+      // DllMain executes while the process loader lock is held, so we defer
+      // initialization to IW4's main thread to avoid deadlocks and ordering
+      // violation.
       //
       uintptr_t target (0x140358EBC);
       uintptr_t source (reinterpret_cast<uintptr_t> (+[] ()
@@ -132,22 +115,24 @@ namespace iw4x
         //
         reinterpret_cast<void (*) ()> (0x1403598CC) ();
 
+        // IW4's binary is built with subsystem:windows and does not receive a
+        // console by default. Attach to an existing one when available so that
+        // diagnostic output become visible in interactive use.
+        //
+        attach_console ();
+
         // Under normal circumstances, a DLL is unloaded via FreeLibrary once
         // its reference count reaches zero. This is acceptable for auxiliary
         // libraries but unsuitable for modules like ours, which embed deeply
         // into the host process.
         //
-        // To prevent FreeLibrary call on our module, whether accidental or
-        // deliberate, we informs the Windows loader that our module is a
-        // permanent part of the process.
-        //
         HMODULE m;
         if (!GetModuleHandleEx (GET_MODULE_HANDLE_EX_FLAG_PIN |
-                                GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS,
+                                  GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS,
                                 reinterpret_cast<LPCTSTR> (DllMain),
                                 &m))
         {
-          cerr << "error: unable to mark module as permanent" << endl;
+          cerr << "error: unable to mark module as permanent";
           exit (1);
         }
 
@@ -160,10 +145,6 @@ namespace iw4x
         // file operations resolve against the module's directory when the
         // process is hosted or started indirectly.
         //
-        // Note also that failure to resolve or change the directory is treated
-        // as fatal, since continuing under an indeterminate working path would
-        // likely lead to cascading file I/O errors later on.
-        //
         char p [MAX_PATH];
         if (GetModuleFileName (m, p, MAX_PATH))
         {
@@ -173,18 +154,18 @@ namespace iw4x
           if (i == string::npos ||
               !SetCurrentDirectory (s.substr (0, i).c_str ()))
           {
-            cerr << "error: unable to set current directory" << endl;
+            cerr << "error: unable to set module current directory";
             exit (1);
           }
         }
         else
         {
-          cerr << "error: unable to retrieve module location" << endl;
+          cerr << "error: unable to retrieve module location";
           exit (1);
         }
 
-        // Relax the binary's memory protection to permit writes to code or data
-        // segments that are otherwise read-only.
+        // Relax module's memory protection to permit writes to segments that
+        // are otherwise read-only.
         //
         MODULEINFO mi;
         if (GetModuleInformation (GetCurrentProcess (),
@@ -192,52 +173,53 @@ namespace iw4x
                                   &mi,
                                   sizeof (mi)))
         {
-          if (DWORD o (0); !VirtualProtect (mi.lpBaseOfDll,
-                                            mi.SizeOfImage,
-                                            PAGE_EXECUTE_READWRITE,
-                                            &o))
+          DWORD o (0);
+          if (!VirtualProtect (mi.lpBaseOfDll,
+                               mi.SizeOfImage,
+                               PAGE_EXECUTE_READWRITE,
+                               &o))
           {
-            cerr << "error: unable to change memory protection" << endl;
+            cerr << "error: unable to change memory protection";
             exit (1);
           }
         }
         else
         {
-          cerr << "error: unable to retrieve module information" << endl;
+          cerr << "error: unable to retrieve module information";
           exit (1);
         }
 
-        // Quick Patch
+        // Patch runtime checks and service initialization.
         //
-        // Removes runtime dependencies on Xbox Live and XGameRuntime
-        // components.
+        // Removes references to Xbox Live and XGameRuntime and disables
+        // related handling paths.
         //
         ([] (void (*_) (uintptr_t, int, size_t))
           {
-            _(0x1401B2FCA, 0x31, 1); // Bypass XGameRuntimeInitialize
+            _(0x1401B2FCA, 0x31, 1); // Bypass xgameruntimeinitialize
             _(0x1401B2FCB, 0xC0, 1); //
             _(0x1401B2FCC, 0x90, 3); //
             _(0x1401B308F, 0x31, 1); //
             _(0x1401B3090, 0xC0, 1); //
             _(0x1401B3091, 0x90, 3); //
 
-            _(0x1402A6A4B, 0x90, 5); // NOP out CurlX initialization
-            _(0x1402A6368, 0x90, 5); // NOP out CurlX cleanup
+            _(0x1402A6A4B, 0x90, 5); // Bypass curlx
+            _(0x1402A6368, 0x90, 5); //
 
-            _(0x1402A5F70, 0x90, 3); // Skip flag clobbering
-            _(0x1402A5F73, 0x74, 1); // Bypass Xbox Live restriction
-            _(0x1400F5B86, 0xEB, 1); // Skip XBOXLIVE_SIGNINCHANGED
-            _(0x1400F5BAC, 0xEB, 1); // Skip XBOXLIVE_SIGNEDOUT
-            _(0x14010B332, 0xEB, 1); // Bypass Xbox Live permission
-            _(0x1401BA1FE, 0xEB, 1); // Always pass signed-in status
+            _(0x1402A5F70, 0x90, 3); // Bypass xboxlive_signed
+            _(0x1402A5F73, 0x74, 1); //
+            _(0x1400F5B86, 0xEB, 1); //
+            _(0x1400F5BAC, 0xEB, 1); //
+            _(0x14010B332, 0xEB, 1); //
+            _(0x1401BA1FE, 0xEB, 1); //
 
-            _(0x140271ED0, 0xC3, 1); // Disable popup
+            _(0x140271ED0, 0xC3, 1); // Bypass playlist
+            _(0x1400F6BC4, 0x90, 2); //
 
-            _(0x1400F6BC4, 0x90, 2); // Skip playlist download check
-            _(0x1400FC833, 0xEB, 1); // Skip config string mismatch (1)
-            _(0x1400D2AFC, 0x90, 2); // Skip config string mismatch (2)
+            _(0x1400FC833, 0xEB, 1); // Bypass configstring mismatch
+            _(0x1400D2AFC, 0x90, 2); //
 
-            _(0x1400E4DA0, 0x33, 1); // Skip crash from stats
+            _(0x1400E4DA0, 0x33, 1); // Bypass stats mismatch
             _(0x1400E4DA1, 0xC0, 1); //
             _(0x1400E4DA2, 0xC3, 1); //
           })
@@ -246,38 +228,16 @@ namespace iw4x
             memset (reinterpret_cast<void*> (address), value, size);
           });
 
-        minhook::initialize ();
-        process_threads_api_init ();
-
-        // Subsystem initialization.
-        //
-        // These subsystems form part of the fixed IW4x execution model. They
-        // are required unconditionally, and their construction is tied to the
-        // process lifetime.
-        //
-        #define X(name, args) name name { args };
-        X (scheduler, /*empty*/)
-        X (frame,     scheduler)
-        X (menu,      scheduler)
-        #undef X
-
         // __scrt_common_main_seh
         //
         return reinterpret_cast<int (*) ()> (0x140358D48) ();
       }));
 
-      // Build 64-bit absolute jump.
+      // Build a 64-bit jump using a 6-byte RIP-relative opcode plus 8-byte
+      // address, since x86-64 lacks a single-instruction that takes a 64-bit
+      // immediate.
       //
-      // x86-64 has no single-instruction form that takes a 64-bit immediate.
-      // The canonical solution is an indirect, RIP-relative jump followed by
-      // the eight-byte destination in little-endian form.
-      //
-      // With a zero displacement the memory operand refers to the eight bytes
-      // immediately after the six-byte opcode. The processor loads that value
-      // and transfers control to it. The total sequence is therefore 14 bytes:
-      // six for the opcode and displacement, eight for the address.
-      //
-      array<unsigned char, 14> sequence
+      array<unsigned char, 14> seq
       ({
         static_cast<unsigned char> (0xFF),
         static_cast<unsigned char> (0x25),
@@ -295,39 +255,17 @@ namespace iw4x
         static_cast<unsigned char> (source >> 56 & 0xFF)
       });
 
-      attach_console ();
-
       DWORD o (0);
 
       if (VirtualProtect (reinterpret_cast<void*> (target),
-                          sequence.size (),
-                          PAGE_READWRITE,
-                          &o) == 0)
+                          seq.size (),
+                          PAGE_EXECUTE_READWRITE,
+                          &o))
       {
-        cerr << "error: unable to change page protection" << endl;
-        return FALSE;
+        memmove (reinterpret_cast<void*> (target), seq.data (), seq.size ());
       }
-
-      memmove (reinterpret_cast<void*> (target),
-               sequence.data (),
-               sequence.size ());
-
-      if (VirtualProtect (reinterpret_cast<void*> (target),
-                          sequence.size (),
-                          o,
-                          &o) == 0)
-      {
-        cerr << "error: unable to restore page protection" << endl;
+      else
         return FALSE;
-      }
-
-      if (FlushInstructionCache (GetCurrentProcess (),
-                                 reinterpret_cast<const void*> (target),
-                                 sequence.size ()) == 0)
-      {
-        cerr << "error: unable to flush instruction cache" << endl;
-        return FALSE;
-      }
 
       // Successful DLL_PROCESS_ATTACH.
       //
