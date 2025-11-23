@@ -1,5 +1,6 @@
 #pragma once
 
+
 // Include Windows.h in a way that avoids the usual namespace pollution.
 //
 // In particular, we temporarily define WIN32_LEAN_AND_MEAN to exclude rarely
@@ -12,22 +13,34 @@
 #  define WIN32_LEAN_AND_MEAN
 #  ifndef NOMINMAX
 #    define NOMINMAX
+#    include <winsock2.h>
 #    include <windows.h>
+#    include <d3d9.h>
+#    include <psapi.h>
 #    include <tlhelp32.h>
 #    undef NOMINMAX
 #  else
+#    include <winsock2.h>
 #    include <windows.h>
+#    include <d3d9.h>
+#    include <psapi.h>
 #    include <tlhelp32.h>
 #  endif
 #  undef WIN32_LEAN_AND_MEAN
 #else
 #  ifndef NOMINMAX
 #    define NOMINMAX
+#    include <winsock2.h>
 #    include <windows.h>
+#    include <d3d9.h>
+#    include <psapi.h>
 #    include <tlhelp32.h>
 #    undef NOMINMAX
 #  else
+#    include <winsock2.h>
 #    include <windows.h>
+#    include <d3d9.h>
+#    include <psapi.h>
 #    include <tlhelp32.h>
 #  endif
 #endif
