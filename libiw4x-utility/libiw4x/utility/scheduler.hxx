@@ -2,12 +2,13 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <functional>
 #include <memory>
 #include <mutex>
 #include <string>
 #include <unordered_map>
-#include <vector>
+
+#include <boost/asio/io_context.hpp>
+#include <boost/asio/strand.hpp>
 
 #include <libiw4x/utility/export.hxx>
 
@@ -24,98 +25,103 @@ namespace iw4x
       scheduler (const scheduler&) = delete;
       scheduler& operator= (const scheduler&) = delete;
 
-      // Register a new pipeline with the given name.
+      // Register a new strand with the given name.
       //
-      // Pipeline names must be unique. Throws std::invalid_argument if the
+      // Strand names must be unique. Throws std::invalid_argument if the
       // name is empty or already registered.
       //
       void
-      register_pipeline (const std::string& name);
+      register_strand (const std::string& name);
 
-      // Unregister a pipeline, clearing any pending tasks.
+      // Unregister a strand.
       //
-      // Throws std::invalid_argument if the pipeline is not registered.
+      // Throws std::invalid_argument if the strand is not registered.
       //
       void
-      unregister_pipeline (const std::string& name);
+      unregister_strand (const std::string& name);
 
-      // Poll one pipeline to process pending tasks.
+      // Poll one strand to process pending tasks.
       //
-      // This is non-blocking and processes all ready tasks. Throws
-      // std::invalid_argument if the pipeline is not registered.
+      // This is a convenience wrapper that looks up the strand by name and
+      // calls io_context::poll() on its underlying context. Returns the
+      // number of handlers executed. Throws std::invalid_argument if the
+      // strand is not registered.
       //
-      void
+      std::size_t
       poll (const std::string& name);
 
-      // Post an immediate task to the specified pipeline.
+      // Post a task to the specified strand.
       //
-      // The task is enqueued and will execute when the pipeline is polled.
-      // Throws std::invalid_argument if the pipeline is not registered.
+      // This is a convenience wrapper that looks up the strand by name and
+      // posts the task using boost::asio::post(). Throws std::invalid_argument
+      // if the strand is not registered.
       //
-      template <typename F>
-      void
-      post (const std::string& pipeline_name, F&& function)
-      {
-        enqueue_task (pipeline_name,
-                      std::function<void ()> (static_cast<F&&> (function)));
-      }
+      template <typename F> void
+      post (const std::string& strand_name, F&& function);
 
-      // Check if a pipeline has pending tasks.
-      //
-      // Throws std::invalid_argument if the pipeline is not registered.
-      //
-      bool
-      has_pending (const std::string& name) const;
-
-      // Check if a pipeline is registered.
+      // Check if a strand is registered.
       //
       bool
       is_registered (const std::string& name) const;
 
-    private:
-      // Pipeline context holds the task queue for a single pipeline.
+      // Get direct access to the strand's io_context.
       //
-      struct pipeline_context
+      // Returns a reference to the underlying io_context for the named strand.
+      // Throws std::invalid_argument if the strand is not registered.
+      //
+      boost::asio::io_context&
+      get_io_context (const std::string& name);
+
+      // Get direct access to the strand.
+      //
+      // Returns a reference to the underlying strand for the named strand.
+      // Throws std::invalid_argument if the strand is not registered.
+      //
+      boost::asio::io_context::strand&
+      get_strand (const std::string& name);
+
+    private:
+      class strand_context
       {
-        std::string name;
-        std::vector<std::function<void ()>> tasks;
-        mutable std::mutex mtx;
+      public:
+        strand_context ();
+        ~strand_context () = default;
 
-        explicit
-        pipeline_context (const std::string& pipeline_name);
+        strand_context (const strand_context&) = delete;
+        strand_context& operator= (const strand_context&) = delete;
 
-       ~pipeline_context ();
+        boost::asio::io_context&
+        io_context () noexcept;
 
-        pipeline_context (const pipeline_context&) = delete;
-        pipeline_context& operator= (const pipeline_context&) = delete;
+        boost::asio::io_context::strand&
+        strand () noexcept;
 
-        void
-        enqueue (std::function<void ()> task);
-
-        std::vector<std::function<void ()>>
-        extract_pending ();
-
-        bool
-        has_pending () const;
-
-        void
-        clear ();
+      private:
+        boost::asio::io_context io_context_;
+        boost::asio::io_context::strand strand_;
       };
 
-      std::unordered_map<std::uint64_t, std::unique_ptr<pipeline_context>> pipelines_;
-      mutable std::mutex registry_mutex_;
+      using strand_map = std::unordered_map<std::uint64_t,
+                                            std::unique_ptr<strand_context>>;
 
-      void
-      enqueue_task (const std::string& name, std::function<void ()>);
+      strand_map strands_;
+      mutable std::mutex mutex_;
 
-      pipeline_context*
-      find_context (std::uint64_t hash) noexcept;
+      strand_context&
+      require_context (const std::string& name);
 
-      const pipeline_context*
-      find_context (std::uint64_t hash) const noexcept;
-
-      void
-      process_tasks (pipeline_context&);
+      const strand_context&
+      require_context (const std::string& name) const;
     };
+
+    // Template implementation
+    //
+    template <typename F>
+    void scheduler::
+    post (const std::string& strand_name, F&& function)
+    {
+      boost::asio::io_context::strand& s (get_strand (strand_name));
+      boost::asio::post (s, std::forward<F> (function));
+    }
   }
 }

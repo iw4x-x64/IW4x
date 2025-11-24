@@ -43,7 +43,7 @@ namespace iw4x
     {
       sched = &s;
 
-      s.register_pipeline ("com_frame");
+      s.register_strand ("com_frame");
 
       minhook::create (Com_Frame_Try_Block_Function, &com_frame_try_block_function);
     }

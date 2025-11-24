@@ -11,94 +11,94 @@ int main ()
   using namespace std;
   using namespace iw4x::utility;
 
-  // Test register_pipeline
+  // Test register_strand
   //
   {
     scheduler sched;
-    sched.register_pipeline ("test_pipeline");
+    sched.register_strand ("test_strand");
 
-    // Verify pipeline is registered
+    // Verify strand is registered
     //
-    assert (sched.is_registered ("test_pipeline"));
+    assert (sched.is_registered ("test_strand"));
 
     // Verify different name is not registered
     //
-    assert (!sched.is_registered ("other_pipeline"));
+    assert (!sched.is_registered ("other_strand"));
   }
 
-  // Test register_pipeline with empty name
+  // Test register_strand with empty name
   //
   {
     scheduler sched;
 
     try
     {
-      sched.register_pipeline ("");
+      sched.register_strand ("");
       assert (false);
     }
     catch (const invalid_argument& e)
     {
-      assert (e.what () == string ("pipeline name cannot be empty"));
+      assert (e.what () == string ("strand name cannot be empty"));
     }
   }
 
-  // Test register_pipeline with duplicate name
+  // Test register_strand with duplicate name
   //
   {
     scheduler sched;
-    sched.register_pipeline ("duplicate");
+    sched.register_strand ("duplicate");
 
     try
     {
-      sched.register_pipeline ("duplicate");
+      sched.register_strand ("duplicate");
       assert (false);
     }
     catch (const invalid_argument& e)
     {
-      assert (e.what () == string ("pipeline name already registered: duplicate"));
+      assert (e.what () == string ("strand name already registered: duplicate"));
     }
   }
 
-  // Test unregister_pipeline
+  // Test unregister_strand
   //
   {
     scheduler sched;
-    sched.register_pipeline ("temp");
+    sched.register_strand ("temp");
     assert (sched.is_registered ("temp"));
 
-    sched.unregister_pipeline ("temp");
+    sched.unregister_strand ("temp");
     assert (!sched.is_registered ("temp"));
   }
 
-  // Test unregister_pipeline with empty name
+  // Test unregister_strand with empty name
   //
   {
     scheduler sched;
 
     try
     {
-      sched.unregister_pipeline ("");
+      sched.unregister_strand ("");
       assert (false);
     }
     catch (const invalid_argument& e)
     {
-      assert (e.what () == string ("pipeline name cannot be empty"));
+      assert (e.what () == string ("strand name cannot be empty"));
     }
   }
 
-  // Test unregister_pipeline with non-existent pipeline
+  // Test unregister_strand with non-existent strand
   //
   {
     scheduler sched;
 
     try
     {
-      sched.unregister_pipeline ("nonexistent");
+      sched.unregister_strand ("nonexistent");
       assert (false);
     }
     catch (const invalid_argument& e)
     {
-      assert (e.what () == string ("pipeline not registered: nonexistent"));
+      assert (e.what () == string ("strand not registered: nonexistent"));
     }
   }
 
@@ -106,7 +106,7 @@ int main ()
   //
   {
     scheduler sched;
-    sched.register_pipeline ("main");
+    sched.register_strand ("main");
 
     int counter (0);
 
@@ -115,21 +115,21 @@ int main ()
     // Task should not execute until poll
     //
     assert (counter == 0);
-    assert (sched.has_pending ("main"));
+    assert (!sched.get_io_context("main").stopped());
 
     sched.poll ("main");
 
     // Task should have executed
     //
     assert (counter == 1);
-    assert (!sched.has_pending ("main"));
+    assert (sched.get_io_context("main").stopped());
   }
 
   // Test post and poll with multiple tasks
   //
   {
     scheduler sched;
-    sched.register_pipeline ("main");
+    sched.register_strand ("main");
 
     int sum (0);
 
@@ -137,17 +137,17 @@ int main ()
     sched.post ("main", [&sum] () { sum += 2; });
     sched.post ("main", [&sum] () { sum += 3; });
 
-    assert (sched.has_pending ("main"));
+    assert (!sched.get_io_context("main").stopped());
 
     sched.poll ("main");
 
     // All tasks should have executed
     //
     assert (sum == 6);
-    assert (!sched.has_pending ("main"));
+    assert (sched.get_io_context("main").stopped());
   }
 
-  // Test post to unregistered pipeline
+  // Test post to unregistered strand
   //
   {
     scheduler sched;
@@ -159,11 +159,11 @@ int main ()
     }
     catch (const invalid_argument& e)
     {
-      assert (e.what () == string ("pipeline not registered: missing"));
+      assert (e.what () == string ("strand not registered: missing"));
     }
   }
 
-  // Test poll on unregistered pipeline
+  // Test poll on unregistered strand
   //
   {
     scheduler sched;
@@ -175,23 +175,23 @@ int main ()
     }
     catch (const invalid_argument& e)
     {
-      assert (e.what () == string ("pipeline not registered: missing"));
+      assert (e.what () == string ("strand not registered: missing"));
     }
   }
 
-  // Test has_pending on unregistered pipeline
+  // Test has_pending on unregistered strand
   //
   {
     scheduler sched;
 
     try
     {
-      sched.has_pending ("missing");
+      sched.get_io_context("missing");
       assert (false);
     }
     catch (const invalid_argument& e)
     {
-      assert (e.what () == string ("pipeline not registered: missing"));
+      assert (e.what () == string ("strand not registered: missing"));
     }
   }
 
@@ -199,58 +199,58 @@ int main ()
   //
   {
     scheduler sched;
-    sched.register_pipeline ("empty");
+    sched.register_strand ("empty");
 
-    assert (!sched.has_pending ("empty"));
+    assert (!sched.get_io_context("empty").stopped());
 
     // Should not throw, just do nothing
     //
     sched.poll ("empty");
 
-    assert (!sched.has_pending ("empty"));
+    assert (sched.get_io_context("empty").stopped());
   }
 
-  // Test multiple pipelines
+  // Test multiple strands
   //
   {
     scheduler sched;
-    sched.register_pipeline ("pipeline_a");
-    sched.register_pipeline ("pipeline_b");
+    sched.register_strand ("strand_a");
+    sched.register_strand ("strand_b");
 
     int counter_a (0);
     int counter_b (0);
 
-    sched.post ("pipeline_a", [&counter_a] () { ++counter_a; });
-    sched.post ("pipeline_b", [&counter_b] () { ++counter_b; });
+    sched.post ("strand_a", [&counter_a] () { ++counter_a; });
+    sched.post ("strand_b", [&counter_b] () { ++counter_b; });
 
     // Both should have pending tasks
     //
-    assert (sched.has_pending ("pipeline_a"));
-    assert (sched.has_pending ("pipeline_b"));
+    assert (!sched.get_io_context("strand_a").stopped());
+    assert (!sched.get_io_context("strand_b").stopped());
 
-    // Poll only pipeline_a
+    // Poll only strand_a
     //
-    sched.poll ("pipeline_a");
+    sched.poll ("strand_a");
 
     assert (counter_a == 1);
     assert (counter_b == 0);
-    assert (!sched.has_pending ("pipeline_a"));
-    assert (sched.has_pending ("pipeline_b"));
+    assert (sched.get_io_context("strand_a").stopped());
+    assert (!sched.get_io_context("strand_b").stopped());
 
-    // Poll pipeline_b
+    // Poll strand_b
     //
-    sched.poll ("pipeline_b");
+    sched.poll ("strand_b");
 
     assert (counter_a == 1);
     assert (counter_b == 1);
-    assert (!sched.has_pending ("pipeline_b"));
+    assert (sched.get_io_context("strand_b").stopped());
   }
 
   // Test task execution order (FIFO)
   //
   {
     scheduler sched;
-    sched.register_pipeline ("ordered");
+    sched.register_strand ("ordered");
 
     string result;
 
@@ -267,16 +267,16 @@ int main ()
   //
   {
     scheduler sched;
-    sched.register_pipeline ("temp");
+    sched.register_strand ("temp");
 
     int counter (0);
     sched.post ("temp", [&counter] () { ++counter; });
 
-    assert (sched.has_pending ("temp"));
+    assert (!sched.get_io_context("temp").stopped());
 
-    sched.unregister_pipeline ("temp");
+    sched.unregister_strand ("temp");
 
-    // Pipeline is gone, counter should not have changed
+    // strand is gone, counter should not have changed
     //
     assert (counter == 0);
     assert (!sched.is_registered ("temp"));
@@ -286,17 +286,17 @@ int main ()
   //
   {
     scheduler sched;
-    sched.register_pipeline ("reuse");
+    sched.register_strand ("reuse");
 
     int counter (0);
     sched.post ("reuse", [&counter] () { ++counter; });
 
-    sched.unregister_pipeline ("reuse");
-    sched.register_pipeline ("reuse");
+    sched.unregister_strand ("reuse");
+    sched.register_strand ("reuse");
 
-    // New pipeline should have no pending tasks
+    // New strand should have no pending tasks
     //
-    assert (!sched.has_pending ("reuse"));
+    assert (!sched.get_io_context("reuse").stopped());
 
     sched.post ("reuse", [&counter] () { ++counter; });
     sched.poll ("reuse");
@@ -310,7 +310,7 @@ int main ()
   //
   {
     scheduler sched;
-    sched.register_pipeline ("capture");
+    sched.register_strand ("capture");
 
     int value (42);
     bool executed (false);
@@ -329,7 +329,7 @@ int main ()
   //
   {
     scheduler sched;
-    sched.register_pipeline ("mutable");
+    sched.register_strand ("mutable");
 
     int external (0);
 
@@ -342,11 +342,11 @@ int main ()
     assert (external == 100);
   }
 
-  // Test multiple polls on same pipeline
+  // Test multiple polls on same strand
   //
   {
     scheduler sched;
-    sched.register_pipeline ("multi_poll");
+    sched.register_strand ("multi_poll");
 
     int counter (0);
 
@@ -367,7 +367,7 @@ int main ()
   //
   {
     scheduler sched;
-    sched.register_pipeline ("continuous");
+    sched.register_strand ("continuous");
 
     int counter (0);
 
@@ -375,11 +375,11 @@ int main ()
     sched.poll ("continuous");
 
     assert (counter == 1);
-    assert (!sched.has_pending ("continuous"));
+    assert (sched.get_io_context("continuous").stopped());
 
     sched.post ("continuous", [&counter] () { ++counter; });
 
-    assert (sched.has_pending ("continuous"));
+    assert (sched.get_io_context("continuous").stopped());
 
     sched.poll ("continuous");
 
@@ -390,7 +390,7 @@ int main ()
   //
   {
     scheduler sched;
-    sched.register_pipeline ("recursive");
+    sched.register_strand ("recursive");
 
     int counter (0);
 
@@ -402,29 +402,23 @@ int main ()
 
     sched.poll ("recursive");
 
-    // First task executed, second task posted but not yet polled
-    //
-    assert (counter == 1);
-    assert (sched.has_pending ("recursive"));
-
-    sched.poll ("recursive");
-
-    // Second task executed
+    // All task executed
     //
     assert (counter == 2);
+    assert (sched.get_io_context("recursive").stopped());
   }
 
-  // Test pipeline names are case-sensitive
+  // Test strand names are case-sensitive
   //
   {
     scheduler sched;
-    sched.register_pipeline ("CaseSensitive");
-    sched.register_pipeline ("casesensitive");
+    sched.register_strand ("CaseSensitive");
+    sched.register_strand ("casesensitive");
 
     assert (sched.is_registered ("CaseSensitive"));
     assert (sched.is_registered ("casesensitive"));
 
-    // These are different pipelines
+    // These are different strands
     //
     int counter_upper (0);
     int counter_lower (0);
@@ -441,11 +435,11 @@ int main ()
     assert (counter_lower == 1);
   }
 
-  // Test pipeline with special characters
+  // Test strand with special characters
   //
   {
     scheduler sched;
-    sched.register_pipeline ("pipe-line_123!@#");
+    sched.register_strand ("pipe-line_123!@#");
 
     assert (sched.is_registered ("pipe-line_123!@#"));
 
@@ -460,22 +454,22 @@ int main ()
   //
   {
     scheduler sched;
-    sched.register_pipeline ("check_pending");
+    sched.register_strand ("check_pending");
 
     sched.post ("check_pending", [] () {});
 
-    assert (sched.has_pending ("check_pending"));
+    assert (!sched.get_io_context("check_pending").stopped ());
 
     sched.poll ("check_pending");
 
-    assert (!sched.has_pending ("check_pending"));
+    assert (sched.get_io_context("check_pending").stopped ());
   }
 
   // Test exception safety in tasks
   //
   {
     scheduler sched;
-    sched.register_pipeline ("exception_test");
+    sched.register_strand ("exception_test");
 
     int counter (0);
 
@@ -500,12 +494,12 @@ int main ()
     assert (counter == 1);
   }
 
-  // Test long pipeline names
+  // Test long strand names
   //
   {
     scheduler sched;
     string long_name (1000, 'x');
-    sched.register_pipeline (long_name);
+    sched.register_strand (long_name);
 
     assert (sched.is_registered (long_name));
 
@@ -516,14 +510,14 @@ int main ()
     assert (counter == 1);
   }
 
-  // Test destructor clears all pipelines
+  // Test destructor clears all strands
   //
   {
     int counter (0);
 
     {
       scheduler sched;
-      sched.register_pipeline ("temp");
+      sched.register_strand ("temp");
       sched.post ("temp", [&counter] () { ++counter; });
 
       // Scheduler destroyed here, tasks not executed

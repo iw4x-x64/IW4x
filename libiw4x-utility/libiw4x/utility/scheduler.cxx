@@ -1,7 +1,8 @@
 #include <libiw4x/utility/scheduler.hxx>
 
 #include <stdexcept>
-#include <utility>
+
+#include <boost/asio/post.hpp>
 
 #include <libiw4x/utility/xxhash.hxx>
 
@@ -11,52 +12,26 @@ namespace iw4x
 {
   namespace utility
   {
-    // scheduler::pipeline_context
+    // scheduler::strand_context
     //
 
-    scheduler::pipeline_context::
-    pipeline_context (const string& n)
-        : name (n), tasks (), mtx ()
+    scheduler::strand_context::
+    strand_context ()
+      : io_context_ (),
+        strand_ (io_context_)
     {
     }
 
-    scheduler::pipeline_context::
-    ~pipeline_context ()
+    boost::asio::io_context& scheduler::strand_context::
+    io_context () noexcept
     {
+      return io_context_;
     }
 
-    void scheduler::pipeline_context::
-    enqueue (function<void ()> t)
+    boost::asio::io_context::strand& scheduler::strand_context::
+    strand () noexcept
     {
-      lock_guard<mutex> lck (mtx);
-      tasks.push_back (move (t));
-    }
-
-    vector<function<void ()>> scheduler::pipeline_context::
-    extract_pending ()
-    {
-      vector<function<void ()>> pnd;
-
-      {
-        lock_guard<mutex> lck (mtx);
-        pnd.swap (tasks);
-      }
-
-      return pnd;
-    }
-
-    bool scheduler::pipeline_context::
-    has_pending () const
-    {
-      lock_guard<mutex> lck (mtx);
-      return !tasks.empty ();
-    }
-
-    void scheduler::pipeline_context::
-    clear ()
-    {
-      lock_guard<mutex> lck (mtx);
-      tasks.clear ();
+      return strand_;
     }
 
     // scheduler
@@ -64,124 +39,105 @@ namespace iw4x
 
     scheduler::
     scheduler ()
-      : pipelines_ (), registry_mutex_ ()
+      : strands_ (), mutex_ ()
     {
     }
 
     scheduler::
     ~scheduler ()
     {
-      lock_guard<mutex> lck (registry_mutex_);
-      pipelines_.clear ();
+      scoped_lock lck (mutex_);
+      strands_.clear ();
     }
 
     void scheduler::
-    register_pipeline (const string& n)
+    register_strand (const string& n)
     {
       if (n.empty ())
-        throw invalid_argument ("pipeline name cannot be empty");
+        throw invalid_argument ("strand name cannot be empty");
 
       uint64_t h (xxh64 (n));
-      lock_guard<mutex> lck (registry_mutex_);
+      scoped_lock lck (mutex_);
 
-      // Check for duplicate names.
-      //
-      if (pipelines_.find (h) != pipelines_.end ())
-        throw invalid_argument ("pipeline name already registered: " + n);
+      if (strands_.contains (h))
+        throw invalid_argument ("strand name already registered: " + n);
 
-      pipelines_.emplace (h, make_unique<pipeline_context> (n));
+      strands_.emplace (h, make_unique<strand_context> ());
     }
 
     void scheduler::
-    unregister_pipeline (const string& n)
+    unregister_strand (const string& n)
     {
       if (n.empty ())
-        throw invalid_argument ("pipeline name cannot be empty");
+        throw invalid_argument ("strand name cannot be empty");
 
       uint64_t h (xxh64 (n));
-      lock_guard<mutex> lck (registry_mutex_);
+      scoped_lock lck (mutex_);
 
-      if (pipelines_.find (h) == pipelines_.end ())
-        throw invalid_argument ("pipeline not registered: " + n);
-
-      pipelines_.erase (h);
+      if (strands_.erase (h) == 0)
+        throw invalid_argument ("strand not registered: " + n);
     }
 
-    void scheduler::
+    size_t scheduler::
     poll (const string& n)
     {
-      uint64_t h (xxh64 (n));
-      pipeline_context* ctx (find_context (h));
+      auto& ctx = require_context (n).io_context ();
 
-      if (ctx == nullptr)
-        throw invalid_argument ("pipeline not registered: " + n);
+      // If the context ran out of work previously, it is "stopped" and we must
+      // restart it to allow it to process new tasks.
+      //
+      if (ctx.stopped ())
+        ctx.restart ();
 
-      process_tasks (*ctx);
-    }
-
-    void scheduler::
-    enqueue_task (const string& n, function<void ()> f)
-    {
-      uint64_t h (xxh64 (n));
-      pipeline_context* ctx (find_context (h));
-
-      if (ctx == nullptr)
-        throw invalid_argument ("pipeline not registered: " + n);
-
-      ctx->enqueue (move (f));
-    }
-
-    bool scheduler::
-    has_pending (const string& n) const
-    {
-      uint64_t h (xxh64 (n));
-      const pipeline_context* ctx (find_context (h));
-
-      if (ctx == nullptr)
-        throw invalid_argument ("pipeline not registered: " + n);
-
-      return ctx->has_pending ();
+      return ctx.poll ();
     }
 
     bool scheduler::
     is_registered (const string& n) const
     {
       uint64_t h (xxh64 (n));
-      lock_guard<mutex> lck (registry_mutex_);
-      return pipelines_.find (h) != pipelines_.end ();
+      scoped_lock lck (mutex_);
+      return strands_.contains (h);
     }
 
-    scheduler::pipeline_context* scheduler::
-    find_context (uint64_t h) noexcept
+    boost::asio::io_context& scheduler::
+    get_io_context (const string& n)
     {
-      lock_guard<mutex> lck (registry_mutex_);
-
-      unordered_map<uint64_t, unique_ptr<pipeline_context>>::iterator it (
-        pipelines_.find (h));
-
-      return it != pipelines_.end () ? it->second.get () : nullptr;
+      return require_context (n).io_context ();
     }
 
-    const scheduler::pipeline_context* scheduler::
-    find_context (uint64_t h) const noexcept
+    boost::asio::io_context::strand& scheduler::
+    get_strand (const string& n)
     {
-      lock_guard<mutex> lck (registry_mutex_);
-
-      unordered_map<uint64_t, unique_ptr<pipeline_context>>::const_iterator it (
-        pipelines_.find (h));
-
-      return it != pipelines_.end () ? it->second.get () : nullptr;
+      return require_context (n).strand ();
     }
 
-    void scheduler::
-    process_tasks (pipeline_context& ctx)
+    scheduler::strand_context& scheduler::
+    require_context (const string& n)
     {
-      vector<function<void ()>> tsks (ctx.extract_pending ());
+      uint64_t h (xxh64 (n));
+      scoped_lock lck (mutex_);
 
-      // Execute tasks outside the lock.
-      //
-      for (function<void ()>& tsk : tsks)
-        tsk ();
+      strand_map::iterator it (strands_.find (h));
+
+      if (it == strands_.end ())
+        throw invalid_argument ("strand not registered: " + n);
+
+      return *it->second;
+    }
+
+    const scheduler::strand_context& scheduler::
+    require_context (const string& n) const
+    {
+      uint64_t h (xxh64 (n));
+      scoped_lock lck (mutex_);
+
+      strand_map::const_iterator it (strands_.find (h));
+
+      if (it == strands_.end ())
+        throw invalid_argument ("strand not registered: " + n);
+
+      return *it->second;
     }
   }
 }

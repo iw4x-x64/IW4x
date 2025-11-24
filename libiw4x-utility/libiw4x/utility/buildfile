@@ -2,6 +2,7 @@ intf_libs = # Interface dependencies.
 impl_libs = # Implementation dependencies.
 
 import intf_libs += xxhash%lib{xxhash}
+import intf_libs += libboost-asio%lib{boost_asio}
 
 lib{iw4x-utility}: {h   c  }{**         } \
                    {hxx cxx}{** -version} \
