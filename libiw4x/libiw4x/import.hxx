@@ -566,14 +566,14 @@ namespace iw4x
   struct _AILSOUNDINFO
   {
     int format;
-    const void *data_ptr;
+    const void* data_ptr;
     unsigned int data_len;
     unsigned int rate;
     int bits;
     int channels;
     unsigned int samples;
     unsigned int block_size;
-    const void *initial_ptr;
+    const void* initial_ptr;
   };
 
   // 772
@@ -581,14 +581,14 @@ namespace iw4x
   struct MssSound
   {
     _AILSOUNDINFO info;
-    char *data;
+    char* data;
   };
 
   // 773
   //
   struct LoadedSound
   {
-    const char *name;
+    const char* name;
     MssSound sound;
   };
 
@@ -596,8 +596,8 @@ namespace iw4x
   //
   struct StreamFileNameRaw
   {
-    const char *dir;
-    const char *name;
+    const char* dir;
+    const char* name;
   };
 
   // 775
@@ -625,7 +625,7 @@ namespace iw4x
   //
   union SoundFileRef
   {
-    LoadedSound *loadSnd;
+    LoadedSound* loadSnd;
     StreamedSound streamSnd;
   };
 
@@ -642,7 +642,7 @@ namespace iw4x
   //
   struct SndCurve
   {
-    const char *filename;
+    const char* filename;
     unsigned short knotCount;
     float knots[16][2];
   };
@@ -669,7 +669,7 @@ namespace iw4x
   struct SpeakerMap
   {
     bool isDefault;
-    const char *name;
+    const char* name;
     MSSChannelMap channelMaps[2][2];
   };
 
@@ -677,12 +677,12 @@ namespace iw4x
   //
   struct snd_alias_t
   {
-    const char *aliasName;
-    const char *subtitle;
-    const char *secondaryAliasName;
-    const char *chainAliasName;
-    const char *mixerGroup;
-    SoundFile *soundFile;
+    const char* aliasName;
+    const char* subtitle;
+    const char* secondaryAliasName;
+    const char* chainAliasName;
+    const char* mixerGroup;
+    SoundFile* soundFile;
     int sequence;
     float volMin;
     float volMax;
@@ -692,20 +692,22 @@ namespace iw4x
     float distMax;
     float velocityMin;
     int flags;
+
     union
     {
       float slavePercentage;
       float masterPercentage;
     };
+
     float probability;
     float lfePercentage;
     float centerPercentage;
     int startDelay;
-    SndCurve *volumeFalloffCurve;
+    SndCurve* volumeFalloffCurve;
     float envelopMin;
     float envelopMax;
     float envelopPercentage;
-    SpeakerMap *speakerMap;
+    SpeakerMap* speakerMap;
   };
 
   // 791
@@ -717,7 +719,7 @@ namespace iw4x
     unsigned int unsignedInt;
     float value;
     float vector[4];
-    const char *string;
+    const char* string;
     char color[4];
   };
 
@@ -754,8 +756,8 @@ namespace iw4x
   //
   struct dvar_t
   {
-    const char *name;
-    const char *description;
+    const char* name;
+    const char* description;
     unsigned int flags;
     dvarType type;
     bool modified;
@@ -763,14 +765,14 @@ namespace iw4x
     DvarValue latched;
     DvarValue reset;
     DvarLimits domain;
-    bool (__cdecl *domainFunc)(dvar_t *, DvarValue);
-    dvar_t *hashNext;
+    bool (__cdecl* domainFunc) (dvar_t*, DvarValue);
+    dvar_t* hashNext;
   };
 
   struct snd_alias_list_t
   {
-    const char *aliasName;
-    snd_alias_t *head;
+    const char* aliasName;
+    snd_alias_t* head;
     int count;
   };
 
@@ -803,7 +805,7 @@ namespace iw4x
   //
   struct MaterialInfo
   {
-    const char *name;
+    const char* name;
     char gameFlags;
     char sortKey;
     char textureAtlasRowCount;
@@ -817,12 +819,12 @@ namespace iw4x
   //
   struct MaterialTechniqueSet
   {
-    const char *name;
+    const char* name;
     char worldVertFormat;
     bool hasBeenUploaded;
     char unused[1];
-    MaterialTechniqueSet *remappedTechniqueSet;
-    MaterialTechnique *techniques[48];
+    MaterialTechniqueSet* remappedTechniqueSet;
+    MaterialTechnique* techniques[48];
   };
 
   // 966
@@ -838,14 +840,14 @@ namespace iw4x
   struct MaterialVertexStreamRouting
   {
     MaterialStreamRouting data[13];
-    IDirect3DVertexDeclaration9 *decl[16];
+    IDirect3DVertexDeclaration9* decl[16];
   };
 
   // 969
   //
   struct MaterialVertexDeclaration
   {
-    const char *name;
+    const char* name;
     char streamCount;
     bool hasOptionalSource;
     MaterialVertexStreamRouting routing;
@@ -855,7 +857,7 @@ namespace iw4x
   //
   struct GfxVertexShaderLoadDef
   {
-    unsigned int *program;
+    unsigned int* program;
     unsigned short programSize;
     unsigned short loadForRenderer;
   };
@@ -864,7 +866,7 @@ namespace iw4x
   //
   struct MaterialVertexShaderProgram
   {
-    IDirect3DVertexShader9 *vs;
+    IDirect3DVertexShader9* vs;
     GfxVertexShaderLoadDef loadDef;
   };
 
@@ -872,7 +874,7 @@ namespace iw4x
   //
   struct MaterialVertexShader
   {
-    const char *name;
+    const char* name;
     MaterialVertexShaderProgram prog;
   };
 
@@ -880,7 +882,7 @@ namespace iw4x
   //
   struct GfxPixelShaderLoadDef
   {
-    unsigned int *program;
+    unsigned int* program;
     unsigned short programSize;
     unsigned short loadForRenderer;
   };
@@ -889,7 +891,7 @@ namespace iw4x
   //
   struct MaterialPixelShaderProgram
   {
-    IDirect3DPixelShader9 *ps;
+    IDirect3DPixelShader9* ps;
     GfxPixelShaderLoadDef loadDef;
   };
 
@@ -897,7 +899,7 @@ namespace iw4x
   //
   struct MaterialPixelShader
   {
-    const char *name;
+    const char* name;
     MaterialPixelShaderProgram prog;
   };
 
@@ -914,7 +916,7 @@ namespace iw4x
   //
   union MaterialArgumentDef
   {
-    const float *literalConst;
+    const float* literalConst;
     MaterialArgumentCodeConst codeConst;
     unsigned int codeSampler;
     unsigned int nameHash;
@@ -933,21 +935,21 @@ namespace iw4x
   //
   struct MaterialPass
   {
-    MaterialVertexDeclaration *vertexDecl;
-    MaterialVertexShader *vertexShader;
-    MaterialPixelShader *pixelShader;
+    MaterialVertexDeclaration* vertexDecl;
+    MaterialVertexShader* vertexShader;
+    MaterialPixelShader* pixelShader;
     char perPrimArgCount;
     char perObjArgCount;
     char stableArgCount;
     char customSamplerFlags;
-    MaterialShaderArgument *args;
+    MaterialShaderArgument* args;
   };
 
   // 982
   //
   struct MaterialTechnique
   {
-    const char *name;
+    const char* name;
     unsigned short flags;
     unsigned short passCount;
     MaterialPass passArray[1];
@@ -969,11 +971,11 @@ namespace iw4x
   //
   union GfxTexture
   {
-    IDirect3DBaseTexture9 *basemap;
-    IDirect3DTexture9 *map;
-    IDirect3DVolumeTexture9 *volmap;
-    IDirect3DCubeTexture9 *cubemap;
-    GfxImageLoadDef *loadDef;
+    IDirect3DBaseTexture9* basemap;
+    IDirect3DTexture9* map;
+    IDirect3DVolumeTexture9* volmap;
+    IDirect3DCubeTexture9* cubemap;
+    GfxImageLoadDef* loadDef;
   };
 
   // 990
@@ -1007,7 +1009,7 @@ namespace iw4x
     unsigned short height;
     unsigned short depth;
     bool delayLoadPixels;
-    const char *name;
+    const char* name;
   };
 
   // 993
@@ -1030,8 +1032,8 @@ namespace iw4x
   struct water_t
   {
     WaterWritable writable;
-    complex_s *H0;
-    float *wTerm;
+    complex_s* H0;
+    float* wTerm;
     int M;
     int N;
     float Lx;
@@ -1041,15 +1043,15 @@ namespace iw4x
     float winddir[2];
     float amplitude;
     float codeConstant[4];
-    GfxImage *image;
+    GfxImage* image;
   };
 
   // 996
   //
   union MaterialTextureDefInfo
   {
-    GfxImage *image;
-    water_t *water;
+    GfxImage* image;
+    water_t* water;
   };
 
   // 997
@@ -1091,10 +1093,10 @@ namespace iw4x
     char stateBitsCount;
     char stateFlags;
     char cameraRegion;
-    MaterialTechniqueSet *techniqueSet;
-    MaterialTextureDef *textureTable;
-    MaterialConstantDef *constantTable;
-    GfxStateBits *stateBitsTable;
+    MaterialTechniqueSet* techniqueSet;
+    MaterialTextureDef* textureTable;
+    MaterialConstantDef* constantTable;
+    GfxStateBits* stateBitsTable;
   };
 
   // 1002
@@ -1117,12 +1119,12 @@ namespace iw4x
   //
   struct Font_s
   {
-    const char *fontName;
+    const char* fontName;
     int pixelHeight;
     int glyphCount;
-    Material *material;
-    Material *glowMaterial;
-    Glyph *glyphs;
+    Material* material;
+    Material* glowMaterial;
+    Glyph* glyphs;
   };
 
   // 1015
@@ -1150,7 +1152,7 @@ namespace iw4x
   //
   struct cbrushside_t
   {
-    cplane_s *plane;
+    cplane_s* plane;
     unsigned short materialNum;
     char firstAdjacentSideOffset;
     char edgeCount;
@@ -1162,8 +1164,8 @@ namespace iw4x
   {
     unsigned short numsides;
     unsigned short glassPieceIndex;
-    cbrushside_t *sides;
-    char *baseAdjacentSide;
+    cbrushside_t* sides;
+    char* baseAdjacentSide;
     short axialMaterialNum[2][3];
     char firstAdjacentSideOffsets[2][3];
     char edgeCount[2][3];
@@ -1209,7 +1211,7 @@ namespace iw4x
     Bounds bounds;
     cbrush_t brush;
     int totalEdgeCount;
-    cplane_s *planes;
+    cplane_s* planes;
   };
 
   // 1067
@@ -1348,7 +1350,7 @@ namespace iw4x
   //
   struct FxElemMarkVisuals
   {
-    Material *materials[2];
+    Material* materials[2];
   };
 
   // 1083
@@ -1365,7 +1367,7 @@ namespace iw4x
   struct XSurfaceVertexInfo
   {
     short vertCount[4];
-    unsigned short *vertsBlend;
+    unsigned short* vertsBlend;
   };
 
   // 1085
@@ -1434,9 +1436,9 @@ namespace iw4x
     float trans[3];
     float scale[3];
     unsigned int nodeCount;
-    XSurfaceCollisionNode *nodes;
+    XSurfaceCollisionNode* nodes;
     unsigned int leafCount;
-    XSurfaceCollisionLeaf *leafs;
+    XSurfaceCollisionLeaf* leafs;
   };
 
   // 1093
@@ -1447,7 +1449,7 @@ namespace iw4x
     unsigned short vertCount;
     unsigned short triOffset;
     unsigned short triCount;
-    XSurfaceCollisionTree *collisionTree;
+    XSurfaceCollisionTree* collisionTree;
   };
 
   // 1094
@@ -1461,11 +1463,11 @@ namespace iw4x
     char zoneHandle;
     unsigned short baseTriIndex;
     unsigned short baseVertIndex;
-    unsigned short *triIndices;
+    unsigned short* triIndices;
     XSurfaceVertexInfo vertInfo;
-    GfxPackedVertex *verts0;
+    GfxPackedVertex* verts0;
     unsigned int vertListCount;
-    XRigidVertList *vertList;
+    XRigidVertList* vertList;
     int partBits[6];
   };
 
@@ -1473,8 +1475,8 @@ namespace iw4x
   //
   struct XModelSurfs
   {
-    const char *name;
-    XSurface *surfs;
+    const char* name;
+    XSurface* surfs;
     unsigned short numsurfs;
     int partBits[6];
   };
@@ -1486,9 +1488,9 @@ namespace iw4x
     float dist;
     unsigned short numsurfs;
     unsigned short surfIndex;
-    XModelSurfs *modelSurfs;
+    XModelSurfs* modelSurfs;
     int partBits[6];
-    XSurface *surfs;
+    XSurface* surfs;
     char lod;
     char smcBaseIndexPlusOne;
     char smcSubIndexMask;
@@ -1499,7 +1501,7 @@ namespace iw4x
   //
   struct XModelCollSurf_s
   {
-    XModelCollTri_s *collTris;
+    XModelCollTri_s* collTris;
     int numCollTris;
     Bounds bounds;
     int boneIdx;
@@ -1519,14 +1521,14 @@ namespace iw4x
   //
   struct PhysPreset
   {
-    const char *name;
+    const char* name;
     int type;
     float mass;
     float bounce;
     float friction;
     float bulletForceScale;
     float explosiveForceScale;
-    const char *sndAliasPrefix;
+    const char* sndAliasPrefix;
     float piecesSpreadFraction;
     float piecesUpwardVelocity;
     bool tempDefaultToCylinder;
@@ -1537,7 +1539,7 @@ namespace iw4x
   //
   struct PhysGeomInfo
   {
-    BrushWrapper *brushWrapper;
+    BrushWrapper* brushWrapper;
     int type;
     float orientation[3][3];
     Bounds bounds;
@@ -1547,9 +1549,9 @@ namespace iw4x
   //
   struct PhysCollmap
   {
-    const char *name;
+    const char* name;
     unsigned int count;
-    PhysGeomInfo *geoms;
+    PhysGeomInfo* geoms;
     PhysMass mass;
     Bounds bounds;
   };
@@ -1558,76 +1560,76 @@ namespace iw4x
   //
   struct XModel
   {
-    const char *name;
+    const char* name;
     char numBones;
     char numRootBones;
     char numsurfs;
     char lodRampType;
     float scale;
     unsigned int noScalePartBits[6];
-    unsigned short *boneNames;
-    char *parentList;
-    short *quats;
-    float *trans;
-    char *partClassification;
-    DObjAnimMat *baseMat;
-    Material **materialHandles;
+    unsigned short* boneNames;
+    char* parentList;
+    short* quats;
+    float* trans;
+    char* partClassification;
+    DObjAnimMat* baseMat;
+    Material** materialHandles;
     XModelLodInfo lodInfo[4];
     char maxLoadedLod;
     char numLods;
     char collLod;
     char flags;
-    XModelCollSurf_s *collSurfs;
+    XModelCollSurf_s* collSurfs;
     int numCollSurfs;
     int contents;
-    XBoneInfo *boneInfo;
+    XBoneInfo* boneInfo;
     float radius;
     Bounds bounds;
     int memUsage;
     bool bad;
-    PhysPreset *physPreset;
-    PhysCollmap *physCollmap;
+    PhysPreset* physPreset;
+    PhysCollmap* physCollmap;
   };
 
   // 1103
   //
   struct FxEffectDef
   {
-    const char *name;
+    const char* name;
     int flags;
     int totalSize;
     int msecLoopingLife;
     int elemDefCountLooping;
     int elemDefCountOneShot;
     int elemDefCountEmission;
-    FxElemDef *elemDefs;
+    FxElemDef* elemDefs;
   };
 
   // 1104
   //
   union FxEffectDefRef
   {
-    FxEffectDef *handle;
-    const char *name;
+    FxEffectDef* handle;
+    const char* name;
   };
 
   // 1105
   //
   union FxElemVisuals
   {
-    const void *anonymous;
-    Material *material;
-    XModel *model;
+    const void* anonymous;
+    Material* material;
+    XModel* model;
     FxEffectDefRef effectDef;
-    const char *soundName;
+    const char* soundName;
   };
 
   // 1106
   //
   union FxElemDefVisuals
   {
-    FxElemMarkVisuals *markArray;
-    FxElemVisuals *array;
+    FxElemMarkVisuals* markArray;
+    FxElemVisuals* array;
     FxElemVisuals instance;
   };
 
@@ -1650,9 +1652,9 @@ namespace iw4x
     float invSplitArcDist;
     float invSplitTime;
     int vertCount;
-    FxTrailVertex *verts;
+    FxTrailVertex* verts;
     int indCount;
-    unsigned short *inds;
+    unsigned short* inds;
   };
 
   // 1109
@@ -1678,9 +1680,9 @@ namespace iw4x
   //
   union FxElemExtendedDefPtr
   {
-    FxTrailDef *trailDef;
-    FxSparkFountainDef *sparkFountainDef;
-    void *unknownDef;
+    FxTrailDef* trailDef;
+    FxSparkFountainDef* sparkFountainDef;
+    void* unknownDef;
   };
 
   // 1111
@@ -1708,8 +1710,8 @@ namespace iw4x
     char visualCount;
     char velIntervalCount;
     char visStateIntervalCount;
-    FxElemVelStateSample *velSamples;
-    FxElemVisStateSample *visSamples;
+    FxElemVelStateSample* velSamples;
+    FxElemVisStateSample* visSamples;
     FxElemDefVisuals visuals;
     Bounds collBounds;
     FxEffectDefRef effectOnImpact;
@@ -1728,8 +1730,8 @@ namespace iw4x
   //
   struct FxImpactEntry
   {
-    FxEffectDef *nonflesh[31];
-    FxEffectDef *flesh[4];
+    FxEffectDef* nonflesh[31];
+    FxEffectDef* flesh[4];
   };
 
   // 1113
@@ -1776,7 +1778,7 @@ namespace iw4x
     bool itemsUnlockedLastGameDirty;
     unsigned short itemsUnlockedLastGame[16];
     int itemsUnlockedLastGameCount;
-    char *itemsUnlockedBuffer;
+    char* itemsUnlockedBuffer;
     int itemsUnlockedLocalClientNum;
     int itemsUnlockedControllerIndex;
     int itemsUnlockedStatsSource;
@@ -1888,7 +1890,7 @@ namespace iw4x
   struct profile_guard_t
   {
     int id;
-    profile_t **ppStack;
+    profile_t** ppStack;
   };
 
   // 1125
@@ -1896,8 +1898,8 @@ namespace iw4x
   struct ProfileStack
   {
     profile_t prof_root;
-    profile_t *prof_pStack[16384];
-    profile_t **prof_ppStack;
+    profile_t* prof_pStack[16384];
+    profile_t** prof_ppStack;
     profile_t prof_array[443];
     ProfileAtom prof_overhead_internal;
     ProfileAtom prof_overhead_inlineal;
@@ -1919,17 +1921,17 @@ namespace iw4x
   //
   struct FxImpactTable
   {
-    const char *name;
-    FxImpactEntry *table;
+    const char* name;
+    FxImpactEntry* table;
   };
 
   // 1128
   //
   union XAnimIndices
   {
-    char *_1;
-    unsigned short *_2;
-    void *data;
+    char* _1;
+    unsigned short* _2;
+    void* data;
   };
 
   // 1129
@@ -2035,16 +2037,16 @@ namespace iw4x
   //
   struct XAnimDeltaPart
   {
-    XAnimPartTrans *trans;
-    XAnimDeltaPartQuat2 *quat2;
-    XAnimDeltaPartQuat *quat;
+    XAnimPartTrans* trans;
+    XAnimDeltaPartQuat2* quat2;
+    XAnimDeltaPartQuat* quat;
   };
 
   // 1142
   //
   struct XAnimParts
   {
-    const char *name;
+    const char* name;
     unsigned short dataByteCount;
     unsigned short dataShortCount;
     unsigned short dataIntCount;
@@ -2060,23 +2062,23 @@ namespace iw4x
     unsigned int indexCount;
     float framerate;
     float frequency;
-    unsigned short *names;
-    char *dataByte;
-    short *dataShort;
-    int *dataInt;
-    short *randomDataShort;
-    char *randomDataByte;
-    int *randomDataInt;
+    unsigned short* names;
+    char* dataByte;
+    short* dataShort;
+    int* dataInt;
+    short* randomDataShort;
+    char* randomDataByte;
+    int* randomDataInt;
     XAnimIndices indices;
-    XAnimNotifyInfo *notify;
-    XAnimDeltaPart *deltaPart;
+    XAnimNotifyInfo* notify;
+    XAnimDeltaPart* deltaPart;
   };
 
   // 1143
   //
   struct cStaticModel_s
   {
-    XModel *xmodel;
+    XModel* xmodel;
     float origin[3];
     float invScaledAxis[3][3];
     Bounds absBounds;
@@ -2086,7 +2088,7 @@ namespace iw4x
   //
   struct ClipMaterial
   {
-    const char *name;
+    const char* name;
     int surfaceFlags;
     int contents;
   };
@@ -2095,7 +2097,7 @@ namespace iw4x
   //
   struct cNode_t
   {
-    cplane_s *plane;
+    cplane_s* plane;
     short children[2];
   };
 
@@ -2115,7 +2117,7 @@ namespace iw4x
   //
   struct cLeafBrushNodeLeaf_t
   {
-    unsigned short *brushes;
+    unsigned short* brushes;
   };
 
   // 1148
@@ -2164,7 +2166,7 @@ namespace iw4x
     char borderCount;
     char firstVertSegment;
     int firstTri;
-    CollisionBorder *borders;
+    CollisionBorder* borders;
   };
 
   // 1153
@@ -2200,18 +2202,18 @@ namespace iw4x
   struct MapTriggers
   {
     unsigned int count;
-    TriggerModel *models;
+    TriggerModel* models;
     unsigned int hullCount;
-    TriggerHull *hulls;
+    TriggerHull* hulls;
     unsigned int slabCount;
-    TriggerSlab *slabs;
+    TriggerSlab* slabs;
   };
 
   // 1157
   //
   struct Stage
   {
-    const char *name;
+    const char* name;
     float origin[3];
     unsigned short triggerIndex;
     char sunPrimaryLightIndex;
@@ -2221,11 +2223,11 @@ namespace iw4x
   //
   struct MapEnts
   {
-    const char *name;
-    char *entityString;
+    const char* name;
+    char* entityString;
     int numEntityChars;
     MapTriggers trigger;
-    Stage *stages;
+    Stage* stages;
     char stageCount;
   };
 
@@ -2252,11 +2254,11 @@ namespace iw4x
   {
     DynEntityType type;
     GfxPlacement pose;
-    XModel *xModel;
+    XModel* xModel;
     unsigned short brushModel;
     unsigned short physicsBrushModel;
-    FxEffectDef *destroyFx;
-    PhysPreset *physPreset;
+    FxEffectDef* destroyFx;
+    PhysPreset* physPreset;
     int health;
     PhysMass mass;
     int contents;
@@ -2294,53 +2296,53 @@ namespace iw4x
   //
   struct clipMap_t
   {
-    const char *name;
+    const char* name;
     int isInUse;
     int planeCount;
-    cplane_s *planes;
+    cplane_s* planes;
     unsigned int numStaticModels;
-    cStaticModel_s *staticModelList;
+    cStaticModel_s* staticModelList;
     unsigned int numMaterials;
-    ClipMaterial *materials;
+    ClipMaterial* materials;
     unsigned int numBrushSides;
-    cbrushside_t *brushsides;
+    cbrushside_t* brushsides;
     unsigned int numBrushEdges;
-    char *brushEdges;
+    char* brushEdges;
     unsigned int numNodes;
-    cNode_t *nodes;
+    cNode_t* nodes;
     unsigned int numLeafs;
-    cLeaf_t *leafs;
+    cLeaf_t* leafs;
     unsigned int leafbrushNodesCount;
-    cLeafBrushNode_s *leafbrushNodes;
+    cLeafBrushNode_s* leafbrushNodes;
     unsigned int numLeafBrushes;
-    unsigned short *leafbrushes;
+    unsigned short* leafbrushes;
     unsigned int numLeafSurfaces;
-    unsigned int *leafsurfaces;
+    unsigned int* leafsurfaces;
     unsigned int vertCount;
     float (*verts)[3];
     int triCount;
-    unsigned short *triIndices;
-    char *triEdgeIsWalkable;
+    unsigned short* triIndices;
+    char* triEdgeIsWalkable;
     int borderCount;
-    CollisionBorder *borders;
+    CollisionBorder* borders;
     int partitionCount;
-    CollisionPartition *partitions;
+    CollisionPartition* partitions;
     int aabbTreeCount;
-    CollisionAabbTree *aabbTrees;
+    CollisionAabbTree* aabbTrees;
     unsigned int numSubModels;
-    cmodel_t *cmodels;
+    cmodel_t* cmodels;
     unsigned short numBrushes;
-    cbrush_t *brushes;
-    Bounds *brushBounds;
-    int *brushContents;
-    MapEnts *mapEnts;
+    cbrush_t* brushes;
+    Bounds* brushBounds;
+    int* brushContents;
+    MapEnts* mapEnts;
     unsigned short smodelNodeCount;
-    SModelAabbNode *smodelNodes;
+    SModelAabbNode* smodelNodes;
     unsigned short dynEntCount[2];
-    DynEntityDef *dynEntDefList[2];
-    DynEntityPose *dynEntPoseList[2];
-    DynEntityClient *dynEntClientList[2];
-    DynEntityColl *dynEntCollList[2];
+    DynEntityDef* dynEntDefList[2];
+    DynEntityPose* dynEntPoseList[2];
+    DynEntityClient* dynEntClientList[2];
+    DynEntityColl* dynEntCollList[2];
     unsigned int checksum;
   };
 
@@ -2361,17 +2363,17 @@ namespace iw4x
     float cosHalfFovExpanded;
     float rotationLimit;
     float translationLimit;
-    const char *defName;
+    const char* defName;
   };
 
   // 1167
   //
   struct ComWorld
   {
-    const char *name;
+    const char* name;
     int isInUse;
     unsigned int primaryLightCount;
-    ComPrimaryLight *primaryLights;
+    ComPrimaryLight* primaryLights;
   };
 
   // 1168
@@ -2402,21 +2404,23 @@ namespace iw4x
     float fAngle;
     float forward[2];
     float fRadius;
+
     union
     {
       float minUseDistSq;
       PathNodeErrorCode error;
     };
+
     short wOverlapNode[2];
     unsigned short totalLinkCount;
-    pathlink_s *Links;
+    pathlink_s* Links;
   };
 
   // 1171
   //
   struct pathnode_dynamic_t
   {
-    void *pOwner;
+    void* pOwner;
     int iFreeTime;
     int iValidTime[3];
     int dangerousNodeTime[3];
@@ -2433,11 +2437,12 @@ namespace iw4x
   struct pathnode_transient_t
   {
     int iSearchFrame;
-    pathnode_t *pNextOpen;
-    pathnode_t *pPrevOpen;
-    pathnode_t *pParent;
+    pathnode_t* pNextOpen;
+    pathnode_t* pPrevOpen;
+    pathnode_t* pParent;
     float fCost;
     float fHeuristic;
+
     union
     {
       float nodeCost;
@@ -2467,14 +2472,14 @@ namespace iw4x
   struct pathnode_tree_nodes_t
   {
     int nodeCount;
-    unsigned short *nodes;
+    unsigned short* nodes;
   };
 
   // 1178
   //
   union pathnode_tree_info_t
   {
-    pathnode_tree_t *child[2];
+    pathnode_tree_t* child[2];
     pathnode_tree_nodes_t s;
   };
 
@@ -2487,22 +2492,20 @@ namespace iw4x
     pathnode_tree_info_t u;
   };
 
-
-
   // 1179
   //
   struct PathData
   {
     unsigned int nodeCount;
-    pathnode_t *nodes;
-    pathbasenode_t *basenodes;
+    pathnode_t* nodes;
+    pathbasenode_t* basenodes;
     unsigned int chainNodeCount;
-    unsigned short *chainNodeForNode;
-    unsigned short *nodeForChainNode;
+    unsigned short* chainNodeForNode;
+    unsigned short* nodeForChainNode;
     int visBytes;
-    char *pathVis;
+    char* pathVis;
     int nodeTreeCount;
-    pathnode_tree_t *nodeTree;
+    pathnode_tree_t* nodeTree;
   };
 
   // 1180
@@ -2527,7 +2530,7 @@ namespace iw4x
     float sectorWidth;
     float totalPriorLength;
     float totalFollowingLength;
-    VehicleTrackObstacle *obstacles;
+    VehicleTrackObstacle* obstacles;
     unsigned int obstacleCount;
   };
 
@@ -2535,12 +2538,12 @@ namespace iw4x
   //
   struct VehicleTrackSegment
   {
-    const char *targetName;
-    VehicleTrackSector *sectors;
+    const char* targetName;
+    VehicleTrackSector* sectors;
     unsigned int sectorCount;
-    VehicleTrackSegment **nextBranches;
+    VehicleTrackSegment** nextBranches;
     unsigned int nextBranchesCount;
-    VehicleTrackSegment **prevBranches;
+    VehicleTrackSegment** prevBranches;
     unsigned int prevBranchesCount;
     float endEdgeDir[2];
     float endEdgeDist;
@@ -2551,7 +2554,7 @@ namespace iw4x
   //
   struct VehicleTrack
   {
-    VehicleTrackSegment *segments;
+    VehicleTrackSegment* segments;
     unsigned int segmentCount;
   };
 
@@ -2570,22 +2573,22 @@ namespace iw4x
   //
   struct G_GlassName
   {
-    char *nameStr;
+    char* nameStr;
     unsigned short name;
     unsigned short pieceCount;
-    unsigned short *pieceIndices;
+    unsigned short* pieceIndices;
   };
 
   // 1186
   //
   struct G_GlassData
   {
-    G_GlassPiece *glassPieces;
+    G_GlassPiece* glassPieces;
     unsigned int pieceCount;
     unsigned short damageToWeaken;
     unsigned short damageToDestroy;
     unsigned int glassNameCount;
-    G_GlassName *glassNames;
+    G_GlassName* glassNames;
     char pad[108];
   };
 
@@ -2593,18 +2596,18 @@ namespace iw4x
   //
   struct GameWorldSp
   {
-    const char *name;
+    const char* name;
     PathData path;
     VehicleTrack vehicleTrack;
-    G_GlassData *g_glassData;
+    G_GlassData* g_glassData;
   };
 
   // 1188
   //
   struct GameWorldMp
   {
-    const char *name;
-    G_GlassData *g_glassData;
+    const char* name;
+    G_GlassData* g_glassData;
   };
 
   // 1189
@@ -2614,9 +2617,9 @@ namespace iw4x
     float halfThickness;
     float texVecs[2][2];
     GfxColor color;
-    Material *material;
-    Material *materialShattered;
-    PhysPreset *physPreset;
+    Material* material;
+    Material* materialShattered;
+    PhysPreset* physPreset;
   };
 
   // 1190
@@ -2638,6 +2641,7 @@ namespace iw4x
       FxSpatialFrame frame;
       float radius;
     };
+
     unsigned int nextFree;
   };
 
@@ -2738,19 +2742,19 @@ namespace iw4x
     unsigned int geoDataLimit;
     unsigned int geoDataCount;
     unsigned int initGeoDataCount;
-    FxGlassDef *defs;
-    FxGlassPiecePlace *piecePlaces;
-    FxGlassPieceState *pieceStates;
-    FxGlassPieceDynamics *pieceDynamics;
-    FxGlassGeometryData *geoData;
-    unsigned int *isInUse;
-    unsigned int *cellBits;
-    char *visData;
+    FxGlassDef* defs;
+    FxGlassPiecePlace* piecePlaces;
+    FxGlassPieceState* pieceStates;
+    FxGlassPieceDynamics* pieceDynamics;
+    FxGlassGeometryData* geoData;
+    unsigned int* isInUse;
+    unsigned int* cellBits;
+    char* visData;
     float (*linkOrg)[3];
-    float *halfThickness;
-    unsigned short *lightingHandles;
-    FxGlassInitPieceState *initPieceStates;
-    FxGlassGeometryData *initGeoData;
+    float* halfThickness;
+    unsigned short* lightingHandles;
+    FxGlassInitPieceState* initPieceStates;
+    FxGlassGeometryData* initGeoData;
     bool needToCompactData;
     char initCount;
     float effectChanceAccum;
@@ -2761,7 +2765,7 @@ namespace iw4x
   //
   struct FxWorld
   {
-    const char *name;
+    const char* name;
     FxGlassSystem glassSys;
   };
 
@@ -2770,8 +2774,8 @@ namespace iw4x
   struct GfxSky
   {
     int skySurfCount;
-    int *skyStartSurfs;
-    GfxImage *skyImage;
+    int* skyStartSurfs;
+    GfxImage* skyImage;
     char skySamplerState;
   };
 
@@ -2780,9 +2784,9 @@ namespace iw4x
   struct GfxWorldDpvsPlanes
   {
     int cellCount;
-    cplane_s *planes;
-    unsigned short *nodes;
-    unsigned int *sceneEntCellBits;
+    cplane_s* planes;
+    unsigned short* nodes;
+    unsigned int* sceneEntCellBits;
   };
 
   // 1204
@@ -2803,7 +2807,7 @@ namespace iw4x
     unsigned short surfaceCountNoDecal;
     unsigned short startSurfIndexNoDecal;
     unsigned short smodelIndexCount;
-    unsigned short *smodelIndexes;
+    unsigned short* smodelIndexes;
     int childrenOffset;
   };
 
@@ -2811,7 +2815,7 @@ namespace iw4x
   //
   struct GfxCellTree
   {
-    GfxAabbTree *aabbTree;
+    GfxAabbTree* aabbTree;
   };
 
   // 1208
@@ -2823,7 +2827,7 @@ namespace iw4x
     char recursionDepth;
     char hullPointCount;
     float (*hullPoints)[2];
-    GfxPortal *queuedParent;
+    GfxPortal* queuedParent;
   };
 
   // 1209
@@ -2851,9 +2855,9 @@ namespace iw4x
   {
     Bounds bounds;
     int portalCount;
-    GfxPortal *portals;
+    GfxPortal* portals;
     char reflectionProbeCount;
-    char *reflectionProbes;
+    char* reflectionProbes;
   };
 
   // 1211
@@ -2867,8 +2871,8 @@ namespace iw4x
   //
   struct GfxLightmapArray
   {
-    GfxImage *primary;
-    GfxImage *secondary;
+    GfxImage* primary;
+    GfxImage* secondary;
   };
 
   // 1213
@@ -2888,16 +2892,16 @@ namespace iw4x
   //
   struct GfxWorldVertexData
   {
-    GfxWorldVertex *vertices;
-    IDirect3DVertexBuffer9 *worldVb;
+    GfxWorldVertex* vertices;
+    IDirect3DVertexBuffer9* worldVb;
   };
 
   // 1216
   //
   struct GfxWorldVertexLayerData
   {
-    char *data;
-    IDirect3DVertexBuffer9 *layerVb;
+    char* data;
+    IDirect3DVertexBuffer9* layerVb;
   };
 
   // 1217
@@ -2905,21 +2909,21 @@ namespace iw4x
   struct GfxWorldDraw
   {
     unsigned int reflectionProbeCount;
-    GfxImage **reflectionProbes;
-    GfxReflectionProbe *reflectionProbeOrigins;
-    GfxTexture *reflectionProbeTextures;
+    GfxImage** reflectionProbes;
+    GfxReflectionProbe* reflectionProbeOrigins;
+    GfxTexture* reflectionProbeTextures;
     int lightmapCount;
-    GfxLightmapArray *lightmaps;
-    GfxTexture *lightmapPrimaryTextures;
-    GfxTexture *lightmapSecondaryTextures;
-    GfxImage *lightmapOverridePrimary;
-    GfxImage *lightmapOverrideSecondary;
+    GfxLightmapArray* lightmaps;
+    GfxTexture* lightmapPrimaryTextures;
+    GfxTexture* lightmapSecondaryTextures;
+    GfxImage* lightmapOverridePrimary;
+    GfxImage* lightmapOverrideSecondary;
     unsigned int vertexCount;
     GfxWorldVertexData vd;
     unsigned int vertexLayerDataSize;
     GfxWorldVertexLayerData vld;
     unsigned int indexCount;
-    unsigned short *indices;
+    unsigned short* indices;
   };
 
   // 1218
@@ -2948,13 +2952,13 @@ namespace iw4x
     unsigned short maxs[3];
     unsigned int rowAxis;
     unsigned int colAxis;
-    unsigned short *rowDataStart;
+    unsigned short* rowDataStart;
     unsigned int rawRowDataSize;
-    char *rawRowData;
+    char* rawRowData;
     unsigned int entryCount;
-    GfxLightGridEntry *entries;
+    GfxLightGridEntry* entries;
     unsigned int colorCount;
-    GfxLightGridColors *colors;
+    GfxLightGridColors* colors;
   };
 
   // 1221
@@ -2980,7 +2984,7 @@ namespace iw4x
   //
   struct MaterialMemory
   {
-    Material *material;
+    Material* material;
     int memory;
   };
 
@@ -2989,8 +2993,8 @@ namespace iw4x
   struct sunflare_t
   {
     bool hasValidData;
-    Material *spriteMaterial;
-    Material *flareMaterial;
+    Material* spriteMaterial;
+    Material* flareMaterial;
     float spriteSize;
     float flareMinSize;
     float flareMinDot;
@@ -3050,8 +3054,8 @@ namespace iw4x
   {
     unsigned short surfaceCount;
     unsigned short smodelCount;
-    unsigned short *sortedSurfIndex;
-    unsigned short *smodelIndex;
+    unsigned short* sortedSurfIndex;
+    unsigned short* smodelIndex;
   };
 
   // 1230
@@ -3070,7 +3074,7 @@ namespace iw4x
     float kdopMidPoint[9];
     float kdopHalfSize[9];
     unsigned int axisCount;
-    GfxLightRegionAxis *axis;
+    GfxLightRegionAxis* axis;
   };
 
   // 1232
@@ -3078,7 +3082,7 @@ namespace iw4x
   struct GfxLightRegion
   {
     unsigned int hullCount;
-    GfxLightRegionHull *hulls;
+    GfxLightRegionHull* hulls;
   };
 
   // 1233
@@ -3123,7 +3127,7 @@ namespace iw4x
   struct GfxSurface
   {
     srfTriangles_t tris;
-    Material *material;
+    Material* material;
     GfxSurfaceLightingAndFlags laf;
   };
 
@@ -3148,7 +3152,7 @@ namespace iw4x
   struct GfxStaticModelDrawInst
   {
     GfxPackedPlacement placement;
-    XModel *model;
+    XModel* model;
     unsigned short cullDist;
     unsigned short lightingHandle;
     char reflectionProbeIndex;
@@ -3176,15 +3180,15 @@ namespace iw4x
     unsigned int emissiveSurfsEnd;
     unsigned int smodelVisDataCount;
     unsigned int surfaceVisDataCount;
-    char *smodelVisData[3];
-    char *surfaceVisData[3];
-    unsigned short *sortedSurfIndex;
-    GfxStaticModelInst *smodelInsts;
-    GfxSurface *surfaces;
-    GfxSurfaceBounds *surfacesBounds;
-    GfxStaticModelDrawInst *smodelDrawInsts;
-    GfxDrawSurf *surfaceMaterials;
-    unsigned int *surfaceCastsSunShadow;
+    char* smodelVisData[3];
+    char* surfaceVisData[3];
+    unsigned short* sortedSurfIndex;
+    GfxStaticModelInst* smodelInsts;
+    GfxSurface* surfaces;
+    GfxSurfaceBounds* surfacesBounds;
+    GfxStaticModelDrawInst* smodelDrawInsts;
+    GfxDrawSurf* surfaceMaterials;
+    unsigned int* surfaceCastsSunShadow;
     volatile int usageCount;
   };
 
@@ -3194,8 +3198,8 @@ namespace iw4x
   {
     unsigned int dynEntClientWordCount[2];
     unsigned int dynEntClientCount[2];
-    unsigned int *dynEntCellBits[2];
-    char *dynEntVisData[2][3];
+    unsigned int* dynEntCellBits[2];
+    char* dynEntVisData[2][3];
   };
 
   // 1243
@@ -3217,13 +3221,13 @@ namespace iw4x
   //
   struct GfxWorld
   {
-    const char *name;
-    const char *baseName;
+    const char* name;
+    const char* baseName;
     int planeCount;
     int nodeCount;
     unsigned int surfaceCount;
     int skyCount;
-    GfxSky *skies;
+    GfxSky* skies;
     unsigned int lastSunPrimaryLightIndex;
     unsigned int primaryLightCount;
     unsigned int sortKeyLitDecal;
@@ -3231,34 +3235,34 @@ namespace iw4x
     unsigned int sortKeyEffectAuto;
     unsigned int sortKeyDistortion;
     GfxWorldDpvsPlanes dpvsPlanes;
-    GfxCellTreeCount *aabbTreeCounts;
-    GfxCellTree *aabbTrees;
-    GfxCell *cells;
+    GfxCellTreeCount* aabbTreeCounts;
+    GfxCellTree* aabbTrees;
+    GfxCell* cells;
     GfxWorldDraw draw;
     GfxLightGrid lightGrid;
     int modelCount;
-    GfxBrushModel *models;
+    GfxBrushModel* models;
     Bounds bounds;
     unsigned int checksum;
     int materialMemoryCount;
-    MaterialMemory *materialMemory;
+    MaterialMemory* materialMemory;
     sunflare_t sun;
     float outdoorLookupMatrix[4][4];
-    GfxImage *outdoorImage;
-    unsigned int *cellCasterBits;
-    unsigned int *cellHasSunLitSurfsBits;
-    GfxSceneDynModel *sceneDynModel;
-    GfxSceneDynBrush *sceneDynBrush;
-    unsigned int *primaryLightEntityShadowVis;
-    unsigned int *primaryLightDynEntShadowVis[2];
-    char *nonSunPrimaryLightForModelDynEnt;
-    GfxShadowGeometry *shadowGeom;
-    GfxLightRegion *lightRegion;
+    GfxImage* outdoorImage;
+    unsigned int* cellCasterBits;
+    unsigned int* cellHasSunLitSurfsBits;
+    GfxSceneDynModel* sceneDynModel;
+    GfxSceneDynBrush* sceneDynBrush;
+    unsigned int* primaryLightEntityShadowVis;
+    unsigned int* primaryLightDynEntShadowVis[2];
+    char* nonSunPrimaryLightForModelDynEnt;
+    GfxShadowGeometry* shadowGeom;
+    GfxLightRegion* lightRegion;
     GfxWorldDpvsStatic dpvs;
     GfxWorldDpvsDynamic dpvsDyn;
     unsigned int mapVtxChecksum;
     unsigned int heroOnlyLightCount;
-    GfxHeroOnlyLight *heroOnlyLights;
+    GfxHeroOnlyLight* heroOnlyLights;
     char fogTypesAllowed;
   };
 
@@ -3266,7 +3270,7 @@ namespace iw4x
   //
   struct GfxLightImage
   {
-    GfxImage *image;
+    GfxImage* image;
     char samplerState;
   };
 
@@ -3274,7 +3278,7 @@ namespace iw4x
   //
   struct GfxLightDef
   {
-    const char *name;
+    const char* name;
     GfxLightImage attenuation;
     int lmapLookupStart;
   };
@@ -3295,10 +3299,10 @@ namespace iw4x
   //
   struct windowDef_t
   {
-    const char *name;
+    const char* name;
     rectDef_s rect;
     rectDef_s rectClient;
-    const char *group;
+    const char* group;
     int style;
     int border;
     int ownerDraw;
@@ -3312,7 +3316,7 @@ namespace iw4x
     float borderColor[4];
     float outlineColor[4];
     float disableColor[4];
-    Material *background;
+    Material* background;
   };
 
   // 1249
@@ -3320,14 +3324,14 @@ namespace iw4x
   struct MenuEventHandlerSet
   {
     int eventHandlerCount;
-    MenuEventHandler **eventHandlers;
+    MenuEventHandler** eventHandlers;
   };
 
   // 1250
   //
   struct ExpressionString
   {
-    const char *string;
+    const char* string;
   };
 
   // 1252
@@ -3337,7 +3341,7 @@ namespace iw4x
     int intVal;
     float floatVal;
     ExpressionString stringVal;
-    Statement_s *function;
+    Statement_s* function;
   };
 
   // 1253
@@ -3353,8 +3357,8 @@ namespace iw4x
   struct Statement_s
   {
     int numEntries;
-    expressionEntry *entries;
-    ExpressionSupportingData *supportingData;
+    expressionEntry* entries;
+    ExpressionSupportingData* supportingData;
     int lastExecuteTime;
     Operand lastResult;
   };
@@ -3380,15 +3384,15 @@ namespace iw4x
   struct UIFunctionList
   {
     int totalFunctions;
-    Statement_s **functions;
+    Statement_s** functions;
   };
 
   // 1257
   //
   struct StaticDvar
   {
-    dvar_t *dvar;
-    char *dvarName;
+    dvar_t* dvar;
+    char* dvarName;
   };
 
   // 1258
@@ -3396,7 +3400,7 @@ namespace iw4x
   struct StaticDvarList
   {
     int numStaticDvars;
-    StaticDvar **staticDvars;
+    StaticDvar** staticDvars;
   };
 
   // 1259
@@ -3404,7 +3408,7 @@ namespace iw4x
   struct StringList
   {
     int totalStrings;
-    const char **strings;
+    const char** strings;
   };
 
   // 1260
@@ -3420,26 +3424,26 @@ namespace iw4x
   //
   struct ConditionalScript
   {
-    MenuEventHandlerSet *eventHandlerSet;
-    Statement_s *eventExpression;
+    MenuEventHandlerSet* eventHandlerSet;
+    Statement_s* eventExpression;
   };
 
   // 1262
   //
   struct SetLocalVarData
   {
-    const char *localVarName;
-    Statement_s *expression;
+    const char* localVarName;
+    Statement_s* expression;
   };
 
   // 1263
   //
   union EventData
   {
-    const char *unconditionalScript;
-    ConditionalScript *conditionalScript;
-    MenuEventHandlerSet *elseScript;
-    SetLocalVarData *setLocalVarData;
+    const char* unconditionalScript;
+    ConditionalScript* conditionalScript;
+    MenuEventHandlerSet* elseScript;
+    SetLocalVarData* setLocalVarData;
   };
 
   // 1264
@@ -3455,8 +3459,8 @@ namespace iw4x
   struct ItemKeyHandler
   {
     int key;
-    MenuEventHandlerSet *action;
-    ItemKeyHandler *next;
+    MenuEventHandlerSet* action;
+    ItemKeyHandler* next;
   };
 
   // 1276
@@ -3477,7 +3481,7 @@ namespace iw4x
   struct menuDef_t
   {
     windowDef_t window;
-    const char *font;
+    const char* font;
     int fullScreen;
     int itemCount;
     int fontIndex;
@@ -3487,28 +3491,28 @@ namespace iw4x
     float fadeAmount;
     float fadeInAmount;
     float blurRadius;
-    MenuEventHandlerSet *onOpen;
-    MenuEventHandlerSet *onCloseRequest;
-    MenuEventHandlerSet *onClose;
-    MenuEventHandlerSet *onESC;
-    ItemKeyHandler *onKey;
-    Statement_s *visibleExp;
-    const char *allowedBinding;
-    const char *soundName;
+    MenuEventHandlerSet* onOpen;
+    MenuEventHandlerSet* onCloseRequest;
+    MenuEventHandlerSet* onClose;
+    MenuEventHandlerSet* onESC;
+    ItemKeyHandler* onKey;
+    Statement_s* visibleExp;
+    const char* allowedBinding;
+    const char* soundName;
     int imageTrack;
     float focusColor[4];
-    Statement_s *rectXExp;
-    Statement_s *rectYExp;
-    Statement_s *rectWExp;
-    Statement_s *rectHExp;
-    Statement_s *openSoundExp;
-    Statement_s *closeSoundExp;
-    itemDef_s **items;
+    Statement_s* rectXExp;
+    Statement_s* rectYExp;
+    Statement_s* rectWExp;
+    Statement_s* rectHExp;
+    Statement_s* openSoundExp;
+    Statement_s* closeSoundExp;
+    itemDef_s** items;
     menuTransition scaleTransition[1];
     menuTransition alphaTransition[1];
     menuTransition xTransition[1];
     menuTransition yTransition[1];
-    ExpressionSupportingData *expressionData;
+    ExpressionSupportingData* expressionData;
   };
 
   // 1267
@@ -3534,12 +3538,12 @@ namespace iw4x
     int elementStyle;
     int numColumns;
     columnInfo_s columnInfo[16];
-    MenuEventHandlerSet *onDoubleClick;
+    MenuEventHandlerSet* onDoubleClick;
     int notselectable;
     int noScrollBars;
     int usePaging;
     float selectBorder[4];
-    Material *selectIcon;
+    Material* selectIcon;
   };
 
   // 1269
@@ -3560,8 +3564,8 @@ namespace iw4x
   //
   struct multiDef_s
   {
-    const char *dvarList[32];
-    const char *dvarStr[32];
+    const char* dvarList[32];
+    const char* dvarStr[32];
     float dvarValue[32];
     int count;
     int strDef;
@@ -3591,13 +3595,13 @@ namespace iw4x
   //
   union itemDefData_t
   {
-    listBoxDef_s *listBox;
-    editFieldDef_s *editField;
-    multiDef_s *multi;
-    const char *enumDvarName;
-    newsTickerDef_s *ticker;
-    textScrollDef_s *scroll;
-    void *data;
+    listBoxDef_s* listBox;
+    editFieldDef_s* editField;
+    multiDef_s* multi;
+    const char* enumDvarName;
+    newsTickerDef_s* ticker;
+    textScrollDef_s* scroll;
+    void* data;
   };
 
   // 1274
@@ -3605,7 +3609,7 @@ namespace iw4x
   struct ItemFloatExpression
   {
     int target;
-    Statement_s *expression;
+    Statement_s* expression;
   };
 
   // 1275
@@ -3625,34 +3629,34 @@ namespace iw4x
     int textStyle;
     int gameMsgWindowIndex;
     int gameMsgWindowMode;
-    const char *text;
+    const char* text;
     int itemFlags;
-    menuDef_t *parent;
-    MenuEventHandlerSet *mouseEnterText;
-    MenuEventHandlerSet *mouseExitText;
-    MenuEventHandlerSet *mouseEnter;
-    MenuEventHandlerSet *mouseExit;
-    MenuEventHandlerSet *action;
-    MenuEventHandlerSet *accept;
-    MenuEventHandlerSet *onFocus;
-    MenuEventHandlerSet *leaveFocus;
-    const char *dvar;
-    const char *dvarTest;
-    ItemKeyHandler *onKey;
-    const char *enableDvar;
-    const char *localVar;
+    menuDef_t* parent;
+    MenuEventHandlerSet* mouseEnterText;
+    MenuEventHandlerSet* mouseExitText;
+    MenuEventHandlerSet* mouseEnter;
+    MenuEventHandlerSet* mouseExit;
+    MenuEventHandlerSet* action;
+    MenuEventHandlerSet* accept;
+    MenuEventHandlerSet* onFocus;
+    MenuEventHandlerSet* leaveFocus;
+    const char* dvar;
+    const char* dvarTest;
+    ItemKeyHandler* onKey;
+    const char* enableDvar;
+    const char* localVar;
     int dvarFlags;
-    snd_alias_list_t *focusSound;
+    snd_alias_list_t* focusSound;
     float special;
     int cursorPos[1];
     itemDefData_t typeData;
     int imageTrack;
     int floatExpressionCount;
-    ItemFloatExpression *floatExpressions;
-    Statement_s *visibleExp;
-    Statement_s *disabledExp;
-    Statement_s *textExp;
-    Statement_s *materialExp;
+    ItemFloatExpression* floatExpressions;
+    Statement_s* visibleExp;
+    Statement_s* disabledExp;
+    Statement_s* textExp;
+    Statement_s* materialExp;
     float glowColor[4];
     bool decayActive;
     int fxBirthTime;
@@ -3666,25 +3670,25 @@ namespace iw4x
   //
   struct MenuList
   {
-    const char *name;
+    const char* name;
     int menuCount;
-    menuDef_t **menus;
+    menuDef_t** menus;
   };
 
   // 1278
   //
   struct LocalizeEntry
   {
-    const char *value;
-    const char *name;
+    const char* value;
+    const char* name;
   };
 
   // 1279
   //
   struct TracerDef
   {
-    const char *name;
-    Material *material;
+    const char* name;
+    Material* material;
     unsigned int drawInterval;
     float speed;
     float beamLength;
@@ -3698,16 +3702,16 @@ namespace iw4x
   //
   struct WeaponDef
   {
-    const char *szOverlayName;
-    XModel **gunXModel;
-    XModel *handXModel;
-    const char **szXAnimsRightHanded;
-    const char **szXAnimsLeftHanded;
-    const char *szModeName;
-    unsigned short *notetrackSoundMapKeys;
-    unsigned short *notetrackSoundMapValues;
-    unsigned short *notetrackRumbleMapKeys;
-    unsigned short *notetrackRumbleMapValues;
+    const char* szOverlayName;
+    XModel** gunXModel;
+    XModel* handXModel;
+    const char** szXAnimsRightHanded;
+    const char** szXAnimsLeftHanded;
+    const char* szModeName;
+    unsigned short* notetrackSoundMapKeys;
+    unsigned short* notetrackSoundMapValues;
+    unsigned short* notetrackRumbleMapKeys;
+    unsigned short* notetrackRumbleMapValues;
     int playerAnimType;
     weapType_t weapType;
     weapClass_t weapClass;
@@ -3716,62 +3720,62 @@ namespace iw4x
     weapFireType_t fireType;
     OffhandClass offhandClass;
     weapStance_t stance;
-    FxEffectDef *viewFlashEffect;
-    FxEffectDef *worldFlashEffect;
-    snd_alias_list_t *pickupSound;
-    snd_alias_list_t *pickupSoundPlayer;
-    snd_alias_list_t *ammoPickupSound;
-    snd_alias_list_t *ammoPickupSoundPlayer;
-    snd_alias_list_t *projectileSound;
-    snd_alias_list_t *pullbackSound;
-    snd_alias_list_t *pullbackSoundPlayer;
-    snd_alias_list_t *fireSound;
-    snd_alias_list_t *fireSoundPlayer;
-    snd_alias_list_t *fireSoundPlayerAkimbo;
-    snd_alias_list_t *fireLoopSound;
-    snd_alias_list_t *fireLoopSoundPlayer;
-    snd_alias_list_t *fireStopSound;
-    snd_alias_list_t *fireStopSoundPlayer;
-    snd_alias_list_t *fireLastSound;
-    snd_alias_list_t *fireLastSoundPlayer;
-    snd_alias_list_t *emptyFireSound;
-    snd_alias_list_t *emptyFireSoundPlayer;
-    snd_alias_list_t *meleeSwipeSound;
-    snd_alias_list_t *meleeSwipeSoundPlayer;
-    snd_alias_list_t *meleeHitSound;
-    snd_alias_list_t *meleeMissSound;
-    snd_alias_list_t *rechamberSound;
-    snd_alias_list_t *rechamberSoundPlayer;
-    snd_alias_list_t *reloadSound;
-    snd_alias_list_t *reloadSoundPlayer;
-    snd_alias_list_t *reloadEmptySound;
-    snd_alias_list_t *reloadEmptySoundPlayer;
-    snd_alias_list_t *reloadStartSound;
-    snd_alias_list_t *reloadStartSoundPlayer;
-    snd_alias_list_t *reloadEndSound;
-    snd_alias_list_t *reloadEndSoundPlayer;
-    snd_alias_list_t *detonateSound;
-    snd_alias_list_t *detonateSoundPlayer;
-    snd_alias_list_t *nightVisionWearSound;
-    snd_alias_list_t *nightVisionWearSoundPlayer;
-    snd_alias_list_t *nightVisionRemoveSound;
-    snd_alias_list_t *nightVisionRemoveSoundPlayer;
-    snd_alias_list_t *altSwitchSound;
-    snd_alias_list_t *altSwitchSoundPlayer;
-    snd_alias_list_t *raiseSound;
-    snd_alias_list_t *raiseSoundPlayer;
-    snd_alias_list_t *firstRaiseSound;
-    snd_alias_list_t *firstRaiseSoundPlayer;
-    snd_alias_list_t *putawaySound;
-    snd_alias_list_t *putawaySoundPlayer;
-    snd_alias_list_t *scanSound;
-    snd_alias_list_t **bounceSound;
-    FxEffectDef *viewShellEjectEffect;
-    FxEffectDef *worldShellEjectEffect;
-    FxEffectDef *viewLastShotEjectEffect;
-    FxEffectDef *worldLastShotEjectEffect;
-    Material *reticleCenter;
-    Material *reticleSide;
+    FxEffectDef* viewFlashEffect;
+    FxEffectDef* worldFlashEffect;
+    snd_alias_list_t* pickupSound;
+    snd_alias_list_t* pickupSoundPlayer;
+    snd_alias_list_t* ammoPickupSound;
+    snd_alias_list_t* ammoPickupSoundPlayer;
+    snd_alias_list_t* projectileSound;
+    snd_alias_list_t* pullbackSound;
+    snd_alias_list_t* pullbackSoundPlayer;
+    snd_alias_list_t* fireSound;
+    snd_alias_list_t* fireSoundPlayer;
+    snd_alias_list_t* fireSoundPlayerAkimbo;
+    snd_alias_list_t* fireLoopSound;
+    snd_alias_list_t* fireLoopSoundPlayer;
+    snd_alias_list_t* fireStopSound;
+    snd_alias_list_t* fireStopSoundPlayer;
+    snd_alias_list_t* fireLastSound;
+    snd_alias_list_t* fireLastSoundPlayer;
+    snd_alias_list_t* emptyFireSound;
+    snd_alias_list_t* emptyFireSoundPlayer;
+    snd_alias_list_t* meleeSwipeSound;
+    snd_alias_list_t* meleeSwipeSoundPlayer;
+    snd_alias_list_t* meleeHitSound;
+    snd_alias_list_t* meleeMissSound;
+    snd_alias_list_t* rechamberSound;
+    snd_alias_list_t* rechamberSoundPlayer;
+    snd_alias_list_t* reloadSound;
+    snd_alias_list_t* reloadSoundPlayer;
+    snd_alias_list_t* reloadEmptySound;
+    snd_alias_list_t* reloadEmptySoundPlayer;
+    snd_alias_list_t* reloadStartSound;
+    snd_alias_list_t* reloadStartSoundPlayer;
+    snd_alias_list_t* reloadEndSound;
+    snd_alias_list_t* reloadEndSoundPlayer;
+    snd_alias_list_t* detonateSound;
+    snd_alias_list_t* detonateSoundPlayer;
+    snd_alias_list_t* nightVisionWearSound;
+    snd_alias_list_t* nightVisionWearSoundPlayer;
+    snd_alias_list_t* nightVisionRemoveSound;
+    snd_alias_list_t* nightVisionRemoveSoundPlayer;
+    snd_alias_list_t* altSwitchSound;
+    snd_alias_list_t* altSwitchSoundPlayer;
+    snd_alias_list_t* raiseSound;
+    snd_alias_list_t* raiseSoundPlayer;
+    snd_alias_list_t* firstRaiseSound;
+    snd_alias_list_t* firstRaiseSoundPlayer;
+    snd_alias_list_t* putawaySound;
+    snd_alias_list_t* putawaySoundPlayer;
+    snd_alias_list_t* scanSound;
+    snd_alias_list_t** bounceSound;
+    FxEffectDef* viewShellEjectEffect;
+    FxEffectDef* worldShellEjectEffect;
+    FxEffectDef* viewLastShotEjectEffect;
+    FxEffectDef* worldLastShotEjectEffect;
+    Material* reticleCenter;
+    Material* reticleSide;
     int iReticleCenterSize;
     int iReticleSideSize;
     int iReticleMinOfs;
@@ -3796,26 +3800,26 @@ namespace iw4x
     float fStandRotMinSpeed;
     float fDuckedRotMinSpeed;
     float fProneRotMinSpeed;
-    XModel **worldModel;
-    XModel *worldClipModel;
-    XModel *rocketModel;
-    XModel *knifeModel;
-    XModel *worldKnifeModel;
-    Material *hudIcon;
+    XModel** worldModel;
+    XModel* worldClipModel;
+    XModel* rocketModel;
+    XModel* knifeModel;
+    XModel* worldKnifeModel;
+    Material* hudIcon;
     weaponIconRatioType_t hudIconRatio;
-    Material *pickupIcon;
+    Material* pickupIcon;
     weaponIconRatioType_t pickupIconRatio;
-    Material *ammoCounterIcon;
+    Material* ammoCounterIcon;
     weaponIconRatioType_t ammoCounterIconRatio;
     ammoCounterClipType_t ammoCounterClip;
     int iStartAmmo;
-    const char *szAmmoName;
+    const char* szAmmoName;
     int iAmmoIndex;
-    const char *szClipName;
+    const char* szClipName;
     int iClipIndex;
     int iMaxAmmo;
     int shotCount;
-    const char *szSharedAmmoCapName;
+    const char* szSharedAmmoCapName;
     int iSharedAmmoCapIndex;
     int iSharedAmmoCap;
     int damage;
@@ -3872,10 +3876,10 @@ namespace iw4x
     float sprintDurationScale;
     float fAdsZoomInFrac;
     float fAdsZoomOutFrac;
-    Material *overlayMaterial;
-    Material *overlayMaterialLowRes;
-    Material *overlayMaterialEMP;
-    Material *overlayMaterialEMPLowRes;
+    Material* overlayMaterial;
+    Material* overlayMaterialLowRes;
+    Material* overlayMaterialEMP;
+    Material* overlayMaterialEMPLowRes;
     weapOverlayReticle_t overlayReticle;
     WeapOverlayInteface_t overlayInterface;
     float overlayWidth;
@@ -3920,7 +3924,7 @@ namespace iw4x
     float adsSwayVertScale;
     float adsViewErrorMin;
     float adsViewErrorMax;
-    PhysCollmap *physCollmap;
+    PhysCollmap* physCollmap;
     float dualWieldViewModelOffset;
     weaponIconRatioType_t killIconRatio;
     int iReloadAmmoAdd;
@@ -3942,25 +3946,25 @@ namespace iw4x
     float projLifetime;
     float timeToAccelerate;
     float projectileCurvature;
-    XModel *projectileModel;
+    XModel* projectileModel;
     weapProjExposion_t projExplosion;
-    FxEffectDef *projExplosionEffect;
-    FxEffectDef *projDudEffect;
-    snd_alias_list_t *projExplosionSound;
-    snd_alias_list_t *projDudSound;
+    FxEffectDef* projExplosionEffect;
+    FxEffectDef* projDudEffect;
+    snd_alias_list_t* projExplosionSound;
+    snd_alias_list_t* projDudSound;
     WeapStickinessType stickiness;
     float lowAmmoWarningThreshold;
     float ricochetChance;
-    float *parallelBounce;
-    float *perpendicularBounce;
-    FxEffectDef *projTrailEffect;
-    FxEffectDef *projBeaconEffect;
+    float* parallelBounce;
+    float* perpendicularBounce;
+    FxEffectDef* projTrailEffect;
+    FxEffectDef* projBeaconEffect;
     float vProjectileColor[3];
     guidedMissileType_t guidedMissileType;
     float maxSteeringAccel;
     int projIgnitionDelay;
-    FxEffectDef *projIgnitionEffect;
-    snd_alias_list_t *projIgnitionSound;
+    FxEffectDef* projIgnitionEffect;
+    snd_alias_list_t* projIgnitionSound;
     float fAdsAimPitch;
     float fAdsCrosshairInFrac;
     float fAdsCrosshairOutFrac;
@@ -3999,7 +4003,7 @@ namespace iw4x
     float fHipViewScatterMax;
     float fightDist;
     float maxDist;
-    const char *accuracyGraphName[2];
+    const char* accuracyGraphName[2];
     float (*originalAccuracyGraphKnots[2])[2];
     unsigned short originalAccuracyGraphKnotCount[2];
     int iPositionReloadTransTime;
@@ -4018,8 +4022,8 @@ namespace iw4x
     float maxRange;
     float fAnimHorRotateInc;
     float fPlayerPositionDist;
-    const char *szUseHintString;
-    const char *dropHintString;
+    const char* szUseHintString;
+    const char* dropHintString;
     int iUseHintStringIndex;
     int dropHintStringIndex;
     float horizViewJitter;
@@ -4027,7 +4031,7 @@ namespace iw4x
     float scanSpeed;
     float scanAccel;
     int scanPauseTime;
-    const char *szScript;
+    const char* szScript;
     float fOOPosAnimLength[2];
     int minDamage;
     int minPlayerDamage;
@@ -4036,27 +4040,27 @@ namespace iw4x
     float destabilizationRateTime;
     float destabilizationCurvatureMax;
     int destabilizeDistance;
-    float *locationDamageMultipliers;
-    const char *fireRumble;
-    const char *meleeImpactRumble;
-    TracerDef *tracerType;
+    float* locationDamageMultipliers;
+    const char* fireRumble;
+    const char* meleeImpactRumble;
+    TracerDef* tracerType;
     float turretScopeZoomRate;
     float turretScopeZoomMin;
     float turretScopeZoomMax;
     float turretOverheatUpRate;
     float turretOverheatDownRate;
     float turretOverheatPenalty;
-    snd_alias_list_t *turretOverheatSound;
-    FxEffectDef *turretOverheatEffect;
-    const char *turretBarrelSpinRumble;
+    snd_alias_list_t* turretOverheatSound;
+    FxEffectDef* turretOverheatEffect;
+    const char* turretBarrelSpinRumble;
     float turretBarrelSpinSpeed;
     float turretBarrelSpinUpTime;
     float turretBarrelSpinDownTime;
-    snd_alias_list_t *turretBarrelSpinMaxSnd;
-    snd_alias_list_t *turretBarrelSpinUpSnd[4];
-    snd_alias_list_t *turretBarrelSpinDownSnd[4];
-    snd_alias_list_t *missileConeSoundAlias;
-    snd_alias_list_t *missileConeSoundAliasAtBase;
+    snd_alias_list_t* turretBarrelSpinMaxSnd;
+    snd_alias_list_t* turretBarrelSpinUpSnd[4];
+    snd_alias_list_t* turretBarrelSpinDownSnd[4];
+    snd_alias_list_t* missileConeSoundAlias;
+    snd_alias_list_t* missileConeSoundAliasAtBase;
     float missileConeSoundRadiusAtTop;
     float missileConeSoundRadiusAtBase;
     float missileConeSoundHeight;
@@ -4122,11 +4126,11 @@ namespace iw4x
   //
   struct WeaponCompleteDef
   {
-    const char *szInternalName;
-    WeaponDef *weapDef;
-    const char *szDisplayName;
-    unsigned short *hideTags;
-    const char **szXAnims;
+    const char* szInternalName;
+    WeaponDef* weapDef;
+    const char* szDisplayName;
+    unsigned short* hideTags;
+    const char** szXAnims;
     float fAdsZoomFov;
     int iAdsTransInTime;
     int iAdsTransOutTime;
@@ -4137,11 +4141,11 @@ namespace iw4x
     float penetrateMultiplier;
     float fAdsViewKickCenterSpeed;
     float fHipViewKickCenterSpeed;
-    const char *szAltWeaponName;
+    const char* szAltWeaponName;
     unsigned int altWeaponIndex;
     int iAltRaiseTime;
-    Material *killIcon;
-    Material *dpadIcon;
+    Material* killIcon;
+    Material* dpadIcon;
     int fireAnimLength;
     int iFirstRaiseTime;
     int ammoDropStockMax;
@@ -4158,24 +4162,24 @@ namespace iw4x
   //
   struct SndDriverGlobals
   {
-    const char *name;
+    const char* name;
   };
 
   // 1283
   //
   struct RawFile
   {
-    const char *name;
+    const char* name;
     int compressedLen;
     int len;
-    const char *buffer;
+    const char* buffer;
   };
 
   // 1284
   //
   struct StringTableCell
   {
-    const char *string;
+    const char* string;
     int hash;
   };
 
@@ -4183,21 +4187,21 @@ namespace iw4x
   //
   struct StringTable
   {
-    const char *name;
+    const char* name;
     int columnCount;
     int rowCount;
-    StringTableCell *values;
+    StringTableCell* values;
   };
 
   // 1286
   //
   struct LbColumnDef
   {
-    const char *name;
+    const char* name;
     int id;
     int propertyId;
     bool hidden;
-    const char *statName;
+    const char* statName;
     LbColType type;
     int precision;
     LbAggType agg;
@@ -4207,19 +4211,19 @@ namespace iw4x
   //
   struct LeaderboardDef
   {
-    const char *name;
+    const char* name;
     int id;
     int columnCount;
     int xpColId;
     int prestigeColId;
-    LbColumnDef *columns;
+    LbColumnDef* columns;
   };
 
   // 1288
   //
   struct StructuredDataEnumEntry
   {
-    const char *string;
+    const char* string;
     unsigned short index;
   };
 
@@ -4229,7 +4233,7 @@ namespace iw4x
   {
     int entryCount;
     int reservedEntryCount;
-    StructuredDataEnumEntry *entries;
+    StructuredDataEnumEntry* entries;
   };
 
   // 1290
@@ -4255,7 +4259,7 @@ namespace iw4x
   //
   struct StructuredDataStructProperty
   {
-    const char *name;
+    const char* name;
     StructuredDataType type;
     unsigned int offset;
   };
@@ -4265,7 +4269,7 @@ namespace iw4x
   struct StructuredDataStruct
   {
     int propertyCount;
-    StructuredDataStructProperty *properties;
+    StructuredDataStructProperty* properties;
     int size;
     unsigned int bitOffset;
   };
@@ -4295,13 +4299,13 @@ namespace iw4x
     int version;
     unsigned int formatChecksum;
     int enumCount;
-    StructuredDataEnum *enums;
+    StructuredDataEnum* enums;
     int structCount;
-    StructuredDataStruct *structs;
+    StructuredDataStruct* structs;
     int indexedArrayCount;
-    StructuredDataIndexedArray *indexedArrays;
+    StructuredDataIndexedArray* indexedArrays;
     int enumedArrayCount;
-    StructuredDataEnumedArray *enumedArrays;
+    StructuredDataEnumedArray* enumedArrays;
     StructuredDataType rootType;
     unsigned int size;
   };
@@ -4310,9 +4314,9 @@ namespace iw4x
   //
   struct StructuredDataDefSet
   {
-    const char *name;
+    const char* name;
     unsigned int defCount;
-    StructuredDataDef *defs;
+    StructuredDataDef* defs;
   };
 
   // 1298
@@ -4320,9 +4324,9 @@ namespace iw4x
   struct VehiclePhysDef
   {
     int physicsEnabled;
-    const char *physPresetName;
-    PhysPreset *physPreset;
-    const char *accelGraphName;
+    const char* physPresetName;
+    PhysPreset* physPreset;
+    const char* accelGraphName;
     VehicleAxleType steeringAxle;
     VehicleAxleType powerAxle;
     VehicleAxleType brakingAxle;
@@ -4370,9 +4374,9 @@ namespace iw4x
   //
   struct VehicleDef
   {
-    const char *name;
+    const char* name;
     VehicleType type;
-    const char *useHintString;
+    const char* useHintString;
     int health;
     int quadBarrel;
     float texScrollScale;
@@ -4426,49 +4430,49 @@ namespace iw4x
     float camFovIncrease;
     float camFovOffset;
     float camFovSpeed;
-    const char *turretWeaponName;
-    WeaponCompleteDef *turretWeapon;
+    const char* turretWeaponName;
+    WeaponCompleteDef* turretWeapon;
     float turretHorizSpanLeft;
     float turretHorizSpanRight;
     float turretVertSpanUp;
     float turretVertSpanDown;
     float turretRotRate;
-    snd_alias_list_t *turretSpinSnd;
-    snd_alias_list_t *turretStopSnd;
+    snd_alias_list_t* turretSpinSnd;
+    snd_alias_list_t* turretStopSnd;
     int trophyEnabled;
     float trophyRadius;
     float trophyInactiveRadius;
     int trophyAmmoCount;
     float trophyReloadTime;
     unsigned short trophyTags[4];
-    Material *compassFriendlyIcon;
-    Material *compassEnemyIcon;
+    Material* compassFriendlyIcon;
+    Material* compassEnemyIcon;
     int compassIconWidth;
     int compassIconHeight;
-    snd_alias_list_t *idleLowSnd;
-    snd_alias_list_t *idleHighSnd;
-    snd_alias_list_t *engineLowSnd;
-    snd_alias_list_t *engineHighSnd;
+    snd_alias_list_t* idleLowSnd;
+    snd_alias_list_t* idleHighSnd;
+    snd_alias_list_t* engineLowSnd;
+    snd_alias_list_t* engineHighSnd;
     float engineSndSpeed;
-    snd_alias_list_t *engineStartUpSnd;
+    snd_alias_list_t* engineStartUpSnd;
     int engineStartUpLength;
-    snd_alias_list_t *engineShutdownSnd;
-    snd_alias_list_t *engineIdleSnd;
-    snd_alias_list_t *engineSustainSnd;
-    snd_alias_list_t *engineRampUpSnd;
+    snd_alias_list_t* engineShutdownSnd;
+    snd_alias_list_t* engineIdleSnd;
+    snd_alias_list_t* engineSustainSnd;
+    snd_alias_list_t* engineRampUpSnd;
     int engineRampUpLength;
-    snd_alias_list_t *engineRampDownSnd;
+    snd_alias_list_t* engineRampDownSnd;
     int engineRampDownLength;
-    snd_alias_list_t *suspensionSoftSnd;
+    snd_alias_list_t* suspensionSoftSnd;
     float suspensionSoftCompression;
-    snd_alias_list_t *suspensionHardSnd;
+    snd_alias_list_t* suspensionHardSnd;
     float suspensionHardCompression;
-    snd_alias_list_t *collisionSnd;
+    snd_alias_list_t* collisionSnd;
     float collisionBlendSpeed;
-    snd_alias_list_t *speedSnd;
+    snd_alias_list_t* speedSnd;
     float speedSndBlendSpeed;
-    const char *surfaceSndPrefix;
-    snd_alias_list_t *surfaceSnds[31];
+    const char* surfaceSndPrefix;
+    snd_alias_list_t* surfaceSnds[31];
     float surfaceSndBlendSpeed;
     float slideVolume;
     float slideBlendSpeed;
@@ -4479,8 +4483,8 @@ namespace iw4x
   //
   struct AddonMapEnts
   {
-    const char *name;
-    char *entityString;
+    const char* name;
+    char* entityString;
     int numEntityChars;
     MapTriggers trigger;
   };
@@ -4489,44 +4493,44 @@ namespace iw4x
   //
   union XAssetHeader
   {
-    PhysPreset *physPreset;
-    PhysCollmap *physCollmap;
-    XAnimParts *parts;
-    XModelSurfs *modelSurfs;
-    XModel *model;
-    Material *material;
-    MaterialPixelShader *pixelShader;
-    MaterialVertexShader *vertexShader;
-    MaterialVertexDeclaration *vertexDecl;
-    MaterialTechniqueSet *techniqueSet;
-    GfxImage *image;
-    snd_alias_list_t *sound;
-    SndCurve *sndCurve;
-    LoadedSound *loadSnd;
-    clipMap_t *clipMap;
-    ComWorld *comWorld;
-    GameWorldSp *gameWorldSp;
-    GameWorldMp *gameWorldMp;
-    MapEnts *mapEnts;
-    FxWorld *fxWorld;
-    GfxWorld *gfxWorld;
-    GfxLightDef *lightDef;
-    Font_s *font;
-    MenuList *menuList;
-    menuDef_t *menu;
-    LocalizeEntry *localize;
-    WeaponCompleteDef *weapon;
-    SndDriverGlobals *sndDriverGlobals;
-    FxEffectDef *fx;
-    FxImpactTable *impactFx;
-    RawFile *rawfile;
-    StringTable *stringTable;
-    LeaderboardDef *leaderboardDef;
-    StructuredDataDefSet *structuredDataDefSet;
-    TracerDef *tracerDef;
-    VehicleDef *vehDef;
-    AddonMapEnts *addonMapEnts;
-    void *data;
+    PhysPreset* physPreset;
+    PhysCollmap* physCollmap;
+    XAnimParts* parts;
+    XModelSurfs* modelSurfs;
+    XModel* model;
+    Material* material;
+    MaterialPixelShader* pixelShader;
+    MaterialVertexShader* vertexShader;
+    MaterialVertexDeclaration* vertexDecl;
+    MaterialTechniqueSet* techniqueSet;
+    GfxImage* image;
+    snd_alias_list_t* sound;
+    SndCurve* sndCurve;
+    LoadedSound* loadSnd;
+    clipMap_t* clipMap;
+    ComWorld* comWorld;
+    GameWorldSp* gameWorldSp;
+    GameWorldMp* gameWorldMp;
+    MapEnts* mapEnts;
+    FxWorld* fxWorld;
+    GfxWorld* gfxWorld;
+    GfxLightDef* lightDef;
+    Font_s* font;
+    MenuList* menuList;
+    menuDef_t* menu;
+    LocalizeEntry* localize;
+    WeaponCompleteDef* weapon;
+    SndDriverGlobals* sndDriverGlobals;
+    FxEffectDef* fx;
+    FxImpactTable* impactFx;
+    RawFile* rawfile;
+    StringTable* stringTable;
+    LeaderboardDef* leaderboardDef;
+    StructuredDataDefSet* structuredDataDefSet;
+    TracerDef* tracerDef;
+    VehicleDef* vehDef;
+    AddonMapEnts* addonMapEnts;
+    void* data;
   };
 
   // 1315
@@ -4568,8 +4572,8 @@ namespace iw4x
   {
     int overflowed;
     int readOnly;
-    char *data;
-    char *splitData;
+    char* data;
+    char* splitData;
     int maxsize;
     int cursize;
     int splitSize;
@@ -4583,7 +4587,7 @@ namespace iw4x
   struct ScriptStringList
   {
     int count;
-    const char **strings;
+    const char** strings;
   };
 
   // 2686
@@ -4600,7 +4604,7 @@ namespace iw4x
   {
     ScriptStringList stringList;
     int assetCount;
-    XAsset *assets;
+    XAsset* assets;
   };
 
   // 2795
@@ -4620,7 +4624,7 @@ namespace iw4x
   union XAssetEntryPoolEntry
   {
     XAssetEntry entry;
-    XAssetEntryPoolEntry *next;
+    XAssetEntryPoolEntry* next;
   };
 
   // Game internal symbols
