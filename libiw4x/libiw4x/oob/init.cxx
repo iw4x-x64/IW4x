@@ -7,8 +7,6 @@
 #include <unordered_map>
 #include <utility>
 
-using namespace std;
-
 namespace iw4x
 {
   namespace oob
@@ -68,7 +66,7 @@ namespace iw4x
           // Outside quotes, whitespace delimits tokens.
           //
           if (!inside_quotes &&
-              isspace (static_cast<unsigned char> (character)))
+              (isspace (static_cast<unsigned char> (character)) != 0))
           {
             if (!current_token.empty ())
             {
@@ -144,7 +142,7 @@ namespace iw4x
           handler_iterator->second (sender_address, arguments);
           return true;
         }
-        catch (const exception& error)
+        catch (const std::exception& error)
         {
           cerr << "error: OOB command '" << command_name << "' handler threw "
                << "exception: " << error.what () << endl;
@@ -196,7 +194,7 @@ namespace iw4x
 
       // Check for duplicate registration.
       //
-      if (command_handlers.find (command_name) != command_handlers.end ())
+      if (command_handlers.contains (command_name))
         throw invalid_argument ("command handler already registered for '" +
                                 command_name + "'");
 

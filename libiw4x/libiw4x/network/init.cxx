@@ -26,7 +26,7 @@ namespace iw4x
           // IW4 always stores four octets in ip[] and keeps port in network
           // byte order.
           //
-          sockaddr_in sa;
+          sockaddr_in sa{};
           sa.sin_family = AF_INET;
           memcpy (&sa.sin_addr, address->ip, sizeof (sa.sin_addr));
           sa.sin_port = address->port;

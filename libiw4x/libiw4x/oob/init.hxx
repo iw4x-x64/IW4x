@@ -1,5 +1,6 @@
 #pragma once
 
+#include <libiw4x/types.hxx>
 #include <libiw4x/import.hxx>
 #include <libiw4x/export.hxx>
 
@@ -13,9 +14,8 @@ namespace iw4x
     // command-line arguments (similar to argc/argv). The first argument is the
     // command name itself.
     //
-    using command_handler =
-      std::function<void (const netadr_t& sender_address,
-                          const std::vector<std::string>& arguments)>;
+    using command_handler = function<void (const netadr_t& sender_address,
+                                           const vector<string>& arguments)>;
 
     // Register handler for an out-of-band command.
     //
@@ -28,7 +28,7 @@ namespace iw4x
     // exists.
     //
     LIBIW4X_SYMEXPORT void
-    register_command_handler (const std::string& command_name,
+    register_command_handler (const string& command_name,
                               command_handler handler);
 
     // Initialize out-of-band packet handling subsystem.

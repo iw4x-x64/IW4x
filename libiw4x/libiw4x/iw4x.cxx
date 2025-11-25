@@ -131,7 +131,7 @@ namespace iw4x
         // libraries but unsuitable for modules like ours, which embed deeply
         // into the host process.
         //
-        HMODULE m;
+        HMODULE m (nullptr);
         if (!GetModuleHandleEx (GET_MODULE_HANDLE_EX_FLAG_PIN |
                                   GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS,
                                 reinterpret_cast<LPCTSTR> (DllMain),
@@ -234,13 +234,7 @@ namespace iw4x
           });
 
         minhook::initialize ();
-
-        //
-        //
         scheduler s;
-
-        //
-        //
         frame::init (s);
         menu::init (s);
         network::init (s);
@@ -278,7 +272,7 @@ namespace iw4x
       if (VirtualProtect (reinterpret_cast<void*> (target),
                           seq.size (),
                           PAGE_EXECUTE_READWRITE,
-                          &o))
+                          &o) != 0)
       {
         memmove (reinterpret_cast<void*> (target), seq.data (), seq.size ());
       }

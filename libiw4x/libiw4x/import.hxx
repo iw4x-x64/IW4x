@@ -643,7 +643,7 @@ namespace iw4x
   struct SndCurve
   {
     const char *filename;
-    unsigned __int16 knotCount;
+    unsigned short knotCount;
     float knots[16][2];
   };
 
@@ -778,17 +778,17 @@ namespace iw4x
   //
   struct GfxDrawSurfFields
   {
-    unsigned __int64 objectId : 16;
-    unsigned __int64 reflectionProbeIndex : 8;
-    unsigned __int64 hasGfxEntIndex : 1;
-    unsigned __int64 customIndex : 5;
-    unsigned __int64 materialSortedIndex : 12;
-    unsigned __int64 prepass : 2;
-    unsigned __int64 useHeroLighting : 1;
-    unsigned __int64 sceneLightIndex : 8;
-    unsigned __int64 surfType : 4;
-    unsigned __int64 primarySortKey : 6;
-    unsigned __int64 unused : 1;
+    unsigned long long objectId : 16;
+    unsigned long long reflectionProbeIndex : 8;
+    unsigned long long hasGfxEntIndex : 1;
+    unsigned long long customIndex : 5;
+    unsigned long long materialSortedIndex : 12;
+    unsigned long long prepass : 2;
+    unsigned long long useHeroLighting : 1;
+    unsigned long long sceneLightIndex : 8;
+    unsigned long long surfType : 4;
+    unsigned long long primarySortKey : 6;
+    unsigned long long unused : 1;
   };
 
   // 963
@@ -796,7 +796,7 @@ namespace iw4x
   union GfxDrawSurf
   {
     GfxDrawSurfFields fields;
-    unsigned __int64 packed;
+    unsigned long long packed;
   };
 
   // 964
@@ -2627,19 +2627,17 @@ namespace iw4x
     float origin[3];
   };
 
-  // 1191
-  //
-  struct $E43DBA5037697D705289B74D87E76C70
-  {
-    FxSpatialFrame frame;
-    float radius;
-  };
-
   // 1192
   //
   union FxGlassPiecePlace
   {
-    $E43DBA5037697D705289B74D87E76C70 __s0;
+    // 1191
+    //
+    struct
+    {
+      FxSpatialFrame frame;
+      float radius;
+    };
     unsigned int nextFree;
   };
 
@@ -4643,22 +4641,22 @@ namespace iw4x
   using  NET_OutOfBandPrint_t = void (*) (int, netadr_t*, const char*, ...);
   inline NET_OutOfBandPrint_t NET_OutOfBandPrint = reinterpret_cast<NET_OutOfBandPrint_t> (0x140209FC0);
 
-  using  Dvar_RegisterString_t = __int64 (*) (__int64, __int64, int, __int64);
+  using  Dvar_RegisterString_t = long long (*) (long long, long long, int, long long);
   inline Dvar_RegisterString_t Dvar_RegisterString = reinterpret_cast<Dvar_RegisterString_t> (0x140288590);
 
-  using  Dvar_RegisterInt_t = __int64 (*) (__int64, int, int, int, int, __int64);
+  using  Dvar_RegisterInt_t = long long (*) (long long, int, int, int, int, long long);
   inline Dvar_RegisterInt_t Dvar_RegisterInt = reinterpret_cast<Dvar_RegisterInt_t> (0x1402881F0);
 
   using  Dvar_FindVar_t = dvar_t* (*) (const char* name);
   inline Dvar_FindVar_t Dvar_FindVar = reinterpret_cast<Dvar_FindVar_t> (0x140287170);
 
-  using  Dvar_SetString_t = __int64 (*) (__int64, __int64);
+  using  Dvar_SetString_t = long long (*) (long long, long long);
   inline Dvar_SetString_t Dvar_SetString = reinterpret_cast<Dvar_SetString_t> (0x140289A80);
 
   using  Dvar_SetFromStringByName_t = dvar_t* (*) (const char*, const char*);
   inline Dvar_SetFromStringByName_t Dvar_SetFromStringByName = reinterpret_cast<Dvar_SetFromStringByName_t> (0x140289570);
 
-  using  Dvar_RegisterBool_t = __int64 (*) (__int64, __int64, int, __int64);
+  using  Dvar_RegisterBool_t = long long (*) (long long, long long, int, long long);
   inline Dvar_RegisterBool_t Dvar_RegisterBool = reinterpret_cast<Dvar_RegisterBool_t> (0x140287CE0);
 
   using  DB_FindXAssetHeader_t = XAssetHeader (*) (XAssetType type, const char* name);

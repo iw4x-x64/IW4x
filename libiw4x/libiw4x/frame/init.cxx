@@ -1,7 +1,5 @@
 #include <libiw4x/frame/init.hxx>
 
-using namespace std;
-
 namespace iw4x
 {
   namespace frame
@@ -17,7 +15,7 @@ namespace iw4x
         {
           ~poll ()
           {
-            if (sched)
+            if (sched != nullptr)
             {
               // Note that we lie here. The engine's nominal frame boundary is
               // Com_Frame, but the actual control path is mediated by
