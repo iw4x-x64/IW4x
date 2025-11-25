@@ -8,7 +8,7 @@ namespace iw4x
 {
   extern "C"
   {
-    BOOL WINAPI
+    LIBIW4X_SYMEXPORT BOOL WINAPI
     DllMain (HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved);
   }
 }
