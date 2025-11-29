@@ -7,6 +7,11 @@
 #include <string>
 #include <unordered_map>
 
+// Temp 
+//
+#define WINVER       0x0A00
+#define _WIN32_WINNT 0x0A00
+
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/strand.hpp>
 
