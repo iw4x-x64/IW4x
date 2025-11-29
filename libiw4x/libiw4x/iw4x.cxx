@@ -138,7 +138,8 @@ namespace iw4x
                 s.find ("__cxa_rethrow")       != string::npos ||
                 s.find ("__tmainCRTStartup")   != string::npos ||
                 s.find ("WinMainCRTStartup")   != string::npos ||
-                s.find ("BaseThreadInitThunk") != string::npos);
+                s.find ("BaseThreadInitThunk") != string::npos ||
+                n.find ("ntdll.dll")           != string::npos);
       });
 
       // Register cpptrace terminate handler.
