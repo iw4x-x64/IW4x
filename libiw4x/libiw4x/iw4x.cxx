@@ -104,7 +104,8 @@ namespace iw4x
       using namespace cpptrace;
 
       using formatter        = cpptrace::formatter;
-      using address_mode     = cpptrace::v1::formatter::address_mode;
+      using address_mode     = cpptrace::formatter::address_mode;
+      using colors_mode      = cpptrace::formatter::color_mode;
       using symbol_mode      = cpptrace::formatter::symbol_mode;
       using stacktrace_frame = cpptrace::stacktrace_frame;
 
@@ -118,6 +119,7 @@ namespace iw4x
       //
       const_cast<formatter&> (get_default_formatter ())
         .addresses (address_mode::object)
+        .colors (colors_mode::always) // automatic mode fails under Wine
         .snippets (true)
         .symbols (symbol_mode::pretty)
         .filter ([] (const stacktrace_frame& frame)
