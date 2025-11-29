@@ -50,52 +50,40 @@ namespace iw4x
           return;
       }
 
-      // At this point, both standard streams appear invalid, so we can safely
-      // attach to the parent process's console.
+      // At this point, both standard streams appear invalid, so we attempt to
+      // attach to the parent's console. Note that this call may fail for
+      // expected reasons such as being already attached or the parent having
+      // exited, and in all such cases the failure is non-fatal and we simply
+      // bail out.
       //
-      if (AttachConsole (ATTACH_PARENT_PROCESS) == 0)
+      if (AttachConsole (ATTACH_PARENT_PROCESS) != 0)
       {
-        unsigned int error (GetLastError ());
-
-        // `ERROR_ACCESS_DENIED` means we are already attached. Any further
-        // action would be redundant and potentially unsafe.
+        // Once attached, rebind `stdout` and `stderr` to `CONOUT$` using
+        // `freopen()`. Also duplicate their low-level descriptors (1 for
+        // stdout, 2 for stderr) so that code using the raw file descriptor API
+        // observes the same handles.
         //
-        if (error == ERROR_ACCESS_DENIED)
-          return;
-
-        // `ERROR_GEN_FAILURE` indicates that the parent console is no longer
-        // usable, usually because the parent process has terminated. Creating a
-        // new console in this case would only produce an orphan window.
+        // Note that failure to rebind is non-fatal. Console output is
+        // diagnostic-only and has no bearing on core functionality. We
+        // therefore avoid exceptions and suppress all errors unconditionally.
         //
-        if (error == ERROR_GEN_FAILURE)
-          return;
+        bool stdout_rebound (false);
+        bool stderr_rebound (false);
+
+        if (freopen ("CONOUT$", "w", stdout) != nullptr &&
+            _dup2 (_fileno (stdout), 1) != -1)
+          stdout_rebound = true;
+
+        if (freopen ("CONOUT$", "w", stderr) != nullptr &&
+            _dup2 (_fileno (stderr), 2) != -1)
+          stderr_rebound = true;
+
+        // If stream were rebound, realign iostream objects (`cout`, `cerr`,
+        // etc.) with C FILE streams.
+        //
+        if (stdout_rebound && stderr_rebound)
+          ios::sync_with_stdio ();
       }
-
-      // Once attached, rebind `stdout` and `stderr` to `CONOUT$` using
-      // `freopen()`. Also duplicate their low-level descriptors (1 for stdout,
-      // 2 for stderr) so that code using the raw file descriptor API observes
-      // the same handles.
-      //
-      // Note that failure to rebind is non-fatal. Console output is
-      // diagnostic-only and has no bearing on core functionality. We therefore
-      // avoid exceptions and suppress all errors unconditionally.
-      //
-      bool stdout_rebound (false);
-      bool stderr_rebound (false);
-
-      if (freopen ("CONOUT$", "w", stdout) != nullptr &&
-          _dup2 (_fileno (stdout), 1) != -1)
-        stdout_rebound = true;
-
-      if (freopen ("CONOUT$", "w", stderr) != nullptr &&
-          _dup2 (_fileno (stderr), 2) != -1)
-        stderr_rebound = true;
-
-      // If stream were rebound, realign iostream objects (`cout`, `cerr`,
-      // etc.) with C FILE streams.
-      //
-      if (stdout_rebound && stderr_rebound)
-        ios::sync_with_stdio ();
     }
 
     void
