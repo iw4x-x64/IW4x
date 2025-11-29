@@ -8,6 +8,9 @@ extern "C"
   #include <io.h>
 }
 
+#include <cpptrace/cpptrace.hpp>
+#include <cpptrace/formatting.hpp>
+
 using namespace std;
 
 namespace iw4x
@@ -94,6 +97,52 @@ namespace iw4x
       if (stdout_rebound && stderr_rebound)
         ios::sync_with_stdio ();
     }
+
+    void
+    setup_cpptrace ()
+    {
+      using namespace cpptrace;
+
+      using formatter        = cpptrace::formatter;
+      using address_mode     = cpptrace::v1::formatter::address_mode;
+      using symbol_mode      = cpptrace::formatter::symbol_mode;
+      using stacktrace_frame = cpptrace::stacktrace_frame;
+
+      // Configure the global cpptrace formatter to produce concise, actionable
+      // stack traces for diagnostics (particularly from terminate handlers).
+      //
+      // Note that the default formatter is returned as a const reference, so we
+      // use const_cast to modify it. This is generally unsafe but acceptable
+      // here since we're modifying a static object before any traces are
+      // generated.
+      //
+      const_cast<formatter&> (get_default_formatter ())
+        .addresses (address_mode::object)
+        .snippets (true)
+        .symbols (symbol_mode::pretty)
+        .filter ([] (const stacktrace_frame& frame)
+      {
+        const string& s (frame.symbol);
+        const string& n (frame.filename);
+
+        // Filter out known runtime and system frames that are unhelpful in
+        // stack traces. Note that a full substring search is necessary because
+        // these symbols can appear anywhere in the decorated names. That is,
+        // word boundaries cannot be relied on.
+        //
+        return (s.find ("terminate_handler")   != string::npos ||
+                s.find ("__terminate")         != string::npos ||
+                s.find ("std::terminate")      != string::npos ||
+                s.find ("__cxa_rethrow")       != string::npos ||
+                s.find ("__tmainCRTStartup")   != string::npos ||
+                s.find ("WinMainCRTStartup")   != string::npos ||
+                s.find ("BaseThreadInitThunk") != string::npos);
+      });
+
+      // Register cpptrace terminate handler.
+      //
+      register_terminate_handler ();
+    }
   }
 
   extern "C"
@@ -120,6 +169,10 @@ namespace iw4x
         // diagnostic output become visible in interactive use.
         //
         attach_console ();
+
+        // Setup cpptrace to generate stack trace from terminate handler.
+        //
+        setup_cpptrace ();
 
         // Under normal circumstances, a DLL is unloaded via FreeLibrary once
         // its reference count reaches zero. This is acceptable for auxiliary
