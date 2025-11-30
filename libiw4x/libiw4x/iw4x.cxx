@@ -97,8 +97,8 @@ namespace iw4x
       using symbol_mode      = cpptrace::formatter::symbol_mode;
       using stacktrace_frame = cpptrace::stacktrace_frame;
 
-      // Configure the global cpptrace formatter to produce concise, actionable
-      // stack traces for diagnostics (particularly from terminate handlers).
+      // Configure the global cpptrace formatter to produce actionable stack
+      // traces for diagnostics (particularly from terminate handlers).
       //
       // Note that the default formatter is returned as a const reference, so we
       // use const_cast to modify it. This is generally unsafe but acceptable
@@ -131,6 +131,8 @@ namespace iw4x
       });
 
       // Register cpptrace terminate handler.
+      //
+      // https://github.com/jeremy-rifkin/cpptrace#terminate-handling
       //
       register_terminate_handler ();
     }
@@ -240,14 +242,14 @@ namespace iw4x
         //
         ([] (void (*_) (uintptr_t, int, size_t))
           {
-            _(0x1401B2FCA, 0x31, 1); // Bypass xgameruntimeinitialize
+            _(0x1401B2FCA, 0x31, 1); // Bypass XGameRuntimeInitialize
             _(0x1401B2FCB, 0xC0, 1); //
             _(0x1401B2FCC, 0x90, 3); //
             _(0x1401B308F, 0x31, 1); //
             _(0x1401B3090, 0xC0, 1); //
             _(0x1401B3091, 0x90, 3); //
 
-            _(0x1402A6A4B, 0x90, 5); // Bypass curlx
+            _(0x1402A6A4B, 0x90, 5); // Bypass xCurl
             _(0x1402A6368, 0x90, 5); //
 
             _(0x1402A5F70, 0x90, 3); // Bypass xboxlive_signed
