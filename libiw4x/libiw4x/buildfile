@@ -1,6 +1,7 @@
 intf_libs = # Interface dependencies.
 impl_libs = # Implementation dependencies.
 
+import intf_libs += libiw4x-utility%lib{iw4x-utility}
 import intf_libs += libcpptrace%lib{cpptrace}
 
 lib{iw4x}: {hxx ixx txx cxx}{** -{config version}} \
