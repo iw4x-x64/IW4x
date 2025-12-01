@@ -8,8 +8,10 @@ extern "C"
   #include <io.h>
 }
 
-#include <cpptrace/cpptrace.hpp>
-#include <cpptrace/formatting.hpp>
+#if LIBIW4X_CPPTRACE
+#  include <cpptrace/cpptrace.hpp>
+#  include <cpptrace/formatting.hpp>
+#endif
 
 using namespace std;
 
@@ -86,6 +88,7 @@ namespace iw4x
       }
     }
 
+#if LIBIW4X_CPPTRACE
     void
     setup_cpptrace ()
     {
@@ -137,6 +140,7 @@ namespace iw4x
       //
       register_terminate_handler ();
     }
+#endif
   }
 
   extern "C"
@@ -166,7 +170,9 @@ namespace iw4x
 
         // Setup cpptrace to generate stack trace from terminate handler.
         //
+#if LIBIW4X_CPPTRACE
         setup_cpptrace ();
+#endif
 
         // Under normal circumstances, a DLL is unloaded via FreeLibrary once
         // its reference count reaches zero. This is acceptable for auxiliary

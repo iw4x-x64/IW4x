@@ -2,7 +2,9 @@ intf_libs = # Interface dependencies.
 impl_libs = # Implementation dependencies.
 
 import intf_libs += libiw4x-utility%lib{iw4x-utility}
-import intf_libs += libcpptrace%lib{cpptrace}
+
+if ($config.libiw4x.cpptrace)
+  import intf_libs += libcpptrace%lib{cpptrace}
 
 lib{iw4x}: {hxx ixx txx cxx}{** -{config version}} \
            {hxx            }{     config version } \
@@ -15,6 +17,9 @@ hxx{config}:  in{config}
 # Build options.
 #
 cxx.poptions =+ "-I$out_root" "-I$src_root"
+
+if ($config.libiw4x.cpptrace)
+  cxx.poptions += "-DLIBIW4X_CPPTRACE"
 
 obja{*}: cxx.poptions += -DLIBIW4X_STATIC_BUILD
 objs{*}: cxx.poptions += -DLIBIW4X_SHARED_BUILD

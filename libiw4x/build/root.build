@@ -19,3 +19,7 @@ test.target = $cxx.target
 # builds.
 #
 config [bool] config.libiw4x.develop ?= false
+
+# Common configuration variable.
+#
+source $src_root/build/config/common.build

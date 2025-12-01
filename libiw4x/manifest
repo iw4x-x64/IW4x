@@ -4,4 +4,31 @@ version: 0.1.0-a.0.z
 summary: iw4x C++ library
 license: GPL-3.0-or-later ; GNU General Public License v3.0 or later.
 depends: libiw4x-utility
-depends: libcpptrace
+depends: libcpptrace ? ($config.libiw4x.cpptrace)
+
+# CI configuration
+#
+# We limit MSVC/MinGW testing to the latest toolchains published on cppget.
+# Older versions are excluded to keep the matrix small and avoid committing
+# to maintaining multiple compiler/packaging variants.
+#
+builds: none
+
+msvc-builds: sys
+msvc-builds: -bindist
+msvc-builds: -static
+msvc-build-include: windows_10-msvc_17.10**
+msvc-build-exclude: windows_*-gcc**
+
+# Disable cpptrace for MinGW. Correct symbol resolution requires libdwarf,
+# which is not (yet) packaged.
+#
+mingw-builds: sys
+mingw-builds: -bindist
+mingw-builds: -static
+mingw-build-include: windows_10-gcc_13.2_mingw_w64**
+mingw-build-exclude: **
+mingw-build-config:
+\
+config.libiw4x.cpptrace=false
+\
