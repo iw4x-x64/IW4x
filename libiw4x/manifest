@@ -8,27 +8,6 @@ depends: libcpptrace ? ($config.libiw4x.cpptrace)
 
 # CI configuration
 #
-# We limit MSVC/MinGW testing to the latest toolchains published on cppget.
-# Older versions are excluded to keep the matrix small and avoid committing
-# to maintaining multiple compiler/packaging variants.
-#
-builds: none
-
-msvc-builds: sys
-msvc-builds: -bindist
-msvc-builds: -static
-msvc-build-include: windows_10-msvc_17.10**
-msvc-build-exclude: windows_*-gcc**
-
-# Disable cpptrace for MinGW. Correct symbol resolution requires libdwarf,
-# which is not (yet) packaged.
-#
-mingw-builds: sys
-mingw-builds: -bindist
-mingw-builds: -static
-mingw-build-include: windows_10-gcc_13.2_mingw_w64**
-mingw-build-exclude: **
-mingw-build-config:
-\
-config.libiw4x.cpptrace=false
-\
+builds: &windows
+builds: -32 ; 64-bit targets only
+builds: -clang ; clang is not supported

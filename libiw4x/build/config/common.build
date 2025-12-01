@@ -1,1 +1,1 @@
-config [bool] config.libiw4x.cpptrace ?= true
+config [bool] config.libiw4x.cpptrace ?= false
