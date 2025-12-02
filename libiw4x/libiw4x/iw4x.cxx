@@ -232,7 +232,7 @@ namespace iw4x
                                PAGE_EXECUTE_READWRITE,
                                &o))
           {
-            cerr << "error: unable to change memory protection";
+            cerr << "error: unable to change module protection";
             exit (1);
           }
         }
