@@ -11,8 +11,16 @@ lib{iw4x-utility}: {hxx ixx txx cxx}{** -{utility-win32 config version}} \
 hxx{version}: in{version} $src_root/manifest
 hxx{config}:  in{config}
 
+tsys    = $cxx.target.system
 tclass  = $cxx.target.class
 windows = ($tclass == 'windows')
+mingw32 = ($tsys == 'mingw32')
+
+ws2_32 =
+if ($mingw32)
+  ws2_32 += -lws2_32
+else
+  ws2_32 += ws2_32.lib
 
 # Only include utility-win32.hxx when targeting Windows.
 #
@@ -21,16 +29,18 @@ lib{iw4x-utility}: {hxx}{utility-win32}: include = $windows
 # Build options.
 #
 cxx.poptions =+ "-I$out_root" "-I$src_root"
+cxx.libs =+ $ws2_32
 
 obja{*}: cxx.poptions += -DLIBIW4X_UTILITY_STATIC_BUILD
 objs{*}: cxx.poptions += -DLIBIW4X_UTILITY_SHARED_BUILD
 
 # Export options.
 #
+
 lib{iw4x-utility}:
 {
   cxx.export.poptions = "-I$out_root" "-I$src_root"
-  cxx.export.libs = $intf_libs
+  cxx.export.libs = $intf_libs $ws2_32
 }
 
 liba{iw4x-utility}: cxx.export.poptions += -DLIBIW4X_UTILITY_STATIC
