@@ -36,7 +36,7 @@ namespace iw4x
       while (ds < min_hook_size && di < max_hook_size)
       {
         if (ZYAN_FAILED (ZydisDecoderDecodeFull (&d,
-                                                 static_cast<byte*> (t) + ds,
+                                                 static_cast<uint8_t*> (t) + ds,
                                                  ZYDIS_MAX_INSTRUCTION_LENGTH,
                                                  &ins[di],
                                                  ops[di])))
@@ -47,7 +47,7 @@ namespace iw4x
 
       // Derive the targnt representations needed for relocation
       //
-      auto to (reinterpret_cast<byte*> (t));
+      auto to (reinterpret_cast<uint8_t*> (t));
       auto ta (reinterpret_cast<uint64_t> (t));
 
       // Allocate an isolated address frame so that PC-relative adjustments
@@ -154,7 +154,7 @@ namespace iw4x
 
       // Derive the frame representations needed for relocation.
       //
-      auto fo (reinterpret_cast<byte*> (frame));
+      auto fo (reinterpret_cast<uint8_t*> (frame));
       auto fa (reinterpret_cast<uint64_t> (frame));
 
       // Track the relocation progress within the isolated frame.
@@ -226,7 +226,7 @@ namespace iw4x
       }
 
       auto
-      commit ([] (byte* b, const void* source)
+      commit ([] (uint8_t* b, const void* source)
       {
         ZydisEncoderRequest r {};
         r.mnemonic = ZYDIS_MNEMONIC_JMP;
