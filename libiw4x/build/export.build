@@ -1,6 +1,0 @@
-$out_root/
-{
-  include libiw4x/
-}
-
-export $out_root/libiw4x/$import.target

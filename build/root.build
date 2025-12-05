@@ -11,6 +11,10 @@ ixx{*}: extension = ixx
 txx{*}: extension = txx
 cxx{*}: extension = cxx
 
+# Module-definition.
+#
+def{*}: extension = def
+
 # The test target for cross-testing (running tests under Wine, etc).
 #
 test.target = $cxx.target
@@ -20,6 +24,6 @@ test.target = $cxx.target
 #
 config [bool] config.libiw4x.develop ?= false
 
-# Common configuration variable.
+# Configuration variable.
 #
 source $src_root/build/config/common.build

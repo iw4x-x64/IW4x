@@ -1,10 +1,10 @@
 : 1
 name: libiw4x
 version: 0.1.0-a.0.z
-summary: iw4x C++ library
+summary: iw4x client
 license: GPL-3.0-or-later ; GNU General Public License v3.0 or later.
-depends: libiw4x-utility
 depends: libcpptrace ? ($config.libiw4x.cpptrace)
+depends: libzydis
 
 # CI configuration
 #
