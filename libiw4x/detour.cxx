@@ -43,7 +43,7 @@ namespace iw4x
       ds += ins[di].length, ++di;
     }
 
-    // Derive the targnt representations needed for relocation
+    // Derive the target representations needed for relocation
     //
     auto to (reinterpret_cast<uint8_t*> (t));
     auto ta (reinterpret_cast<uint64_t> (t));
