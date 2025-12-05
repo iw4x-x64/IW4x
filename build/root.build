@@ -11,6 +11,22 @@ ixx{*}: extension = ixx
 txx{*}: extension = txx
 cxx{*}: extension = cxx
 
+if ($cxx.target.system == 'win32-msvc')
+{
+  cxx.poptions += -D_CRT_SECURE_NO_WARNINGS -D_SCL_SECURE_NO_WARNINGS
+
+  # Pin the Windows version macros to a known baseline.
+  #
+  # ASIO conditionally enables parts of its Windows backend based on
+  # _WIN32_WINNT. Leaving this macros to compiler defaults can result in
+  # different translation units selecting different execution paths, which in
+  # turn leads to inconsistent behavior and, in some cases, ABI mismatches.
+  #
+  # See also the background discussion in: https://stackoverflow.com/a/41068811
+  #
+  cxx.poptions += -DWINVER=0x0A00 -D_WIN32_WINNT=0x0A00
+}
+
 # Module-definition.
 #
 def{*}: extension = def

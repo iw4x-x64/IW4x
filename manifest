@@ -5,6 +5,7 @@ summary: iw4x client
 license: GPL-3.0-or-later ; GNU General Public License v3.0 or later.
 depends: libcpptrace ? ($config.libiw4x.cpptrace)
 depends: libzydis
+depends: libboost-asio
 
 # CI configuration
 #
