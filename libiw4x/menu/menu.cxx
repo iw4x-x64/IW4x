@@ -1,4 +1,4 @@
-#include <libiw4x/menu/init.hxx>
+#include <libiw4x/menu/menu.hxx>
 
 #include <string>
 #include <vector>

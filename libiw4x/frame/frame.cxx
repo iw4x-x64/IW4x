@@ -1,4 +1,4 @@
-#include <libiw4x/frame/init.hxx>
+#include <libiw4x/frame/frame.hxx>
 
 #include <iostream>
 

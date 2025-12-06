@@ -13,8 +13,8 @@ extern "C"
 #  include <cpptrace/formatting.hpp>
 #endif
 
-#include <libiw4x/frame/init.hxx>
-#include <libiw4x/menu/init.hxx>
+#include <libiw4x/frame/frame.hxx>
+#include <libiw4x/menu/menu.hxx>
 
 using namespace std;
 
