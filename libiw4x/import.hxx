@@ -17,6 +17,11 @@ namespace iw4x
   struct pathnode_tree_t;
   struct Statement_s;
 
+  typedef float vec_t;
+  typedef vec_t vec2_t[2];
+  typedef vec_t vec3_t[3];
+  typedef vec_t vec4_t[4];
+
   // 29
   //
   enum netsrc_t
@@ -4614,6 +4619,215 @@ namespace iw4x
     XAssetEntryPoolEntry* next;
   };
 
+  enum DvarSetSource
+  {
+    DVAR_SOURCE_INTERNAL = 0x0,
+    DVAR_SOURCE_EXTERNAL = 0x1,
+    DVAR_SOURCE_SCRIPT = 0x2,
+    DVAR_SOURCE_DEVGUI = 0x3,
+  };
+
+  enum DvarFlags
+  {
+    DVAR_NONE = 0x0,
+    DVAR_ARCHIVE = 0x1,
+    DVAR_LATCH = 0x2,
+    DVAR_CHEAT = 0x4,
+    DVAR_CODINFO = 0x8,
+    DVAR_SCRIPTINFO = 0x10,
+    DVAR_TEMP = 0x20,
+    DVAR_SAVED = 0x40,
+    DVAR_INTERNAL = 0x80,
+    DVAR_EXTERNAL = 0x100,
+    DVAR_USERINFO = 0x200,
+    DVAR_SERVERINFO = 0x400,
+    DVAR_INIT = 0x800,
+    DVAR_SYSTEMINFO = 0x1000,
+    DVAR_ROM = 0x2000,
+    DVAR_CHANGEABLE_RESET = 0x4000,
+    DVAR_AUTOEXEC = 0x8000,
+  };
+
+  struct WinConData
+  {
+    HWND *hWnd;
+    HWND *hwndBuffer;
+    HWND *codLogo;
+    HFONT *hfBufferFont;
+    HWND *hwndInputLine;
+    char errorString[512];
+    char consoleText[512];
+    char returnedText[512];
+    int windowWidth;
+    int windowHeight;
+    int (WINAPI *SysInputLineWndProc) (HWND*, UINT, WPARAM, unsigned int);
+  };
+
+  struct ScreenPlacement
+  {
+    float scaleVirtualToReal[2];
+    float scaleVirtualToFull[2];
+    float scaleRealToVirtual[2];
+    float realViewportPosition[2];
+    float realViewportSize[2];
+    float virtualViewableMin[2];
+    float virtualViewableMax[2];
+    float realViewableMin[2];
+    float realViewableMax[2];
+    float virtualAdjustableMin[2];
+    float virtualAdjustableMax[2];
+    float realAdjustableMin[2];
+    float realAdjustableMax[2];
+    float subScreenLeft[2];
+  };
+
+  struct field_t
+  {
+    int cursor;
+    int scroll;
+    int drawWidth;
+    int widthInPixels;
+    float chatHeight;
+    int fixedSize;
+    char buffer[256];
+  };
+
+  struct CachedAssets_t
+  {
+    Material* scrollBarArrowUp;
+    Material* scrollBarArrowDown;
+    Material* scrollBarArrowLeft;
+    Material* scrollBarArrowRight;
+    Material* scrollBar;
+    Material* scrollBarThumb;
+    Material* sliderBar;
+    Material* sliderThumb;
+    Material* whiteMaterial;
+    Material* cursor;
+    Material* textDecodeCharacters;
+    Material* textDecodeCharactersGlow;
+    Font_s* bigFont;
+    Font_s* smallFont;
+    Font_s* consoleFont;
+    Font_s* boldFont;
+    Font_s* textFont;
+    Font_s* extraBigFont;
+    Font_s* objectiveFont;
+    Font_s* hudBigFont;
+    Font_s* hudSmallFont;
+    snd_alias_list_t* itemFocusSound;
+  };
+
+  struct gameTypeInfo 
+  {
+    char gameType[12];
+    char gameTypeName[32];
+  };
+
+  struct mapInfo 
+  {
+    char mapName[32];
+    char mapLoadName[16];
+    char mapDescription[32];
+    char mapLoadImage[32];
+    char mapCustomKey[32][16];
+    char mapCustomValue[32][64];
+    int mapCustomCount;
+    int teamMembers;
+    int typeBits;
+    int timeToBeat[32];
+    int active;
+  };
+
+  struct pinglist_t 
+  {
+    char adrstr[64];
+    int start;
+  };
+
+  struct serverStatus_s 
+  {
+    pinglist_t pingList[16];
+    int numqueriedservers;
+    int currentping;
+    int nextpingtime;
+    int maxservers;
+    int refreshtime;
+    int numServers;
+    int sortKey;
+    int sortDir;
+    int lastCount;
+    int refreshActive;
+    int currentServer;
+    int displayServers[20000];
+    int numDisplayServers;
+    int serverCount;
+    int numPlayersOnServers;
+    int nextDisplayRefresh;
+    int nextSortTime;
+    int motdLen;
+    int motdWidth;
+    int motdPaintX;
+    int motdPaintX2;
+    int motdOffset;
+    int motdTime;
+    char motd[1024];
+  };
+
+  struct serverStatusInfo_t 
+  {
+    char address[64];
+    const char *lines[128][4];
+    char text[1024];
+    char pings[54];
+    int numLines;
+  };
+
+  struct pendingServer_t 
+  {
+    char adrstr[64];
+    char name[64];
+    int startTime;
+    int serverNum;
+    int valid;
+  };
+
+  struct pendingServerStatus_t 
+  {
+    int num;
+    pendingServer_t server[16];
+  };
+
+  struct sharedUiInfo_t 
+  {
+    CachedAssets_t assets;
+    int playerCount;
+    char playerNames[18][32];
+    char teamNames[18][32];
+    int playerClientNums[18];
+    volatile int updateGameTypeList;
+    int numGameTypes;
+    gameTypeInfo gameTypes[32];
+    int numCustomGameTypes;
+    gameTypeInfo customGameTypes[32];
+    char customGameTypeCancelState[2048];
+    int numJoinGameTypes;
+    gameTypeInfo joinGameTypes[32];
+    volatile int updateArenas;
+    int mapCount;
+    mapInfo mapList[128];
+    int mapIndexSorted[128];
+    bool mapsAreSorted;
+    Material *serverHardwareIconList[9];
+    unsigned __int64 partyMemberXuid;
+    Material *talkingIcons[2];
+    serverStatus_s serverStatus;
+    char serverStatusAddress[64];
+    serverStatusInfo_t serverStatusInfo;
+    int nextServerStatusRefresh;
+    pendingServerStatus_t pendingServerStatus;
+  };
+    
   // Game internal symbols
   //
 
@@ -4632,23 +4846,152 @@ namespace iw4x
   using  NET_OutOfBandPrint_t = void (*) (int, netadr_t*, const char*, ...);
   inline NET_OutOfBandPrint_t NET_OutOfBandPrint = reinterpret_cast<NET_OutOfBandPrint_t> (0x140209FC0);
 
-  using  Dvar_RegisterString_t = long long (*) (long long, long long, int, long long);
-  inline Dvar_RegisterString_t Dvar_RegisterString = reinterpret_cast<Dvar_RegisterString_t> (0x140288590);
+  using Dvar_Command_t = int (*) (void);
+  inline Dvar_Command_t Dvar_Command = reinterpret_cast<Dvar_Command_t> (0x140200F90);
 
-  using  Dvar_RegisterInt_t = long long (*) (long long, int, int, int, int, long long);
-  inline Dvar_RegisterInt_t Dvar_RegisterInt = reinterpret_cast<Dvar_RegisterInt_t> (0x1402881F0);
+  using Dvar_AddCommands_t = void (*) (void);
+  inline Dvar_AddCommands_t Dvar_AddCommands = reinterpret_cast<Dvar_AddCommands_t> (0x140200EE0);
 
-  using  Dvar_FindVar_t = dvar_t* (*) (const char* name);
+  using Dvar_Init_t = void (*) (void);
+  inline Dvar_Init_t Dvar_Init = reinterpret_cast<Dvar_Init_t> (0x140287520);
+
+  using Dvar_ResetScriptInfo_t = void (*) (void);
+  inline Dvar_ResetScriptInfo_t Dvar_ResetScriptInfo = reinterpret_cast<Dvar_ResetScriptInfo_t> (0x140288DD0);
+
+  using Dvar_Reset_t = void (*) (dvar_t *dvar, DvarSetSource setSource);
+  inline Dvar_Reset_t Dvar_Reset = reinterpret_cast<Dvar_Reset_t> (0x140288DB0);
+
+  using Dvar_AddFlags_t = void (*) (dvar_t *dvar, DvarFlags flags);
+  inline Dvar_AddFlags_t Dvar_AddFlags = reinterpret_cast<Dvar_AddFlags_t> (0x140286A80);
+
+  using Dvar_LoadDvarsAddFlags_t = void (*) (void *memFile, DvarFlags flags);
+  inline Dvar_LoadDvarsAddFlags_t Dvar_LoadDvarsAddFlags = reinterpret_cast<Dvar_LoadDvarsAddFlags_t> (0x1402875C0);
+  
+  using Dvar_UpdateResetValue_t = void (*) (dvar_t *dvar, DvarValue value);
+  inline Dvar_UpdateResetValue_t Dvar_UpdateResetValue = reinterpret_cast<Dvar_UpdateResetValue_t> (0x14028A450);
+  
+  using Dvar_ClearModified_t = void (*) (dvar_t *dvar);
+  inline Dvar_ClearModified_t Dvar_ClearModified = reinterpret_cast<Dvar_ClearModified_t> (0x140286FA0);
+
+  using Dvar_FindVar_t = dvar_t* (*) (const char *dvarName);
   inline Dvar_FindVar_t Dvar_FindVar = reinterpret_cast<Dvar_FindVar_t> (0x140287170);
 
-  using  Dvar_SetString_t = long long (*) (long long, long long);
+  using Dvar_FindMalleableVar_t = dvar_t* (*) (const char *dvarName);
+  inline Dvar_FindMalleableVar_t Dvar_FindMalleableVar = reinterpret_cast<Dvar_FindMalleableVar_t> (0x140287080);
+
+  using Dvar_GetBool_t = bool (*) (dvar_t *dvar);
+  inline Dvar_GetBool_t Dvar_GetBool = reinterpret_cast<Dvar_GetBool_t> (0x140287220);
+
+  using Dvar_GetFloat_t = float (*) (dvar_t *dvar);
+  inline Dvar_GetFloat_t Dvar_GetFloat = reinterpret_cast<Dvar_GetFloat_t> (0x140287260);
+
+  using Dvar_GetString_t = const char * (*) (dvar_t *dvar);
+  inline Dvar_GetString_t Dvar_GetString = reinterpret_cast<Dvar_GetString_t> (0x1402872E0);
+
+  using Dvar_SetInt_t = void (*) (dvar_t *dvar, int value);
+  inline Dvar_SetInt_t Dvar_SetInt = reinterpret_cast<Dvar_SetInt_t> (0x1402896E0);
+  
+  using Dvar_SetIntByName_t = void (*) (const char *name, int value);
+  inline Dvar_SetIntByName_t Dvar_SetIntByName = reinterpret_cast<Dvar_SetIntByName_t> (0x140289740);
+
+  using Dvar_SetBool_t = void (*) (dvar_t *dvar, bool value);
+  inline Dvar_SetBool_t Dvar_SetBool = reinterpret_cast<Dvar_SetBool_t> (0x140288FB0);
+
+  using Dvar_SetBoolByName_t = void (*) (const char *nname, bool value);
+  inline Dvar_SetBoolByName_t Dvar_SetBoolByName = reinterpret_cast<Dvar_SetBoolByName_t> (0x140289000);
+
+  using Dvar_SetString_t = void (*) (dvar_t *dvar, const char *value);
   inline Dvar_SetString_t Dvar_SetString = reinterpret_cast<Dvar_SetString_t> (0x140289A80);
 
+  using Dvar_SetStringByName_t = void (*) (const char *name, const char *value);
+  inline Dvar_SetStringByName_t Dvar_SetStringByName = reinterpret_cast<Dvar_SetStringByName_t> (0x140289AE0);
+  
   using  Dvar_SetFromStringByName_t = dvar_t* (*) (const char*, const char*);
   inline Dvar_SetFromStringByName_t Dvar_SetFromStringByName = reinterpret_cast<Dvar_SetFromStringByName_t> (0x140289570);
 
-  using  Dvar_RegisterBool_t = long long (*) (long long, long long, int, long long);
+  using Dvar_SetModified_t = void (*) (dvar_t *dvar);
+  inline Dvar_SetModified_t Dvar_SetModified = reinterpret_cast<Dvar_SetModified_t> (0x140289A70);
+
+  using Dvar_SetLatchedValue_t = void (*) (DvarValue value);
+  inline Dvar_SetLatchedValue_t Dvar_SetLatchedValue = reinterpret_cast<Dvar_SetLatchedValue_t> (0x140289910);
+  
+  using Dvar_SetCommand_t = void (*) (const char *dvarName, const char *string);
+  inline Dvar_SetCommand_t Dvar_SetCommand = reinterpret_cast<Dvar_SetCommand_t> (0x1402892A0);
+
+  using Dvar_SetVariant_t = void (*) (dvar_t *dvar, DvarValue value, DvarSetSource source);
+  inline Dvar_SetVariant_t Dvar_SetVariant = reinterpret_cast<Dvar_SetVariant_t> (0x140289B80);
+
+  using Dvar_SetDomainFunc_t = void (*) (dvar_t *dvar, bool (*callback)(dvar_t *, DvarValue *));
+  inline Dvar_SetDomainFunc_t Dvar_SetDomainFunc = reinterpret_cast<Dvar_SetDomainFunc_t> (0x140289350);
+
+  using Dvar_SetFromStringFromSource_t = void (*) (dvar_t *dvar, const char *string, DvarSetSource source);
+  inline Dvar_SetFromStringFromSource_t Dvar_SetFromStringFromSource = reinterpret_cast<Dvar_SetFromStringFromSource_t> (0x140289640);
+
+  using Dvar_StringToEnum_t = int (*) (const DvarLimits domain, const char *string);
+  inline Dvar_StringToEnum_t Dvar_StringToEnum = reinterpret_cast<Dvar_StringToEnum_t> (0x14028A1C0);
+
+  using Dvar_StringToValue_t = DvarValue * (*) (const dvarType type, const DvarLimits domain, const char *string);
+  inline Dvar_StringToValue_t Dvar_StringToValue = reinterpret_cast<Dvar_StringToValue_t> (0x14028A2C0);
+
+  using Dvar_StringToColor_t = void (*) (const char *string, vec4_t color);
+  inline Dvar_StringToColor_t Dvar_StringToColor = reinterpret_cast<Dvar_StringToColor_t> (0x14028A090);
+
+  using Dvar_ValueToString_t = const char * (*) (dvar_t *dvar, DvarValue value);
+  inline Dvar_ValueToString_t Dvar_ValueToString = reinterpret_cast<Dvar_ValueToString_t> (0x14028A690);
+  
+  using Dvar_DisplayableValue_t = const char * (*) (dvar_t *dvar);
+  inline Dvar_DisplayableValue_t Dvar_DisplayableValue = reinterpret_cast<Dvar_DisplayableValue_t> (0x140286FF0);
+
+  using Dvar_GetCombinedString_t = void (*) (const char *string, int count);
+  inline Dvar_GetCombinedString_t Dvar_GetCombinedString = reinterpret_cast<Dvar_GetCombinedString_t> (0x140201060);
+
+  using Dvar_IsValidName_t = bool (*) (const char *dvarName);
+  inline Dvar_IsValidName_t Dvar_IsValidName = reinterpret_cast<Dvar_IsValidName_t> (0x140287550);
+
+  using Dvar_ValueInDomain_t = bool (*) (dvarType type, DvarValue value, DvarLimits domain);
+  inline Dvar_ValueInDomain_t Dvar_ValueInDomain = reinterpret_cast<Dvar_ValueInDomain_t> (0x14028A550);
+
+  using Dvar_ValuesEqual_t = bool (*) (dvarType type, DvarValue val0, DvarValue val1);
+  inline Dvar_ValuesEqual_t Dvar_ValuesEqual = reinterpret_cast<Dvar_ValuesEqual_t> (0x14028A860);
+
+  using Dvar_AssignResetStringValue_t = void (*) (dvar_t *dvar, DvarValue *dest, const char *string);
+  inline Dvar_AssignResetStringValue_t Dvar_AssignResetStringValue = reinterpret_cast<Dvar_AssignResetStringValue_t> (0x140286C10);
+
+  using Dvar_AssignCurrentStringValue_t = void (*) (dvar_t *dvar, DvarValue *dest, const char *string);
+  inline Dvar_AssignCurrentStringValue_t Dvar_AssignCurrentStringValue = reinterpret_cast<Dvar_AssignCurrentStringValue_t> (0x140286B60);
+
+  using Dvar_RegisterInt_t = dvar_t* (*) (const char *dvarName, int value, int min, int max, DvarFlags flags, const char *description);
+  inline Dvar_RegisterInt_t Dvar_RegisterInt = reinterpret_cast<Dvar_RegisterInt_t> (0x1402881F0);
+
+  using Dvar_RegisterBool_t = dvar_t* (*) (const char *dvarName, bool value, DvarFlags flags, const char *description);
   inline Dvar_RegisterBool_t Dvar_RegisterBool = reinterpret_cast<Dvar_RegisterBool_t> (0x140287CE0);
+
+  using Dvar_RegisterFloat_t = dvar_t* (*) (const char *dvarName, float value, float min, float max, DvarFlags flags, const char *description);
+  inline Dvar_RegisterFloat_t Dvar_RegisterFloat = reinterpret_cast<Dvar_RegisterFloat_t> (0x1402880C0);
+
+  using Dvar_RegisterString_t = dvar_t* (*) (const char *dvarName, const char *value, DvarFlags flags, const char *description);
+  inline Dvar_RegisterString_t Dvar_RegisterString = reinterpret_cast<Dvar_RegisterString_t> (0x140288590);
+
+  using Dvar_RegisterEnum_t = dvar_t* (*) (const char *dvarName, const char **valueList, int defaultIndex, DvarFlags flags, const char *description);
+  inline Dvar_RegisterEnum_t Dvar_RegisterEnum = reinterpret_cast<Dvar_RegisterEnum_t> (0x140287FC0);
+
+  using Dvar_RegisterColor_t = dvar_t* (*) (const char *dvarName, float r, float g, float b, float a, DvarFlags flags, const char *description);
+  inline Dvar_RegisterColor_t Dvar_RegisterColor = reinterpret_cast<Dvar_RegisterColor_t> (0x140287DC0);
+
+  using Dvar_RegisterVec2_t = dvar_t* (*) (const char *dvarName, float x, float y, float min, float max, DvarFlags flags, const char *description);
+  inline Dvar_RegisterVec2_t Dvar_RegisterVec2 = reinterpret_cast<Dvar_RegisterVec2_t> (0x140288660);
+
+  using Dvar_RegisterVec3_t = dvar_t* (*) (const char *dvarName, float x, float y, float z, float min, float max, DvarFlags flags, const char *description);
+  inline Dvar_RegisterVec3_t Dvar_RegisterVec3 = reinterpret_cast<Dvar_RegisterVec3_t> (0x140288780);
+
+  using Dvar_RegisterVec3Color_t = dvar_t* (*) (const char *dvarName, float r, float g, float b, DvarFlags flags, const char *description);
+  inline Dvar_RegisterVec3Color_t Dvar_RegisterVec3Color = reinterpret_cast<Dvar_RegisterVec3Color_t> (0x1402888B0);
+
+  using Dvar_RegisterVec4_t = dvar_t* (*) (const char *dvarName, float x, float y, float z, float w, float min, float max, DvarFlags flags, const char *description);
+  inline Dvar_RegisterVec4_t Dvar_RegisterVec4 = reinterpret_cast<Dvar_RegisterVec4_t> (0x1402889D0);
+
+  using Dvar_RegisterVariant_t = dvar_t* (*) (const char *dvarName, dvarType type, DvarFlags flags, DvarValue value, DvarLimits domain, const char *description);
+  inline Dvar_RegisterVariant_t Dvar_RegisterVariant = reinterpret_cast<Dvar_RegisterVariant_t> (0x1402882E0);
 
   using  DB_FindXAssetHeader_t = XAssetHeader (*) (XAssetType type, const char* name);
   inline DB_FindXAssetHeader_t DB_FindXAssetHeader = reinterpret_cast<DB_FindXAssetHeader_t> (0x140129220);
@@ -4680,11 +5023,14 @@ namespace iw4x
   using  Com_InitParse_t = __int64 (*) (void);
   inline Com_InitParse_t Com_InitParse = reinterpret_cast<Com_InitParse_t> (0x14028CEA0);
 
-  using  Dvar_Init_t = unsigned __int8 * (*) (void);
-  inline Dvar_Init_t Dvar_Init = reinterpret_cast<Dvar_Init_t> (0x140287520);
-
   using  InitTiming_t = void (*) (void);
   inline InitTiming_t InitTiming = reinterpret_cast<InitTiming_t> (0x140290330);
+
+  using  Sys_ShowConsole_t = void (*) ();
+  inline Sys_ShowConsole_t Sys_ShowConsole = reinterpret_cast<Sys_ShowConsole_t> (0x1402AB600);
+
+  using  Conbuf_AppendText_t = void (*) (const char*);
+  inline Conbuf_AppendText_t Conbuf_AppendText = reinterpret_cast<Conbuf_AppendText_t> (0x1402AAE00);
 
   using  Sys_GetCpuCount_t = __int64 (*) (void);
   inline Sys_GetCpuCount_t Sys_GetCpuCount = reinterpret_cast<Sys_GetCpuCount_t> (0x14020DB90);
@@ -4749,8 +5095,103 @@ namespace iw4x
   using  CL_ConnectFromParty_t = void (*) (int, void*, netadr_t, int, int, const char*, const char*);
   inline CL_ConnectFromParty_t CL_ConnectFromParty = reinterpret_cast<CL_ConnectFromParty_t> (0x1400F5220);
 
+  using  Material_RegisterHandle_t = Material* (*) (const char*);
+  inline Material_RegisterHandle_t Material_RegisterHandle = reinterpret_cast<Material_RegisterHandle_t> (0x140019470);
+
+  using  CL_RegisterFont_t = Font_s* (*) (const char*, int);
+  inline CL_RegisterFont_t CL_RegisterFont = reinterpret_cast<CL_RegisterFont_t> (0x1400F9D20);
+
+  using  ScrPlace_GetViewPlacement_t = ScreenPlacement* (*) ();
+  inline ScrPlace_GetViewPlacement_t ScrPlace_GetViewPlacement = reinterpret_cast<ScrPlace_GetViewPlacement_t> (0x1400EF3A0);
+
+  using  R_AddCmdDrawStretchPic_t = void (*) (float x, float y, float width, float height, float s0, float t0, float s1, float t1, float* color, Material* material);
+  inline R_AddCmdDrawStretchPic_t R_AddCmdDrawStretchPic = reinterpret_cast<R_AddCmdDrawStretchPic_t> (0x14001ACE0);
+
+  using  Con_OneTimeInit_t = void (*) ();
+  inline Con_OneTimeInit_t Con_OneTimeInit = reinterpret_cast<Con_OneTimeInit_t> (0x1400E9960);
+
+  using  Con_CheckResize_t = void (*) ();
+  inline Con_CheckResize_t Con_CheckResize = reinterpret_cast<Con_CheckResize_t> (0x1400E9450);
+
+  using Con_DrawSay_t = void (*) (int localClientNum, int x, int y);
+  inline Con_DrawSay_t Con_DrawSay = reinterpret_cast<Con_DrawSay_t> (0x1400E91B0);
+
+  using  ScrPlace_ApplyX_t = float* (*) (const ScreenPlacement*, float, int);
+  inline ScrPlace_ApplyX_t ScrPlace_ApplyX = reinterpret_cast<ScrPlace_ApplyX_t> (0x1400EEF90);
+
+  using  ScrPlace_ApplyY_t = float* (*) (const ScreenPlacement*, float, int);
+  inline ScrPlace_ApplyY_t ScrPlace_ApplyY = reinterpret_cast<ScrPlace_ApplyY_t> (0X1400EF080);
+
+  using  ScrPlace_GetFullPlacement_t = ScreenPlacement* (*) ();
+  inline ScrPlace_GetFullPlacement_t ScrPlace_GetFullPlacement = reinterpret_cast<ScrPlace_GetFullPlacement_t> (0x1400EF3A0);
+
+  using ScrPlace_SetupClientViewports_t = double (*) (__int64, int, int, int);
+  inline ScrPlace_SetupClientViewports_t ScrPlace_SetupClientViewports = reinterpret_cast<ScrPlace_SetupClientViewports_t> (0x1400EF4C0);
+
+  using ScrPlace_SetupFullscreenViewports_t = double (*) (void);
+  inline ScrPlace_SetupFullscreenViewports_t ScrPlace_SetupFullscreenViewports = reinterpret_cast<ScrPlace_SetupFullscreenViewports_t> (0x1400EF710);
+
+  using ScrPlace_ApplyRect_t = void (*) (const ScreenPlacement *scrPlace, float *x, float *y, float *w, float *h, int horzAlign, int vertAlign);
+  inline ScrPlace_ApplyRect_t ScrPlace_ApplyRect = reinterpret_cast<ScrPlace_ApplyRect_t> (0x1400EEB90);
+
+  using ScrPlace_EndFrame_t = void (*) (void);
+  inline ScrPlace_EndFrame_t ScrPlace_EndFrame = reinterpret_cast<ScrPlace_EndFrame_t> (0x1400EF360);
+
+  using CL_InitRenderer_t = void (*) (void);
+  inline CL_InitRenderer_t CL_InitRenderer = reinterpret_cast<CL_InitRenderer_t> (0x1400F8740);
+
+  using CL_DrawText_t = void (*) (const ScreenPlacement *scrPlace, const char *text, unsigned int maxChars, Font_s *font, float x, float y, int horzAlign, int vertAlign, float xScale, float yScale, const vec4_t *color, int style);
+  inline CL_DrawText_t CL_DrawText = reinterpret_cast<CL_DrawText_t> (0x1400F6FA0);
+
+  using R_EndFrame_t = void (*) (void);
+  inline R_EndFrame_t R_EndFrame = reinterpret_cast<R_EndFrame_t> (0x14001C400);
+
+  using R_IssueRenderCommands_t = void (*) (unsigned int type);
+  inline R_IssueRenderCommands_t R_IssueRenderCommands = reinterpret_cast<R_IssueRenderCommands_t> (0x14001A480);
+
+  using R_CheckLostDevice_t = bool (*) (void);
+  inline R_CheckLostDevice_t R_CheckLostDevice = reinterpret_cast<R_CheckLostDevice_t> (0x140032500);
+
+  using R_TextHeight_t = int (*) (Font_s *font);
+  inline R_TextHeight_t R_TextHeight = reinterpret_cast<R_TextHeight_t> (0x1400199C0);
+
+  using R_NormalizedTextScale_t = float (*) (Font_s *font, float scale);
+  inline R_NormalizedTextScale_t R_NormalizedTextScale = reinterpret_cast<R_NormalizedTextScale_t> (0x140019850);
+
+  using R_AddCmdDrawTextInternal_t = void (*) (const char *text, int maxChars, Font_s *font, float x, float y, float xScale, float yScale, float rotation, const vec4_t *color, int style);
+  inline R_AddCmdDrawTextInternal_t R_AddCmdDrawTextInternal = reinterpret_cast<R_AddCmdDrawTextInternal_t> (0x14001B260);
+
+  using Key_IsCatcherActive_t = bool (*) (int localClientNum, int mask);
+  inline Key_IsCatcherActive_t Key_IsCatcherActive = reinterpret_cast<Key_IsCatcherActive_t> (0x1400EB9F0);
+
+  using I_strncat_t = void (*) (char *dest, int size, const char *src);
+  inline I_strncat_t I_strncat = reinterpret_cast<I_strncat_t> (0x14028E430);
+
+  using Field_Clear_t = void (*) (field_t *edit);
+  inline Field_Clear_t Field_Clear = reinterpret_cast<Field_Clear_t> (0x1401FC2B0);
+
+  using Field_Draw_t = void (*) (int localClientNum, field_t *edit, int x, int y, int horzAlign, int vertAlign);
+  inline Field_Draw_t Field_Draw = reinterpret_cast<Field_Draw_t> (0x1400EB160);
+
   // Game Internal variables
   //
   inline SOCKET* ip_socket (reinterpret_cast<SOCKET*> (0x1467E8490));
   inline SOCKET* lsp_socket (reinterpret_cast<SOCKET*> (0x1467E8498));
+
+  inline WinConData* s_wcd (reinterpret_cast<WinConData*> (0x146808800));
+  inline sharedUiInfo_t* sharedUiInfo (reinterpret_cast<sharedUiInfo_t*> (0x146627790));
+  inline ScreenPlacement* scrPlaceFull (reinterpret_cast<ScreenPlacement*> (0x140714860));
+
+  inline char** com_consoleLines (reinterpret_cast<char**> (0x141C35D90));
+  inline int* com_numConsoleLines (reinterpret_cast<int*> (0x141C35D84));
+
+  inline int* con_fontHeight (reinterpret_cast<int*> (0x14070B1B8));
+  inline int* con_visibleLineCount (reinterpret_cast<int*> (0x14070B1BC));
+  inline int* con_visiblePixelWidth (reinterpret_cast<int*> (0x14070B1C0));
+
+  inline int* s_totalChars (reinterpret_cast<int*> (0x146808E38));
+  inline int* g_console_field_width (reinterpret_cast<int*> (0x140463D50));
+
+  inline int* activeScreenPlacementMode (reinterpret_cast<int*> (0x14071493C));
+  inline int* keyCatchers (reinterpret_cast<int*> (0x140719AF0));
 }
