@@ -33,74 +33,109 @@ namespace iw4x
 {
   namespace
   {
-    void
-    attach_console ()
+    class console
     {
-      // The subtlety here is that Windows has many ways to end up with stdout
-      // and stderr pointing *somewhere* (sometimes to an actual console,
-      // sometimes to a pipe, sometimes to a completely invalid handle). We do
-      // not want to attach to `CONOUT$` in cases where the existing handles are
-      // already valid and intentional, as this would silently discard the real
-      // output sink.
-      //
-      // Instead, we first check `_fileno(stdout)` and `_fileno(stderr)`. That
-      // is, MSVCRT sets these up at startup and will return `-2`
-      // (`_NO_CONSOLE_FILENO`) if the file is invalid. This check is more
-      // trustworthy than calling `GetStdHandle()`, which can return stale
-      // handle IDs that may already be reused for unrelated objects by the time
-      // we run.
-      //
-      if (_fileno (stdout) >= 0 || _fileno (stderr) >= 0)
+    public:
+      console ()
       {
-        // If either `_fileno()` is valid, we go one step further: `_fileno()`
-        // itself had a bug (http://crbug.com/358267) in SUBSYSTEM:WINDOWS
-        // builds for certain MSVC versions (VS2010 to VS2013), so we
-        // double-check by calling `_get_osfhandle()` to confirm that the
-        // underlying OS handle is valid. Only if both streams are invalid do
-        // we attempt to attach a console.
+        // The subtlety here is that Windows has many ways to end up with stdout
+        // and stderr pointing *somewhere* (sometimes to an actual console,
+        // sometimes to a pipe, sometimes to a completely invalid handle). We do
+        // not want to attach to `CONOUT$` in cases where the existing handles
+        // are already valid and intentional, as this would silently discard the
+        // real output sink.
         //
-        intptr_t stdout_handle (_get_osfhandle (_fileno (stdout)));
-        intptr_t stderr_handle (_get_osfhandle (_fileno (stderr)));
+        // Instead, we first check `_fileno(stdout)` and `_fileno(stderr)`. That
+        // is, MSVCRT sets these up at startup and will return `-2`
+        // (`_NO_CONSOLE_FILENO`) if the file is invalid. This check is more
+        // trustworthy than calling `GetStdHandle()`, which can return stale
+        // handle IDs that may already be reused for unrelated objects by the
+        // time we run.
+        //
+        if (_fileno (stdout) >= 0 || _fileno (stderr) >= 0)
+        {
+          // If either `_fileno()` is valid, we go one step further: `_fileno()`
+          // itself had a bug (http://crbug.com/358267) in SUBSYSTEM:WINDOWS
+          // builds for certain MSVC versions (VS2010 to VS2013), so we
+          // double-check by calling `_get_osfhandle()` to confirm that the
+          // underlying OS handle is valid. Only if both streams are invalid do
+          // we attempt to attach a console.
+          //
+          intptr_t stdout_handle (_get_osfhandle (_fileno (stdout)));
+          intptr_t stderr_handle (_get_osfhandle (_fileno (stderr)));
 
-        if (stdout_handle >= 0 || stderr_handle >= 0)
-          return;
+          if (stdout_handle >= 0 || stderr_handle >= 0)
+            return;
+        }
+
+        // At this point, both standard streams appear invalid, so we attempt to
+        // attach to the parent's console. Note that this call may fail for
+        // expected reasons such as being already attached or the parent having
+        // exited, and in all such cases the failure is non-fatal and we simply
+        // bail out.
+        //
+        if (AttachConsole (ATTACH_PARENT_PROCESS) != 0)
+        {
+          attached_ = true;
+
+          // Save the original standard handles before rebinding so we can
+          // restore them on exit. This is critical for Windows Terminal which
+          // expects the original handles to be restored when the process exits.
+          //
+          stdout_handle_ = GetStdHandle (STD_OUTPUT_HANDLE);
+          stderr_handle_ = GetStdHandle (STD_ERROR_HANDLE);
+
+          // Once attached, rebind `stdout` and `stderr` to `CONOUT$` using
+          // `freopen()`. Also duplicate their low-level descriptors (1 for
+          // stdout, 2 for stderr) so that code using the raw file descriptor
+          // API observes the same handles.
+          //
+          // Note that failure to rebind is non-fatal. Console output is
+          // diagnostic-only and has no bearing on core functionality. We
+          // therefore avoid exceptions and suppress all errors unconditionally.
+          //
+          bool stdout_rebound (false);
+          bool stderr_rebound (false);
+
+          if (freopen ("CONOUT$", "w", stdout) != nullptr &&
+              _dup2 (_fileno (stdout), 1) != -1)
+            stdout_rebound = true;
+
+          if (freopen ("CONOUT$", "w", stderr) != nullptr &&
+              _dup2 (_fileno (stderr), 2) != -1)
+            stderr_rebound = true;
+
+          // If stream were rebound, realign iostream objects (`cout`, `cerr`,
+          // etc.) with C FILE streams.
+          //
+          if (stdout_rebound && stderr_rebound)
+            ios::sync_with_stdio ();
+        }
       }
 
-      // At this point, both standard streams appear invalid, so we attempt to
-      // attach to the parent's console. Note that this call may fail for
-      // expected reasons such as being already attached or the parent having
-      // exited, and in all such cases the failure is non-fatal and we simply
-      // bail out.
+      // Restore original standard handles and detach from console.
       //
-      if (AttachConsole (ATTACH_PARENT_PROCESS) != 0)
+      ~console ()
       {
-        // Once attached, rebind `stdout` and `stderr` to `CONOUT$` using
-        // `freopen()`. Also duplicate their low-level descriptors (1 for
-        // stdout, 2 for stderr) so that code using the raw file descriptor API
-        // observes the same handles.
+        // Restore original standard handles if they were saved.
         //
-        // Note that failure to rebind is non-fatal. Console output is
-        // diagnostic-only and has no bearing on core functionality. We
-        // therefore avoid exceptions and suppress all errors unconditionally.
+        if (stdout_handle_ != INVALID_HANDLE_VALUE)
+          SetStdHandle (STD_OUTPUT_HANDLE, stdout_handle_);
+
+        if (stderr_handle_ != INVALID_HANDLE_VALUE)
+          SetStdHandle (STD_ERROR_HANDLE, stderr_handle_);
+
+        // Detach from the console we attached to.
         //
-        bool stdout_rebound (false);
-        bool stderr_rebound (false);
-
-        if (freopen ("CONOUT$", "w", stdout) != nullptr &&
-            _dup2 (_fileno (stdout), 1) != -1)
-          stdout_rebound = true;
-
-        if (freopen ("CONOUT$", "w", stderr) != nullptr &&
-            _dup2 (_fileno (stderr), 2) != -1)
-          stderr_rebound = true;
-
-        // If stream were rebound, realign iostream objects (`cout`, `cerr`,
-        // etc.) with C FILE streams.
-        //
-        if (stdout_rebound && stderr_rebound)
-          ios::sync_with_stdio ();
+        if (attached_)
+          FreeConsole ();
       }
-    }
+
+    private:
+      HANDLE stdout_handle_ {INVALID_HANDLE_VALUE};
+      HANDLE stderr_handle_ {INVALID_HANDLE_VALUE};
+      bool attached_ {false};
+    };
 
 #if LIBIW4X_CPPTRACE
     void
@@ -306,7 +341,7 @@ namespace iw4x
         // console by default. Attach to an existing one when available so that
         // diagnostic output become visible in interactive use.
         //
-        attach_console ();
+        console cs;
 
         // Setup cpptrace to generate stack trace from terminate handler.
         //
