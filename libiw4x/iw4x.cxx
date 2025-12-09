@@ -16,8 +16,13 @@ extern "C"
 
 #include <boost/dll/shared_library.hpp>
 
-#include <libiw4x/frame/frame.hxx>
-#include <libiw4x/menu/menu.hxx>
+#include <libiw4x/frame/init.hxx>
+#include <libiw4x/imgui/init.hxx>
+#include <libiw4x/menu/init.hxx>
+#include <libiw4x/network/init.hxx>
+#include <libiw4x/oob/init.hxx>
+#include <libiw4x/renderer/init.hxx>
+
 #include <libiw4x/windows/windows.hxx>
 
 using namespace std;
@@ -426,6 +431,10 @@ namespace iw4x
         scheduler s;
         frame::init (s);
         menu::init (s);
+        renderer::init ();
+        imgui::init ();
+        network::init (s);
+        oob::init ();
 
         // Load external modules discovered under the `module` directory.
         //
