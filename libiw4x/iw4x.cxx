@@ -85,6 +85,25 @@ namespace iw4x
           stdout_handle_ = GetStdHandle (STD_OUTPUT_HANDLE);
           stderr_handle_ = GetStdHandle (STD_ERROR_HANDLE);
 
+          // Register a console control handler to properly handle Ctrl-C and
+          // other console events. GUI applications (SUBSYSTEM:WINDOWS) don't
+          // receive these events by default on Windows.
+          //
+          SetConsoleCtrlHandler (+[] (DWORD type) -> BOOL
+          {
+            switch (type)
+            {
+              case CTRL_C_EVENT:
+              case CTRL_BREAK_EVENT:
+              case CTRL_CLOSE_EVENT:
+                exit (0);
+                return TRUE;
+
+              default:
+                return FALSE;
+            }
+          }, TRUE);
+
           // Once attached, rebind `stdout` and `stderr` to `CONOUT$` using
           // `freopen()`. Also duplicate their low-level descriptors (1 for
           // stdout, 2 for stderr) so that code using the raw file descriptor
