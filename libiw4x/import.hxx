@@ -2,8 +2,8 @@
 
 #include <libiw4x/windows/windows.hxx>
 
-#include <libiw4x/types.hxx>
 #include <libiw4x/detour.hxx>
+#include <libiw4x/types.hxx>
 
 #include <libiw4x/export.hxx>
 
@@ -19,6 +19,23 @@ namespace iw4x
   struct pathnode_t;
   struct pathnode_tree_t;
   struct Statement_s;
+
+  typedef float vec_t;
+  typedef vec_t vec2_t [2];
+  typedef vec_t vec3_t [3];
+  typedef vec_t vec4_t [4];
+
+  enum errorParm_t : int
+  {
+    ERR_FATAL = 0x0,
+    ERR_DROP = 0x1,
+    ERR_FROM_STARTUP = 0x2,
+    ERR_SERVERDISCONNECT = 0x3,
+    ERR_DISCONNECT = 0x4,
+    ERR_SCRIPT = 0x5,
+    ERR_SCRIPT_DROP = 0x6,
+    ERR_LOCALIZATION = 0x7,
+  };
 
   // 29
   //
@@ -634,7 +651,7 @@ namespace iw4x
   {
     const char* filename;
     unsigned short knotCount;
-    float knots[16][2];
+    float knots [16][2];
   };
 
   // 781
@@ -643,7 +660,7 @@ namespace iw4x
   {
     int speaker;
     int numLevels;
-    float levels[2];
+    float levels [2];
   };
 
   // 782
@@ -651,7 +668,7 @@ namespace iw4x
   struct MSSChannelMap
   {
     int speakerCount;
-    MSSSpeakerLevels speakers[6];
+    MSSSpeakerLevels speakers [6];
   };
 
   // 783
@@ -660,7 +677,7 @@ namespace iw4x
   {
     bool isDefault;
     const char* name;
-    MSSChannelMap channelMaps[2][2];
+    MSSChannelMap channelMaps [2][2];
   };
 
   // 785
@@ -708,9 +725,9 @@ namespace iw4x
     int integer;
     unsigned int unsignedInt;
     float value;
-    float vector[4];
+    float vector [4];
     const char* string;
-    char color[4];
+    char color [4];
   };
 
   // 795
@@ -812,9 +829,9 @@ namespace iw4x
     const char* name;
     char worldVertFormat;
     bool hasBeenUploaded;
-    char unused[1];
+    char unused [1];
     MaterialTechniqueSet* remappedTechniqueSet;
-    MaterialTechnique* techniques[48];
+    MaterialTechnique* techniques [48];
   };
 
   // 966
@@ -829,8 +846,8 @@ namespace iw4x
   //
   struct MaterialVertexStreamRouting
   {
-    MaterialStreamRouting data[13];
-    IDirect3DVertexDeclaration9* decl[16];
+    MaterialStreamRouting data [13];
+    IDirect3DVertexDeclaration9* decl [16];
   };
 
   // 969
@@ -942,7 +959,7 @@ namespace iw4x
     const char* name;
     unsigned short flags;
     unsigned short passCount;
-    MaterialPass passArray[1];
+    MaterialPass passArray [1];
   };
 
   // 988
@@ -950,11 +967,11 @@ namespace iw4x
   struct GfxImageLoadDef
   {
     char levelCount;
-    char pad[3];
+    char pad [3];
     int flags;
     int format;
     int resourceSize;
-    char data[1];
+    char data [1];
   };
 
   // 989
@@ -972,14 +989,14 @@ namespace iw4x
   //
   struct Picmip
   {
-    char platform[2];
+    char platform [2];
   };
 
   // 991
   //
   struct CardMemory
   {
-    int platform[2];
+    int platform [2];
   };
 
   // 992
@@ -1030,9 +1047,9 @@ namespace iw4x
     float Lz;
     float gravity;
     float windvel;
-    float winddir[2];
+    float winddir [2];
     float amplitude;
-    float codeConstant[4];
+    float codeConstant [4];
     GfxImage* image;
   };
 
@@ -1061,15 +1078,15 @@ namespace iw4x
   struct MaterialConstantDef
   {
     unsigned int nameHash;
-    char name[12];
-    float literal[4];
+    char name [12];
+    float literal [4];
   };
 
   // 999
   //
   struct GfxStateBits
   {
-    unsigned int loadBits[2];
+    unsigned int loadBits [2];
   };
 
   // 1000
@@ -1077,7 +1094,7 @@ namespace iw4x
   struct Material
   {
     MaterialInfo info;
-    char stateBitsEntry[48];
+    char stateBitsEntry [48];
     char textureCount;
     char constantCount;
     char stateBitsCount;
@@ -1124,18 +1141,18 @@ namespace iw4x
     in_addr inaOnline;
     unsigned short wPort;
     unsigned short wPortOnline;
-    char abEnet[4];
-    char abOnline[20];
+    char abEnet [4];
+    char abOnline [20];
   };
 
   // 1060
   //
   struct cplane_s
   {
-    float normal[3];
+    float normal [3];
     float dist;
     char type;
-    char pad[3];
+    char pad [3];
   };
 
   // 1061
@@ -1156,9 +1173,9 @@ namespace iw4x
     unsigned short glassPieceIndex;
     cbrushside_t* sides;
     char* baseAdjacentSide;
-    short axialMaterialNum[2][3];
-    char firstAdjacentSideOffsets[2][3];
-    char edgeCount[2][3];
+    short axialMaterialNum [2][3];
+    char firstAdjacentSideOffsets [2][3];
+    char edgeCount [2][3];
   };
 
   // 1063
@@ -1174,13 +1191,13 @@ namespace iw4x
   //
   struct ProfileScript
   {
-    ProfileScriptWritable write[40];
-    volatile unsigned int totalTime[40];
-    volatile unsigned int avgTime[40];
-    volatile unsigned int maxTime[40];
-    volatile float cumulative[40];
-    char profileScriptNames[40][20];
-    int scriptSrcBufferIndex[32];
+    ProfileScriptWritable write [40];
+    volatile unsigned int totalTime [40];
+    volatile unsigned int avgTime [40];
+    volatile unsigned int maxTime [40];
+    volatile float cumulative [40];
+    char profileScriptNames [40][20];
+    int scriptSrcBufferIndex [32];
     unsigned int srcTotal;
     unsigned int srcAvgTime;
     unsigned int srcMaxTime;
@@ -1190,8 +1207,8 @@ namespace iw4x
   //
   struct Bounds
   {
-    float midPoint[3];
-    float halfSize[3];
+    float midPoint [3];
+    float halfSize [3];
   };
 
   // 1066
@@ -1208,16 +1225,16 @@ namespace iw4x
   //
   struct XModelCollTri_s
   {
-    float plane[4];
-    float svec[4];
-    float tvec[4];
+    float plane [4];
+    float svec [4];
+    float tvec [4];
   };
 
   // 1068
   //
   struct TriggerSlab
   {
-    float dir[3];
+    float dir [3];
     float midPoint;
     float halfSize;
   };
@@ -1226,9 +1243,9 @@ namespace iw4x
   //
   struct PhysMass
   {
-    float centerOfMass[3];
-    float momentsOfInertia[3];
-    float productsOfInertia[3];
+    float centerOfMass [3];
+    float momentsOfInertia [3];
+    float productsOfInertia [3];
   };
 
   // 1070
@@ -1297,8 +1314,8 @@ namespace iw4x
   //
   struct FxElemVec3Range
   {
-    float base[3];
-    float amplitude[3];
+    float base [3];
+    float amplitude [3];
   };
 
   // 1078
@@ -1321,10 +1338,10 @@ namespace iw4x
   //
   struct FxElemVisualState
   {
-    char color[4];
+    char color [4];
     float rotationDelta;
     float rotationTotal;
-    float size[2];
+    float size [2];
     float scale;
   };
 
@@ -1340,15 +1357,15 @@ namespace iw4x
   //
   struct FxElemMarkVisuals
   {
-    Material* materials[2];
+    Material* materials [2];
   };
 
   // 1083
   //
   struct DObjAnimMat
   {
-    float quat[4];
-    float trans[3];
+    float quat [4];
+    float trans [3];
     float transWeight;
   };
 
@@ -1356,7 +1373,7 @@ namespace iw4x
   //
   struct XSurfaceVertexInfo
   {
-    short vertCount[4];
+    short vertCount [4];
     unsigned short* vertsBlend;
   };
 
@@ -1365,7 +1382,7 @@ namespace iw4x
   union GfxColor
   {
     unsigned int packed;
-    char array[4];
+    char array [4];
   };
 
   // 1086
@@ -1380,14 +1397,14 @@ namespace iw4x
   union PackedUnitVec
   {
     unsigned int packed;
-    char array[4];
+    char array [4];
   };
 
   // 1088
   //
   struct GfxPackedVertex
   {
-    float xyz[3];
+    float xyz [3];
     float binormalSign;
     GfxColor color;
     PackedTexCoords texCoord;
@@ -1399,8 +1416,8 @@ namespace iw4x
   //
   struct XSurfaceCollisionAabb
   {
-    unsigned short mins[3];
-    unsigned short maxs[3];
+    unsigned short mins [3];
+    unsigned short maxs [3];
   };
 
   // 1090
@@ -1423,8 +1440,8 @@ namespace iw4x
   //
   struct XSurfaceCollisionTree
   {
-    float trans[3];
-    float scale[3];
+    float trans [3];
+    float scale [3];
     unsigned int nodeCount;
     XSurfaceCollisionNode* nodes;
     unsigned int leafCount;
@@ -1458,7 +1475,7 @@ namespace iw4x
     GfxPackedVertex* verts0;
     unsigned int vertListCount;
     XRigidVertList* vertList;
-    int partBits[6];
+    int partBits [6];
   };
 
   // 1095
@@ -1468,7 +1485,7 @@ namespace iw4x
     const char* name;
     XSurface* surfs;
     unsigned short numsurfs;
-    int partBits[6];
+    int partBits [6];
   };
 
   // 1096
@@ -1479,7 +1496,7 @@ namespace iw4x
     unsigned short numsurfs;
     unsigned short surfIndex;
     XModelSurfs* modelSurfs;
-    int partBits[6];
+    int partBits [6];
     XSurface* surfs;
     char lod;
     char smcBaseIndexPlusOne;
@@ -1531,7 +1548,7 @@ namespace iw4x
   {
     BrushWrapper* brushWrapper;
     int type;
-    float orientation[3][3];
+    float orientation [3][3];
     Bounds bounds;
   };
 
@@ -1556,7 +1573,7 @@ namespace iw4x
     char numsurfs;
     char lodRampType;
     float scale;
-    unsigned int noScalePartBits[6];
+    unsigned int noScalePartBits [6];
     unsigned short* boneNames;
     char* parentList;
     short* quats;
@@ -1564,7 +1581,7 @@ namespace iw4x
     char* partClassification;
     DObjAnimMat* baseMat;
     Material** materialHandles;
-    XModelLodInfo lodInfo[4];
+    XModelLodInfo lodInfo [4];
     char maxLoadedLod;
     char numLods;
     char collLod;
@@ -1627,8 +1644,8 @@ namespace iw4x
   //
   struct FxTrailVertex
   {
-    float pos[2];
-    float normal[2];
+    float pos [2];
+    float normal [2];
     float texCoord;
   };
 
@@ -1687,11 +1704,11 @@ namespace iw4x
     float spawnFrustumCullRadius;
     FxIntRange spawnDelayMsec;
     FxIntRange lifeSpanMsec;
-    FxFloatRange spawnOrigin[3];
+    FxFloatRange spawnOrigin [3];
     FxFloatRange spawnOffsetRadius;
     FxFloatRange spawnOffsetHeight;
-    FxFloatRange spawnAngles[3];
-    FxFloatRange angularVelocity[3];
+    FxFloatRange spawnAngles [3];
+    FxFloatRange angularVelocity [3];
     FxFloatRange initialRotation;
     FxFloatRange gravity;
     FxFloatRange reflectionFactor;
@@ -1720,8 +1737,8 @@ namespace iw4x
   //
   struct FxImpactEntry
   {
-    FxEffectDef* nonflesh[31];
-    FxEffectDef* flesh[4];
+    FxEffectDef* nonflesh [31];
+    FxEffectDef* flesh [4];
   };
 
   // 1113
@@ -1739,7 +1756,7 @@ namespace iw4x
     int weaponSelectTime;
     int weaponForcedSelectTime;
     unsigned int weaponLatestPrimaryIdx;
-    unsigned short primaryWeaponForAlt[1400];
+    unsigned short primaryWeaponForAlt [1400];
     int holdBreathTime;
     int holdBreathInTime;
     int holdBreathDelay;
@@ -1763,10 +1780,10 @@ namespace iw4x
     bool displayHUDWithKeycatchUI;
     connstate_t connectionState;
     bool invited;
-    char itemsUnlocked[256];
+    char itemsUnlocked [256];
     bool itemsUnlockedInited;
     bool itemsUnlockedLastGameDirty;
-    unsigned short itemsUnlockedLastGame[16];
+    unsigned short itemsUnlockedLastGame [16];
     int itemsUnlockedLastGameCount;
     char* itemsUnlockedBuffer;
     int itemsUnlockedLocalClientNum;
@@ -1787,7 +1804,7 @@ namespace iw4x
   //
   struct netProfileStream_t
   {
-    netProfilePacket_t packets[60];
+    netProfilePacket_t packets [60];
     int iCurrPacket;
     int iBytesPerSecond;
     int iLastBPSCalcTime;
@@ -1802,7 +1819,7 @@ namespace iw4x
   //
   struct ClientVoicePacket_t
   {
-    char data[256];
+    char data [256];
     int dataSize;
   };
 
@@ -1810,7 +1827,7 @@ namespace iw4x
   //
   struct voiceCommunication_t
   {
-    ClientVoicePacket_t voicePackets[10];
+    ClientVoicePacket_t voicePackets [10];
     int voicePacketCount;
     int voicePacketLastTransmit;
     int packetsPerSec;
@@ -1824,7 +1841,7 @@ namespace iw4x
     unsigned int nameOffset;
     unsigned int refImageNameOffset;
     char gameFlags;
-    char pad[1];
+    char pad [1];
     char textureAtlasRowCount;
     char textureAtlasColumnCount;
     unsigned int sortKeyNameOffset;
@@ -1844,7 +1861,7 @@ namespace iw4x
   //
   struct ProfileAtom
   {
-    unsigned int value[1];
+    unsigned int value [1];
   };
 
   // 1121
@@ -1853,7 +1870,7 @@ namespace iw4x
   {
     int nesting;
     unsigned int hits;
-    ProfileAtom start[3];
+    ProfileAtom start [3];
     ProfileAtom total;
     ProfileAtom child;
   };
@@ -1888,12 +1905,12 @@ namespace iw4x
   struct ProfileStack
   {
     profile_t prof_root;
-    profile_t* prof_pStack[16384];
+    profile_t* prof_pStack [16384];
     profile_t** prof_ppStack;
-    profile_t prof_array[443];
+    profile_t prof_array [443];
     ProfileAtom prof_overhead_internal;
     ProfileAtom prof_overhead_inlineal;
-    profile_guard_t prof_guardstack[32];
+    profile_guard_t prof_guardstack [32];
     int prof_guardpos;
     float prof_timescale;
   };
@@ -1936,24 +1953,24 @@ namespace iw4x
   //
   union XAnimDynamicFrames
   {
-    char (*_1)[3];
-    unsigned short (*_2)[3];
+    char (*_1) [3];
+    unsigned short (*_2) [3];
   };
 
   // 1131
   //
   union XAnimDynamicIndices
   {
-    char _1[1];
-    unsigned short _2[1];
+    char _1 [1];
+    unsigned short _2 [1];
   };
 
   // 1132
   //
   struct XAnimPartTransFrames
   {
-    float mins[3];
-    float size[3];
+    float mins [3];
+    float size [3];
     XAnimDynamicFrames frames;
     XAnimDynamicIndices indices;
   };
@@ -1963,7 +1980,7 @@ namespace iw4x
   union XAnimPartTransData
   {
     XAnimPartTransFrames frames;
-    float frame0[3];
+    float frame0 [3];
   };
 
   // 1134
@@ -1979,7 +1996,7 @@ namespace iw4x
   //
   struct XAnimDeltaPartQuatDataFrames2
   {
-    short (*frames)[2];
+    short (*frames) [2];
     XAnimDynamicIndices indices;
   };
 
@@ -1988,7 +2005,7 @@ namespace iw4x
   union XAnimDeltaPartQuatData2
   {
     XAnimDeltaPartQuatDataFrames2 frames;
-    short frame0[2];
+    short frame0 [2];
   };
 
   // 1137
@@ -2003,7 +2020,7 @@ namespace iw4x
   //
   struct XAnimDeltaPartQuatDataFrames
   {
-    short (*frames)[4];
+    short (*frames) [4];
     XAnimDynamicIndices indices;
   };
 
@@ -2012,7 +2029,7 @@ namespace iw4x
   union XAnimDeltaPartQuatData
   {
     XAnimDeltaPartQuatDataFrames frames;
-    short frame0[4];
+    short frame0 [4];
   };
 
   // 1140
@@ -2044,7 +2061,7 @@ namespace iw4x
     unsigned short randomDataIntCount;
     unsigned short numframes;
     char flags;
-    char boneCount[10];
+    char boneCount [10];
     char notifyCount;
     char assetType;
     bool isDefault;
@@ -2069,8 +2086,8 @@ namespace iw4x
   struct cStaticModel_s
   {
     XModel* xmodel;
-    float origin[3];
-    float invScaledAxis[3][3];
+    float origin [3];
+    float invScaledAxis [3][3];
     Bounds absBounds;
   };
 
@@ -2088,7 +2105,7 @@ namespace iw4x
   struct cNode_t
   {
     cplane_s* plane;
-    short children[2];
+    short children [2];
   };
 
   // 1146
@@ -2116,7 +2133,7 @@ namespace iw4x
   {
     float dist;
     float range;
-    unsigned short childOffset[2];
+    unsigned short childOffset [2];
   };
 
   // 1149
@@ -2141,7 +2158,7 @@ namespace iw4x
   //
   struct CollisionBorder
   {
-    float distEq[3];
+    float distEq [3];
     float zBase;
     float zSlope;
     float start;
@@ -2171,10 +2188,10 @@ namespace iw4x
   //
   struct CollisionAabbTree
   {
-    float midPoint[3];
+    float midPoint [3];
     unsigned short materialIndex;
     unsigned short childCount;
-    float halfSize[3];
+    float halfSize [3];
     CollisionAabbTreeIndex u;
   };
 
@@ -2204,7 +2221,7 @@ namespace iw4x
   struct Stage
   {
     const char* name;
-    float origin[3];
+    float origin [3];
     unsigned short triggerIndex;
     char sunPrimaryLightIndex;
   };
@@ -2234,8 +2251,8 @@ namespace iw4x
   //
   struct GfxPlacement
   {
-    float quat[4];
-    float origin[3];
+    float quat [4];
+    float origin [3];
   };
 
   // 1161
@@ -2278,8 +2295,8 @@ namespace iw4x
   {
     unsigned short sector;
     unsigned short nextEntInSector;
-    float linkMins[2];
-    float linkMaxs[2];
+    float linkMins [2];
+    float linkMaxs [2];
   };
 
   // 1165
@@ -2309,7 +2326,7 @@ namespace iw4x
     unsigned int numLeafSurfaces;
     unsigned int* leafsurfaces;
     unsigned int vertCount;
-    float (*verts)[3];
+    float (*verts) [3];
     int triCount;
     unsigned short* triIndices;
     char* triEdgeIsWalkable;
@@ -2328,11 +2345,11 @@ namespace iw4x
     MapEnts* mapEnts;
     unsigned short smodelNodeCount;
     SModelAabbNode* smodelNodes;
-    unsigned short dynEntCount[2];
-    DynEntityDef* dynEntDefList[2];
-    DynEntityPose* dynEntPoseList[2];
-    DynEntityClient* dynEntClientList[2];
-    DynEntityColl* dynEntCollList[2];
+    unsigned short dynEntCount [2];
+    DynEntityDef* dynEntDefList [2];
+    DynEntityPose* dynEntPoseList [2];
+    DynEntityClient* dynEntClientList [2];
+    DynEntityColl* dynEntCollList [2];
     unsigned int checksum;
   };
 
@@ -2344,9 +2361,9 @@ namespace iw4x
     char canUseShadowMap;
     char exponent;
     char unused;
-    float color[3];
-    float dir[3];
-    float origin[3];
+    float color [3];
+    float dir [3];
+    float origin [3];
     float radius;
     float cosHalfFovOuter;
     float cosHalfFovInner;
@@ -2375,7 +2392,7 @@ namespace iw4x
     char disconnectCount;
     char negotiationLink;
     char flags;
-    char ubBadPlaceCount[3];
+    char ubBadPlaceCount [3];
   };
 
   // 1170
@@ -2390,9 +2407,9 @@ namespace iw4x
     unsigned short target;
     unsigned short animscript;
     int animscriptfunc;
-    float vOrigin[3];
+    float vOrigin [3];
     float fAngle;
-    float forward[2];
+    float forward [2];
     float fRadius;
 
     union
@@ -2401,7 +2418,7 @@ namespace iw4x
       PathNodeErrorCode error;
     };
 
-    short wOverlapNode[2];
+    short wOverlapNode [2];
     unsigned short totalLinkCount;
     pathlink_s* Links;
   };
@@ -2412,8 +2429,8 @@ namespace iw4x
   {
     void* pOwner;
     int iFreeTime;
-    int iValidTime[3];
-    int dangerousNodeTime[3];
+    int iValidTime [3];
+    int dangerousNodeTime [3];
     int inPlayerLOSTime;
     short wLinkCount;
     short wOverlapCount;
@@ -2453,7 +2470,7 @@ namespace iw4x
   //
   struct pathbasenode_t
   {
-    float vOrigin[3];
+    float vOrigin [3];
     unsigned int type;
   };
 
@@ -2469,7 +2486,7 @@ namespace iw4x
   //
   union pathnode_tree_info_t
   {
-    pathnode_tree_t* child[2];
+    pathnode_tree_t* child [2];
     pathnode_tree_nodes_t s;
   };
 
@@ -2502,7 +2519,7 @@ namespace iw4x
   //
   struct VehicleTrackObstacle
   {
-    float origin[2];
+    float origin [2];
     float radius;
   };
 
@@ -2510,11 +2527,11 @@ namespace iw4x
   //
   struct VehicleTrackSector
   {
-    float startEdgeDir[2];
+    float startEdgeDir [2];
     float startEdgeDist;
-    float leftEdgeDir[2];
+    float leftEdgeDir [2];
     float leftEdgeDist;
-    float rightEdgeDir[2];
+    float rightEdgeDir [2];
     float rightEdgeDist;
     float sectorLength;
     float sectorWidth;
@@ -2535,7 +2552,7 @@ namespace iw4x
     unsigned int nextBranchesCount;
     VehicleTrackSegment** prevBranches;
     unsigned int prevBranchesCount;
-    float endEdgeDir[2];
+    float endEdgeDir [2];
     float endEdgeDist;
     float totalLength;
   };
@@ -2556,7 +2573,7 @@ namespace iw4x
     unsigned short collapseTime;
     int lastStateChangeTime;
     char impactDir;
-    char impactPos[2];
+    char impactPos [2];
   };
 
   // 1185
@@ -2579,7 +2596,7 @@ namespace iw4x
     unsigned short damageToDestroy;
     unsigned int glassNameCount;
     G_GlassName* glassNames;
-    char pad[108];
+    char pad [108];
   };
 
   // 1187
@@ -2605,7 +2622,7 @@ namespace iw4x
   struct FxGlassDef
   {
     float halfThickness;
-    float texVecs[2][2];
+    float texVecs [2][2];
     GfxColor color;
     Material* material;
     Material* materialShattered;
@@ -2616,8 +2633,8 @@ namespace iw4x
   //
   struct FxSpatialFrame
   {
-    float quat[4];
-    float origin[3];
+    float quat [4];
+    float origin [3];
   };
 
   // 1192
@@ -2639,12 +2656,12 @@ namespace iw4x
   //
   struct FxGlassPieceState
   {
-    float texCoordOrigin[2];
+    float texCoordOrigin [2];
     unsigned int supportMask;
     unsigned short initIndex;
     unsigned short geoDataStart;
     char defIndex;
-    char pad[5];
+    char pad [5];
     char vertCount;
     char holeDataCount;
     char crackDataCount;
@@ -2660,8 +2677,8 @@ namespace iw4x
     int fallTime;
     int physObjId;
     int physJointId;
-    float vel[3];
-    float avel[3];
+    float vel [3];
+    float avel [3];
   };
 
   // 1195
@@ -2678,7 +2695,7 @@ namespace iw4x
   {
     unsigned short uniqueVertCount;
     char touchVert;
-    char pad[1];
+    char pad [1];
   };
 
   // 1197
@@ -2697,8 +2714,8 @@ namespace iw4x
     FxGlassVertex vert;
     FxGlassHoleHeader hole;
     FxGlassCrackHeader crack;
-    char asBytes[4];
-    short anonymous[2];
+    char asBytes [4];
+    short anonymous [2];
   };
 
   // 1199
@@ -2707,13 +2724,13 @@ namespace iw4x
   {
     FxSpatialFrame frame;
     float radius;
-    float texCoordOrigin[2];
+    float texCoordOrigin [2];
     unsigned int supportMask;
     float areaX2;
     char defIndex;
     char vertCount;
     char fanDataCount;
-    char pad[1];
+    char pad [1];
   };
 
   // 1200
@@ -2740,7 +2757,7 @@ namespace iw4x
     unsigned int* isInUse;
     unsigned int* cellBits;
     char* visData;
-    float (*linkOrg)[3];
+    float (*linkOrg) [3];
     float* halfThickness;
     unsigned short* lightingHandles;
     FxGlassInitPieceState* initPieceStates;
@@ -2816,7 +2833,7 @@ namespace iw4x
     bool isAncestor;
     char recursionDepth;
     char hullPointCount;
-    float (*hullPoints)[2];
+    float (*hullPoints) [2];
     GfxPortal* queuedParent;
   };
 
@@ -2824,7 +2841,7 @@ namespace iw4x
   //
   struct DpvsPlane
   {
-    float coeffs[4];
+    float coeffs [4];
   };
 
   // 1207
@@ -2833,10 +2850,10 @@ namespace iw4x
   {
     GfxPortalWritable writable;
     DpvsPlane plane;
-    float (*vertices)[3];
+    float (*vertices) [3];
     unsigned short cellIndex;
     char vertexCount;
-    float hullAxis[2][3];
+    float hullAxis [2][3];
   };
 
   // 1210
@@ -2854,7 +2871,7 @@ namespace iw4x
   //
   struct GfxReflectionProbe
   {
-    float origin[3];
+    float origin [3];
   };
 
   // 1212
@@ -2869,11 +2886,11 @@ namespace iw4x
   //
   struct GfxWorldVertex
   {
-    float xyz[3];
+    float xyz [3];
     float binormalSign;
     GfxColor color;
-    float texCoord[2];
-    float lmapCoord[2];
+    float texCoord [2];
+    float lmapCoord [2];
     PackedUnitVec normal;
     PackedUnitVec tangent;
   };
@@ -2929,7 +2946,7 @@ namespace iw4x
   //
   struct GfxLightGridColors
   {
-    char rgb[56][3];
+    char rgb [56][3];
   };
 
   // 1220
@@ -2938,8 +2955,8 @@ namespace iw4x
   {
     bool hasLightRegions;
     unsigned int lastSunPrimaryLightIndex;
-    unsigned short mins[3];
-    unsigned short maxs[3];
+    unsigned short mins [3];
+    unsigned short maxs [3];
     unsigned int rowAxis;
     unsigned int colAxis;
     unsigned short* rowDataStart;
@@ -3003,7 +3020,7 @@ namespace iw4x
     float glareMaxLighten;
     int glareFadeInTime;
     int glareFadeOutTime;
-    float sunFxPosition[3];
+    float sunFxPosition [3];
   };
 
   // 1225
@@ -3052,7 +3069,7 @@ namespace iw4x
   //
   struct GfxLightRegionAxis
   {
-    float dir[3];
+    float dir [3];
     float midPoint;
     float halfSize;
   };
@@ -3061,8 +3078,8 @@ namespace iw4x
   //
   struct GfxLightRegionHull
   {
-    float kdopMidPoint[9];
-    float kdopHalfSize[9];
+    float kdopMidPoint [9];
+    float kdopHalfSize [9];
     unsigned int axisCount;
     GfxLightRegionAxis* axis;
   };
@@ -3080,7 +3097,7 @@ namespace iw4x
   struct GfxStaticModelInst
   {
     Bounds bounds;
-    float lightingOrigin[3];
+    float lightingOrigin [3];
   };
 
   // 1234
@@ -3132,8 +3149,8 @@ namespace iw4x
   //
   struct GfxPackedPlacement
   {
-    float origin[3];
-    float axis[3][3];
+    float origin [3];
+    float axis [3][3];
     float scale;
   };
 
@@ -3150,7 +3167,7 @@ namespace iw4x
     char flags;
     char firstMtlSkinIndex;
     GfxColor groundLighting;
-    unsigned short cacheId[4];
+    unsigned short cacheId [4];
   };
 
   // 1241
@@ -3170,8 +3187,8 @@ namespace iw4x
     unsigned int emissiveSurfsEnd;
     unsigned int smodelVisDataCount;
     unsigned int surfaceVisDataCount;
-    char* smodelVisData[3];
-    char* surfaceVisData[3];
+    char* smodelVisData [3];
+    char* surfaceVisData [3];
     unsigned short* sortedSurfIndex;
     GfxStaticModelInst* smodelInsts;
     GfxSurface* surfaces;
@@ -3186,10 +3203,10 @@ namespace iw4x
   //
   struct GfxWorldDpvsDynamic
   {
-    unsigned int dynEntClientWordCount[2];
-    unsigned int dynEntClientCount[2];
-    unsigned int* dynEntCellBits[2];
-    char* dynEntVisData[2][3];
+    unsigned int dynEntClientWordCount [2];
+    unsigned int dynEntClientCount [2];
+    unsigned int* dynEntCellBits [2];
+    char* dynEntVisData [2][3];
   };
 
   // 1243
@@ -3197,10 +3214,10 @@ namespace iw4x
   struct GfxHeroOnlyLight
   {
     char type;
-    char unused[3];
-    float color[3];
-    float dir[3];
-    float origin[3];
+    char unused [3];
+    float color [3];
+    float dir [3];
+    float origin [3];
     float radius;
     float cosHalfFovOuter;
     float cosHalfFovInner;
@@ -3237,14 +3254,14 @@ namespace iw4x
     int materialMemoryCount;
     MaterialMemory* materialMemory;
     sunflare_t sun;
-    float outdoorLookupMatrix[4][4];
+    float outdoorLookupMatrix [4][4];
     GfxImage* outdoorImage;
     unsigned int* cellCasterBits;
     unsigned int* cellHasSunLitSurfsBits;
     GfxSceneDynModel* sceneDynModel;
     GfxSceneDynBrush* sceneDynBrush;
     unsigned int* primaryLightEntityShadowVis;
-    unsigned int* primaryLightDynEntShadowVis[2];
+    unsigned int* primaryLightDynEntShadowVis [2];
     char* nonSunPrimaryLightForModelDynEnt;
     GfxShadowGeometry* shadowGeom;
     GfxLightRegion* lightRegion;
@@ -3299,13 +3316,13 @@ namespace iw4x
     int ownerDrawFlags;
     float borderSize;
     int staticFlags;
-    int dynamicFlags[1];
+    int dynamicFlags [1];
     int nextTime;
-    float foreColor[4];
-    float backColor[4];
-    float borderColor[4];
-    float outlineColor[4];
-    float disableColor[4];
+    float foreColor [4];
+    float backColor [4];
+    float borderColor [4];
+    float outlineColor [4];
+    float disableColor [4];
     Material* background;
   };
 
@@ -3475,7 +3492,7 @@ namespace iw4x
     int fullScreen;
     int itemCount;
     int fontIndex;
-    int cursorItem[1];
+    int cursorItem [1];
     int fadeCycle;
     float fadeClamp;
     float fadeAmount;
@@ -3490,7 +3507,7 @@ namespace iw4x
     const char* allowedBinding;
     const char* soundName;
     int imageTrack;
-    float focusColor[4];
+    float focusColor [4];
     Statement_s* rectXExp;
     Statement_s* rectYExp;
     Statement_s* rectWExp;
@@ -3498,10 +3515,10 @@ namespace iw4x
     Statement_s* openSoundExp;
     Statement_s* closeSoundExp;
     itemDef_s** items;
-    menuTransition scaleTransition[1];
-    menuTransition alphaTransition[1];
-    menuTransition xTransition[1];
-    menuTransition yTransition[1];
+    menuTransition scaleTransition [1];
+    menuTransition alphaTransition [1];
+    menuTransition xTransition [1];
+    menuTransition yTransition [1];
     ExpressionSupportingData* expressionData;
   };
 
@@ -3520,19 +3537,19 @@ namespace iw4x
   struct listBoxDef_s
   {
     int mousePos;
-    int startPos[1];
-    int endPos[1];
+    int startPos [1];
+    int endPos [1];
     int drawPadding;
     float elementWidth;
     float elementHeight;
     int elementStyle;
     int numColumns;
-    columnInfo_s columnInfo[16];
+    columnInfo_s columnInfo [16];
     MenuEventHandlerSet* onDoubleClick;
     int notselectable;
     int noScrollBars;
     int usePaging;
-    float selectBorder[4];
+    float selectBorder [4];
     Material* selectIcon;
   };
 
@@ -3554,9 +3571,9 @@ namespace iw4x
   //
   struct multiDef_s
   {
-    const char* dvarList[32];
-    const char* dvarStr[32];
-    float dvarValue[32];
+    const char* dvarList [32];
+    const char* dvarStr [32];
+    float dvarValue [32];
     int count;
     int strDef;
   };
@@ -3607,7 +3624,7 @@ namespace iw4x
   struct itemDef_s
   {
     windowDef_t window;
-    rectDef_s textRect[1];
+    rectDef_s textRect [1];
     int type;
     int dataType;
     int alignment;
@@ -3638,7 +3655,7 @@ namespace iw4x
     int dvarFlags;
     snd_alias_list_t* focusSound;
     float special;
-    int cursorPos[1];
+    int cursorPos [1];
     itemDefData_t typeData;
     int imageTrack;
     int floatExpressionCount;
@@ -3647,7 +3664,7 @@ namespace iw4x
     Statement_s* disabledExp;
     Statement_s* textExp;
     Statement_s* materialExp;
-    float glowColor[4];
+    float glowColor [4];
     bool decayActive;
     int fxBirthTime;
     int fxLetterTime;
@@ -3685,7 +3702,7 @@ namespace iw4x
     float beamWidth;
     float screwRadius;
     float screwDist;
-    float colors[5][4];
+    float colors [5][4];
   };
 
   // 1280
@@ -3770,16 +3787,16 @@ namespace iw4x
     int iReticleSideSize;
     int iReticleMinOfs;
     activeReticleType_t activeReticleType;
-    float vStandMove[3];
-    float vStandRot[3];
-    float strafeMove[3];
-    float strafeRot[3];
-    float vDuckedOfs[3];
-    float vDuckedMove[3];
-    float vDuckedRot[3];
-    float vProneOfs[3];
-    float vProneMove[3];
-    float vProneRot[3];
+    float vStandMove [3];
+    float vStandRot [3];
+    float strafeMove [3];
+    float strafeRot [3];
+    float vDuckedOfs [3];
+    float vDuckedMove [3];
+    float vDuckedRot [3];
+    float vProneOfs [3];
+    float vProneMove [3];
+    float vProneRot [3];
     float fPosMoveRate;
     float fPosProneMoveRate;
     float fStandMoveMinSpeed;
@@ -3949,7 +3966,7 @@ namespace iw4x
     float* perpendicularBounce;
     FxEffectDef* projTrailEffect;
     FxEffectDef* projBeaconEffect;
-    float vProjectileColor[3];
+    float vProjectileColor [3];
     guidedMissileType_t guidedMissileType;
     float maxSteeringAccel;
     int projIgnitionDelay;
@@ -3993,9 +4010,9 @@ namespace iw4x
     float fHipViewScatterMax;
     float fightDist;
     float maxDist;
-    const char* accuracyGraphName[2];
-    float (*originalAccuracyGraphKnots[2])[2];
-    unsigned short originalAccuracyGraphKnotCount[2];
+    const char* accuracyGraphName [2];
+    float (*originalAccuracyGraphKnots [2]) [2];
+    unsigned short originalAccuracyGraphKnotCount [2];
     int iPositionReloadTransTime;
     float leftArc;
     float rightArc;
@@ -4004,8 +4021,8 @@ namespace iw4x
     float accuracy;
     float aiSpread;
     float playerSpread;
-    float minTurnSpeed[2];
-    float maxTurnSpeed[2];
+    float minTurnSpeed [2];
+    float maxTurnSpeed [2];
     float pitchConvergenceTime;
     float yawConvergenceTime;
     float suppressTime;
@@ -4022,7 +4039,7 @@ namespace iw4x
     float scanAccel;
     int scanPauseTime;
     const char* szScript;
-    float fOOPosAnimLength[2];
+    float fOOPosAnimLength [2];
     int minDamage;
     int minPlayerDamage;
     float fMaxDamageRange;
@@ -4047,8 +4064,8 @@ namespace iw4x
     float turretBarrelSpinUpTime;
     float turretBarrelSpinDownTime;
     snd_alias_list_t* turretBarrelSpinMaxSnd;
-    snd_alias_list_t* turretBarrelSpinUpSnd[4];
-    snd_alias_list_t* turretBarrelSpinDownSnd[4];
+    snd_alias_list_t* turretBarrelSpinUpSnd [4];
+    snd_alias_list_t* turretBarrelSpinDownSnd [4];
     snd_alias_list_t* missileConeSoundAlias;
     snd_alias_list_t* missileConeSoundAliasAtBase;
     float missileConeSoundRadiusAtTop;
@@ -4141,8 +4158,8 @@ namespace iw4x
     int ammoDropStockMax;
     float adsDofStart;
     float adsDofEnd;
-    unsigned short accuracyGraphKnotCount[2];
-    float (*accuracyGraphKnots[2])[2];
+    unsigned short accuracyGraphKnotCount [2];
+    float (*accuracyGraphKnots [2]) [2];
     bool motionTracker;
     bool enhanced;
     bool dpadIconShowsAmmo;
@@ -4396,7 +4413,7 @@ namespace iw4x
     float boatBouncingFadeoutSteeringAngle;
     float collisionDamage;
     float collisionSpeed;
-    float killcamOffset[3];
+    float killcamOffset [3];
     int playerProtected;
     int bulletDamage;
     int armorPiercingDamage;
@@ -4434,7 +4451,7 @@ namespace iw4x
     float trophyInactiveRadius;
     int trophyAmmoCount;
     float trophyReloadTime;
-    unsigned short trophyTags[4];
+    unsigned short trophyTags [4];
     Material* compassFriendlyIcon;
     Material* compassEnemyIcon;
     int compassIconWidth;
@@ -4462,7 +4479,7 @@ namespace iw4x
     snd_alias_list_t* speedSnd;
     float speedSndBlendSpeed;
     const char* surfaceSndPrefix;
-    snd_alias_list_t* surfaceSnds[31];
+    snd_alias_list_t* surfaceSnds [31];
     float surfaceSndBlendSpeed;
     float slideVolume;
     float slideBlendSpeed;
@@ -4528,23 +4545,23 @@ namespace iw4x
   struct netadr_t
   {
     netadrtype_t type;
-    char ip[4];
+    char ip [4];
     unsigned short port;
-    char ipx[10];
+    char ipx [10];
   };
 
   // 1362
   //
   struct XNKID
   {
-    char ab[8];
+    char ab [8];
   };
 
   // 1363
   //
   struct XNKEY
   {
-    char ab[16];
+    char ab [16];
   };
 
   // 1364
@@ -4617,6 +4634,239 @@ namespace iw4x
     XAssetEntryPoolEntry* next;
   };
 
+  enum DvarSetSource
+  {
+    DVAR_SOURCE_INTERNAL = 0x0,
+    DVAR_SOURCE_EXTERNAL = 0x1,
+    DVAR_SOURCE_SCRIPT = 0x2,
+    DVAR_SOURCE_DEVGUI = 0x3,
+  };
+
+  enum DvarFlags
+  {
+    DVAR_NONE = 0x0,
+    DVAR_ARCHIVE = 0x1,
+    DVAR_LATCH = 0x2,
+    DVAR_CHEAT = 0x4,
+    DVAR_CODINFO = 0x8,
+    DVAR_SCRIPTINFO = 0x10,
+    DVAR_TEMP = 0x20,
+    DVAR_SAVED = 0x40,
+    DVAR_INTERNAL = 0x80,
+    DVAR_EXTERNAL = 0x100,
+    DVAR_USERINFO = 0x200,
+    DVAR_SERVERINFO = 0x400,
+    DVAR_INIT = 0x800,
+    DVAR_SYSTEMINFO = 0x1000,
+    DVAR_ROM = 0x2000,
+    DVAR_CHANGEABLE_RESET = 0x4000,
+    DVAR_AUTOEXEC = 0x8000,
+  };
+
+  struct WinConData
+  {
+    HWND* hWnd;
+    HWND* hwndBuffer;
+    HWND* codLogo;
+    HFONT* hfBufferFont;
+    HWND* hwndInputLine;
+    char errorString [512];
+    char consoleText [512];
+    char returnedText [512];
+    int windowWidth;
+    int windowHeight;
+    int (WINAPI* SysInputLineWndProc) (HWND*, UINT, WPARAM, unsigned int);
+  };
+
+  struct ScreenPlacement
+  {
+    float scaleVirtualToReal [2];
+    float scaleVirtualToFull [2];
+    float scaleRealToVirtual [2];
+    float realViewportPosition [2];
+    float realViewportSize [2];
+    float virtualViewableMin [2];
+    float virtualViewableMax [2];
+    float realViewableMin [2];
+    float realViewableMax [2];
+    float virtualAdjustableMin [2];
+    float virtualAdjustableMax [2];
+    float realAdjustableMin [2];
+    float realAdjustableMax [2];
+    float subScreenLeft [2];
+  };
+
+  struct field_t
+  {
+    int cursor;
+    int scroll;
+    int drawWidth;
+    int widthInPixels;
+    float charHeight;
+    int fixedSize;
+    char buffer [256];
+  };
+
+  struct CachedAssets_t
+  {
+    Material* scrollBarArrowUp;
+    Material* scrollBarArrowDown;
+    Material* scrollBarArrowLeft;
+    Material* scrollBarArrowRight;
+    Material* scrollBar;
+    Material* scrollBarThumb;
+    Material* sliderBar;
+    Material* sliderThumb;
+    Material* whiteMaterial;
+    Material* cursor;
+    Material* textDecodeCharacters;
+    Material* textDecodeCharactersGlow;
+    Font_s* bigFont;
+    Font_s* smallFont;
+    Font_s* consoleFont;
+    Font_s* boldFont;
+    Font_s* textFont;
+    Font_s* extraBigFont;
+    Font_s* objectiveFont;
+    Font_s* hudBigFont;
+    Font_s* hudSmallFont;
+    snd_alias_list_t* itemFocusSound;
+  };
+
+  struct gameTypeInfo
+  {
+    char gameType [12];
+    char gameTypeName [32];
+  };
+
+  struct mapInfo
+  {
+    char mapName [32];
+    char mapLoadName [16];
+    char mapDescription [32];
+    char mapLoadImage [32];
+    char mapCustomKey [32][16];
+    char mapCustomValue [32][64];
+    int mapCustomCount;
+    int teamMembers;
+    int typeBits;
+    int timeToBeat [32];
+    int active;
+  };
+
+  struct pinglist_t
+  {
+    char adrstr [64];
+    int start;
+  };
+
+  struct serverStatus_s
+  {
+    pinglist_t pingList [16];
+    int numqueriedservers;
+    int currentping;
+    int nextpingtime;
+    int maxservers;
+    int refreshtime;
+    int numServers;
+    int sortKey;
+    int sortDir;
+    int lastCount;
+    int refreshActive;
+    int currentServer;
+    int displayServers [20000];
+    int numDisplayServers;
+    int serverCount;
+    int numPlayersOnServers;
+    int nextDisplayRefresh;
+    int nextSortTime;
+    int motdLen;
+    int motdWidth;
+    int motdPaintX;
+    int motdPaintX2;
+    int motdOffset;
+    int motdTime;
+    char motd [1024];
+  };
+
+  struct serverStatusInfo_t
+  {
+    char address [64];
+    const char* lines [128][4];
+    char text [1024];
+    char pings [54];
+    int numLines;
+  };
+
+  struct pendingServer_t
+  {
+    char adrstr [64];
+    char name [64];
+    int startTime;
+    int serverNum;
+    int valid;
+  };
+
+  struct pendingServerStatus_t
+  {
+    int num;
+    pendingServer_t server [16];
+  };
+
+  struct sharedUiInfo_t
+  {
+    CachedAssets_t assets;
+    int playerCount;
+    char playerNames [18][32];
+    char teamNames [18][32];
+    int playerClientNums [18];
+    volatile int updateGameTypeList;
+    int numGameTypes;
+    gameTypeInfo gameTypes [32];
+    int numCustomGameTypes;
+    gameTypeInfo customGameTypes [32];
+    char customGameTypeCancelState [2048];
+    int numJoinGameTypes;
+    gameTypeInfo joinGameTypes [32];
+    volatile int updateArenas;
+    int mapCount;
+    mapInfo mapList [128];
+    int mapIndexSorted [128];
+    bool mapsAreSorted;
+    Material* serverHardwareIconList [9];
+    unsigned __int64 partyMemberXuid;
+    Material* talkingIcons [2];
+    serverStatus_s serverStatus;
+    char serverStatusAddress [64];
+    serverStatusInfo_t serverStatusInfo;
+    int nextServerStatusRefresh;
+    pendingServerStatus_t pendingServerStatus;
+  };
+
+  struct cmd_function_s
+  {
+    cmd_function_s* next;
+    const char* name;
+    const char* autoCompleteDir;
+    const char* autoCompleteExt;
+    void (__fastcall* function) ();
+  };
+
+  struct XZoneInfo
+  {
+    const char* name;
+    int allocFlags;
+    int freeFlags;
+  };
+
+  enum ScreenPlacementMode : int
+  {
+    SCRMODE_FULL = 0x0,
+    SCRMODE_DISPLAY = 0x1,
+    SCRMODE_INVALID = 0x2,
+    SCRMODE_COUNT = 0x3,
+  };
+
   // Game internal symbols
   //
 
@@ -4635,23 +4885,152 @@ namespace iw4x
   using  NET_OutOfBandPrint_t = void (*) (int, netadr_t*, const char*, ...);
   inline NET_OutOfBandPrint_t NET_OutOfBandPrint = reinterpret_cast<NET_OutOfBandPrint_t> (0x140209FC0);
 
-  using  Dvar_RegisterString_t = long long (*) (long long, long long, int, long long);
-  inline Dvar_RegisterString_t Dvar_RegisterString = reinterpret_cast<Dvar_RegisterString_t> (0x140288590);
+  using Dvar_Command_t = int (*) (void);
+  inline Dvar_Command_t Dvar_Command = reinterpret_cast<Dvar_Command_t> (0x140200F90);
 
-  using  Dvar_RegisterInt_t = long long (*) (long long, int, int, int, int, long long);
-  inline Dvar_RegisterInt_t Dvar_RegisterInt = reinterpret_cast<Dvar_RegisterInt_t> (0x1402881F0);
+  using Dvar_AddCommands_t = void (*) (void);
+  inline Dvar_AddCommands_t Dvar_AddCommands = reinterpret_cast<Dvar_AddCommands_t> (0x140200EE0);
 
-  using  Dvar_FindVar_t = dvar_t* (*) (const char* name);
+  using Dvar_Init_t = void (*) (void);
+  inline Dvar_Init_t Dvar_Init = reinterpret_cast<Dvar_Init_t> (0x140287520);
+
+  using Dvar_ResetScriptInfo_t = void (*) (void);
+  inline Dvar_ResetScriptInfo_t Dvar_ResetScriptInfo = reinterpret_cast<Dvar_ResetScriptInfo_t> (0x140288DD0);
+
+  using Dvar_Reset_t = void (*) (dvar_t *dvar, DvarSetSource setSource);
+  inline Dvar_Reset_t Dvar_Reset = reinterpret_cast<Dvar_Reset_t> (0x140288DB0);
+
+  using Dvar_AddFlags_t = void (*) (dvar_t *dvar, DvarFlags flags);
+  inline Dvar_AddFlags_t Dvar_AddFlags = reinterpret_cast<Dvar_AddFlags_t> (0x140286A80);
+
+  using Dvar_LoadDvarsAddFlags_t = void (*) (void *memFile, DvarFlags flags);
+  inline Dvar_LoadDvarsAddFlags_t Dvar_LoadDvarsAddFlags = reinterpret_cast<Dvar_LoadDvarsAddFlags_t> (0x1402875C0);
+
+  using Dvar_UpdateResetValue_t = void (*) (dvar_t *dvar, DvarValue value);
+  inline Dvar_UpdateResetValue_t Dvar_UpdateResetValue = reinterpret_cast<Dvar_UpdateResetValue_t> (0x14028A450);
+
+  using Dvar_ClearModified_t = void (*) (dvar_t *dvar);
+  inline Dvar_ClearModified_t Dvar_ClearModified = reinterpret_cast<Dvar_ClearModified_t> (0x140286FA0);
+
+  using Dvar_FindVar_t = dvar_t * (*) (const char *dvarName);
   inline Dvar_FindVar_t Dvar_FindVar = reinterpret_cast<Dvar_FindVar_t> (0x140287170);
 
-  using  Dvar_SetString_t = long long (*) (long long, long long);
+  using Dvar_FindMalleableVar_t = dvar_t * (*) (const char *dvarName);
+  inline Dvar_FindMalleableVar_t Dvar_FindMalleableVar = reinterpret_cast<Dvar_FindMalleableVar_t> (0x140287080);
+
+  using Dvar_GetBool_t = bool (*) (dvar_t *dvar);
+  inline Dvar_GetBool_t Dvar_GetBool = reinterpret_cast<Dvar_GetBool_t> (0x140287220);
+
+  using Dvar_GetFloat_t = float (*) (dvar_t *dvar);
+  inline Dvar_GetFloat_t Dvar_GetFloat = reinterpret_cast<Dvar_GetFloat_t> (0x140287260);
+
+  using Dvar_GetString_t = const char * (*) (dvar_t *dvar);
+  inline Dvar_GetString_t Dvar_GetString = reinterpret_cast<Dvar_GetString_t> (0x1402872E0);
+
+  using Dvar_SetInt_t = void (*) (dvar_t *dvar, int value);
+  inline Dvar_SetInt_t Dvar_SetInt = reinterpret_cast<Dvar_SetInt_t> (0x1402896E0);
+
+  using Dvar_SetIntByName_t = void (*) (const char *name, int value);
+  inline Dvar_SetIntByName_t Dvar_SetIntByName = reinterpret_cast<Dvar_SetIntByName_t> (0x140289740);
+
+  using Dvar_SetBool_t = void (*) (dvar_t *dvar, bool value);
+  inline Dvar_SetBool_t Dvar_SetBool = reinterpret_cast<Dvar_SetBool_t> (0x140288FB0);
+
+  using Dvar_SetBoolByName_t = void (*) (const char *nname, bool value);
+  inline Dvar_SetBoolByName_t Dvar_SetBoolByName = reinterpret_cast<Dvar_SetBoolByName_t> (0x140289000);
+
+  using Dvar_SetString_t = void (*) (dvar_t *dvar, const char *value);
   inline Dvar_SetString_t Dvar_SetString = reinterpret_cast<Dvar_SetString_t> (0x140289A80);
 
-  using  Dvar_SetFromStringByName_t = dvar_t* (*) (const char*, const char*);
+  using Dvar_SetStringByName_t = void (*) (const char *name, const char *value);
+  inline Dvar_SetStringByName_t Dvar_SetStringByName = reinterpret_cast<Dvar_SetStringByName_t> (0x140289AE0);
+
+  using  Dvar_SetFromStringByName_t = dvar_t * (*) (const char*, const char*);
   inline Dvar_SetFromStringByName_t Dvar_SetFromStringByName = reinterpret_cast<Dvar_SetFromStringByName_t> (0x140289570);
 
-  using  Dvar_RegisterBool_t = long long (*) (long long, long long, int, long long);
+  using Dvar_SetModified_t = void (*) (dvar_t *dvar);
+  inline Dvar_SetModified_t Dvar_SetModified = reinterpret_cast<Dvar_SetModified_t> (0x140289A70);
+
+  using Dvar_SetLatchedValue_t = void (*) (DvarValue value);
+  inline Dvar_SetLatchedValue_t Dvar_SetLatchedValue = reinterpret_cast<Dvar_SetLatchedValue_t> (0x140289910);
+
+  using Dvar_SetCommand_t = void (*) (const char *dvarName, const char *string);
+  inline Dvar_SetCommand_t Dvar_SetCommand = reinterpret_cast<Dvar_SetCommand_t> (0x1402892A0);
+
+  using Dvar_SetVariant_t = void (*) (dvar_t *dvar, DvarValue value, DvarSetSource source);
+  inline Dvar_SetVariant_t Dvar_SetVariant = reinterpret_cast<Dvar_SetVariant_t> (0x140289B80);
+
+  using Dvar_SetDomainFunc_t = void (*) (dvar_t *dvar, bool (*callback)(dvar_t *, DvarValue *));
+  inline Dvar_SetDomainFunc_t Dvar_SetDomainFunc = reinterpret_cast<Dvar_SetDomainFunc_t> (0x140289350);
+
+  using Dvar_SetFromStringFromSource_t = void (*) (dvar_t *dvar, const char *string, DvarSetSource source);
+  inline Dvar_SetFromStringFromSource_t Dvar_SetFromStringFromSource = reinterpret_cast<Dvar_SetFromStringFromSource_t> (0x140289640);
+
+  using Dvar_StringToEnum_t = int (*) (const DvarLimits domain, const char *string);
+  inline Dvar_StringToEnum_t Dvar_StringToEnum = reinterpret_cast<Dvar_StringToEnum_t> (0x14028A1C0);
+
+  using Dvar_StringToValue_t = DvarValue * (*) (const dvarType type, const DvarLimits domain, const char *string);
+  inline Dvar_StringToValue_t Dvar_StringToValue = reinterpret_cast<Dvar_StringToValue_t> (0x14028A2C0);
+
+  using Dvar_StringToColor_t = void (*) (const char *string, vec4_t color);
+  inline Dvar_StringToColor_t Dvar_StringToColor = reinterpret_cast<Dvar_StringToColor_t> (0x14028A090);
+
+  using Dvar_ValueToString_t = const char * (*) (dvar_t *dvar, DvarValue value);
+  inline Dvar_ValueToString_t Dvar_ValueToString = reinterpret_cast<Dvar_ValueToString_t> (0x14028A690);
+
+  using Dvar_DisplayableValue_t = const char * (*) (dvar_t *dvar);
+  inline Dvar_DisplayableValue_t Dvar_DisplayableValue = reinterpret_cast<Dvar_DisplayableValue_t> (0x140286FF0);
+
+  using Dvar_GetCombinedString_t = void (*) (const char *string, int count);
+  inline Dvar_GetCombinedString_t Dvar_GetCombinedString = reinterpret_cast<Dvar_GetCombinedString_t> (0x140201060);
+
+  using Dvar_IsValidName_t = bool (*) (const char *dvarName);
+  inline Dvar_IsValidName_t Dvar_IsValidName = reinterpret_cast<Dvar_IsValidName_t> (0x140287550);
+
+  using Dvar_ValueInDomain_t = bool (*) (dvarType type, DvarValue value, DvarLimits domain);
+  inline Dvar_ValueInDomain_t Dvar_ValueInDomain = reinterpret_cast<Dvar_ValueInDomain_t> (0x14028A550);
+
+  using Dvar_ValuesEqual_t = bool (*) (dvarType type, DvarValue val0, DvarValue val1);
+  inline Dvar_ValuesEqual_t Dvar_ValuesEqual = reinterpret_cast<Dvar_ValuesEqual_t> (0x14028A860);
+
+  using Dvar_AssignResetStringValue_t = void (*) (dvar_t *dvar, DvarValue *dest, const char *string);
+  inline Dvar_AssignResetStringValue_t Dvar_AssignResetStringValue = reinterpret_cast<Dvar_AssignResetStringValue_t> (0x140286C10);
+
+  using Dvar_AssignCurrentStringValue_t = void (*) (dvar_t *dvar, DvarValue *dest, const char *string);
+  inline Dvar_AssignCurrentStringValue_t Dvar_AssignCurrentStringValue = reinterpret_cast<Dvar_AssignCurrentStringValue_t> (0x140286B60);
+
+  using Dvar_RegisterInt_t = dvar_t * (*) (const char *dvarName, int value, int min, int max, DvarFlags flags, const char *description);
+  inline Dvar_RegisterInt_t Dvar_RegisterInt = reinterpret_cast<Dvar_RegisterInt_t> (0x1402881F0);
+
+  using Dvar_RegisterBool_t = dvar_t * (*) (const char *dvarName, bool value, DvarFlags flags, const char *description);
   inline Dvar_RegisterBool_t Dvar_RegisterBool = reinterpret_cast<Dvar_RegisterBool_t> (0x140287CE0);
+
+  using Dvar_RegisterFloat_t = dvar_t * (*) (const char *dvarName, float value, float min, float max, DvarFlags flags, const char *description);
+  inline Dvar_RegisterFloat_t Dvar_RegisterFloat = reinterpret_cast<Dvar_RegisterFloat_t> (0x1402880C0);
+
+  using Dvar_RegisterString_t = dvar_t * (*) (const char *dvarName, const char *value, DvarFlags flags, const char *description);
+  inline Dvar_RegisterString_t Dvar_RegisterString = reinterpret_cast<Dvar_RegisterString_t> (0x140288590);
+
+  using Dvar_RegisterEnum_t = dvar_t * (*) (const char *dvarName, const char **valueList, int defaultIndex, DvarFlags flags, const char *description);
+  inline Dvar_RegisterEnum_t Dvar_RegisterEnum = reinterpret_cast<Dvar_RegisterEnum_t> (0x140287FC0);
+
+  using Dvar_RegisterColor_t = dvar_t * (*) (const char *dvarName, float r, float g, float b, float a, DvarFlags flags, const char *description);
+  inline Dvar_RegisterColor_t Dvar_RegisterColor = reinterpret_cast<Dvar_RegisterColor_t> (0x140287DC0);
+
+  using Dvar_RegisterVec2_t = dvar_t * (*) (const char *dvarName, float x, float y, float min, float max, DvarFlags flags, const char *description);
+  inline Dvar_RegisterVec2_t Dvar_RegisterVec2 = reinterpret_cast<Dvar_RegisterVec2_t> (0x140288660);
+
+  using Dvar_RegisterVec3_t = dvar_t * (*) (const char *dvarName, float x, float y, float z, float min, float max, DvarFlags flags, const char *description);
+  inline Dvar_RegisterVec3_t Dvar_RegisterVec3 = reinterpret_cast<Dvar_RegisterVec3_t> (0x140288780);
+
+  using Dvar_RegisterVec3Color_t = dvar_t * (*) (const char *dvarName, float r, float g, float b, DvarFlags flags, const char *description);
+  inline Dvar_RegisterVec3Color_t Dvar_RegisterVec3Color = reinterpret_cast<Dvar_RegisterVec3Color_t> (0x1402888B0);
+
+  using Dvar_RegisterVec4_t = dvar_t * (*) (const char *dvarName, float x, float y, float z, float w, float min, float max, DvarFlags flags, const char *description);
+  inline Dvar_RegisterVec4_t Dvar_RegisterVec4 = reinterpret_cast<Dvar_RegisterVec4_t> (0x1402889D0);
+
+  using Dvar_RegisterVariant_t = dvar_t * (*) (const char *dvarName, dvarType type, DvarFlags flags, DvarValue value, DvarLimits domain, const char *description);
+  inline Dvar_RegisterVariant_t Dvar_RegisterVariant = reinterpret_cast<Dvar_RegisterVariant_t> (0x1402882E0);
 
   using  DB_FindXAssetHeader_t = XAssetHeader (*) (XAssetType type, const char* name);
   inline DB_FindXAssetHeader_t DB_FindXAssetHeader = reinterpret_cast<DB_FindXAssetHeader_t> (0x140129220);
@@ -4665,13 +5044,16 @@ namespace iw4x
   using  Sys_InitMainThread_t = __int64 (*) (void);
   inline Sys_InitMainThread_t Sys_InitMainThread = reinterpret_cast<Sys_InitMainThread_t> (0x14020DC00);
 
+  using Sys_IsRenderThread_t = bool (*) (void);
+  inline Sys_IsRenderThread_t Sys_IsRenderThread = reinterpret_cast<Sys_IsRenderThread_t> (0x14020DEC0);
+
   using  XGameRuntimeInitialize_t = char (*) (void);
   inline XGameRuntimeInitialize_t XGameRuntimeInitialize = reinterpret_cast<XGameRuntimeInitialize_t> (0x1401B2FB0);
 
-  using  Win_InitLocalization_t = char (*) (DWORD *);
+  using  Win_InitLocalization_t = bool (*) (int);
   inline Win_InitLocalization_t Win_InitLocalization = reinterpret_cast<Win_InitLocalization_t> (0x1402A7CB0);
 
-  using  I_strnicmp_t = __int64 (*) (__int64, unsigned __int8 *, int);
+  using  I_strnicmp_t = int (*) (const char *s0, const char *s1, int n);
   inline I_strnicmp_t I_strnicmp = reinterpret_cast<I_strnicmp_t> (0x14028E530);
 
   using  sprintf_t = int (*) (char *const Buffer, const char *const Format, ...);
@@ -4683,11 +5065,14 @@ namespace iw4x
   using  Com_InitParse_t = __int64 (*) (void);
   inline Com_InitParse_t Com_InitParse = reinterpret_cast<Com_InitParse_t> (0x14028CEA0);
 
-  using  Dvar_Init_t = unsigned __int8 * (*) (void);
-  inline Dvar_Init_t Dvar_Init = reinterpret_cast<Dvar_Init_t> (0x140287520);
-
   using  InitTiming_t = void (*) (void);
   inline InitTiming_t InitTiming = reinterpret_cast<InitTiming_t> (0x140290330);
+
+  using  Sys_ShowConsole_t = void (*) ();
+  inline Sys_ShowConsole_t Sys_ShowConsole = reinterpret_cast<Sys_ShowConsole_t> (0x1402AB600);
+
+  using  Conbuf_AppendText_t = void (*) (const char*);
+  inline Conbuf_AppendText_t Conbuf_AppendText = reinterpret_cast<Conbuf_AppendText_t> (0x1402AAE00);
 
   using  Sys_GetCpuCount_t = __int64 (*) (void);
   inline Sys_GetCpuCount_t Sys_GetCpuCount = reinterpret_cast<Sys_GetCpuCount_t> (0x14020DB90);
@@ -4695,8 +5080,8 @@ namespace iw4x
   using  Sys_SystemMemoryMB_t = __int64 (*) (void);
   inline Sys_SystemMemoryMB_t Sys_SystemMemoryMB = reinterpret_cast<Sys_SystemMemoryMB_t> (0x1402A4BD0);
 
-  using  Sys_DetectVideoCard_t = IDirect3D9 * (*) (__int64, char *);
-  inline Sys_DetectVideoCard_t Sys_DetectVideoCard = reinterpret_cast<Sys_DetectVideoCard_t> (0x1402A4810);
+  // using  Sys_DetectVideoCard_t = IDirect3D9 * (*) (__int64, char *);
+  // inline Sys_DetectVideoCard_t Sys_DetectVideoCard = reinterpret_cast<Sys_DetectVideoCard_t> (0x1402A4810);
 
   using  Sys_SupportsSSE_t = bool (*) (void);
   inline Sys_SupportsSSE_t Sys_SupportsSSE = reinterpret_cast<Sys_SupportsSSE_t> (0x1402A4B90);
@@ -4707,25 +5092,25 @@ namespace iw4x
   using  Sys_SetAutoConfigureGHz_t = void (*) (__int64);
   inline Sys_SetAutoConfigureGHz_t Sys_SetAutoConfigureGHz = reinterpret_cast<Sys_SetAutoConfigureGHz_t> (0x1402A4A90);
 
-  using  Sys_RecordAccessibilityShortcutSettings_t = BOOL (*) (void);
+  using  Sys_RecordAccessibilityShortcutSettings_t = void (*) (void);
   inline Sys_RecordAccessibilityShortcutSettings_t Sys_RecordAccessibilityShortcutSettings = reinterpret_cast<Sys_RecordAccessibilityShortcutSettings_t> (0x1402AD020);
 
   using  Sys_AllowAccessibilityShortcutKeys_t = int (*) (char);
   inline Sys_AllowAccessibilityShortcutKeys_t Sys_AllowAccessibilityShortcutKeys = reinterpret_cast<Sys_AllowAccessibilityShortcutKeys_t> (0x1402ACF30);
 
-  using  I_strncpyz_t = char * (*) (char *, const char *, int);
+  using  I_strncpyz_t = void (*) (char *dest, const char *src, int destsize);
   inline I_strncpyz_t I_strncpyz = reinterpret_cast<I_strncpyz_t> (0x14028E500);
 
-  using  Sys_CreateSplashWindow_t = __int16 (*) (void);
+  using  Sys_CreateSplashWindow_t = void (*) (void);
   inline Sys_CreateSplashWindow_t Sys_CreateSplashWindow = reinterpret_cast<Sys_CreateSplashWindow_t> (0x1402AA510);
 
-  using  Sys_ShowSplashWindow_t = BOOL (*) (void);
+  using  Sys_ShowSplashWindow_t = void (*) (void);
   inline Sys_ShowSplashWindow_t Sys_ShowSplashWindow = reinterpret_cast<Sys_ShowSplashWindow_t> (0x1402AA7E0);
 
-  using  Com_Error_t = void (*) (int, const char *, __int64, __int64);
+  using  Com_Error_t = void (*) (errorParm_t code, const char *fmt, ...);
   inline Com_Error_t Com_Error = reinterpret_cast<Com_Error_t> (0x1401F8FD0);
 
-  using  Sys_Milliseconds_t = __int64 (*) (void);
+  using  Sys_Milliseconds_t = int (*) (void);
   inline Sys_Milliseconds_t Sys_Milliseconds = reinterpret_cast<Sys_Milliseconds_t> (0x1402AA460);
 
   using  Session_InitDvars_t = char * (*) (void);
@@ -4752,8 +5137,130 @@ namespace iw4x
   using  CL_ConnectFromParty_t = void (*) (int, void*, netadr_t, int, int, const char*, const char*);
   inline CL_ConnectFromParty_t CL_ConnectFromParty = reinterpret_cast<CL_ConnectFromParty_t> (0x1400F5220);
 
+  using  Material_RegisterHandle_t = Material * (*) (const char*);
+  inline Material_RegisterHandle_t Material_RegisterHandle = reinterpret_cast<Material_RegisterHandle_t> (0x140019470);
+
+  using  CL_RegisterFont_t = Font_s * (*) (const char*, int);
+  inline CL_RegisterFont_t CL_RegisterFont = reinterpret_cast<CL_RegisterFont_t> (0x1400F9D20);
+
+  using  ScrPlace_GetViewPlacement_t = ScreenPlacement * (*) ();
+  inline ScrPlace_GetViewPlacement_t ScrPlace_GetViewPlacement = reinterpret_cast<ScrPlace_GetViewPlacement_t> (0x1400EF3A0);
+
+  using ScrPlace_GetActivePlacement_t = ScreenPlacement * (*) (int localClientNum);
+  inline ScrPlace_GetActivePlacement_t ScrPlace_GetActivePlacement = reinterpret_cast<ScrPlace_GetActivePlacement_t> (0x1400EF370);
+
+  using  R_AddCmdDrawStretchPic_t = void (*) (float x, float y, float width, float height, float s0, float t0, float s1, float t1, float* color, Material* material);
+  inline R_AddCmdDrawStretchPic_t R_AddCmdDrawStretchPic = reinterpret_cast<R_AddCmdDrawStretchPic_t> (0x14001ACE0);
+
+  using  Con_OneTimeInit_t = void (*) ();
+  inline Con_OneTimeInit_t Con_OneTimeInit = reinterpret_cast<Con_OneTimeInit_t> (0x1400E9960);
+
+  using  Con_CheckResize_t = void (*) ();
+  inline Con_CheckResize_t Con_CheckResize = reinterpret_cast<Con_CheckResize_t> (0x1400E9450);
+
+  using Con_DrawSay_t = void (*) (int localClientNum, int x, int y);
+  inline Con_DrawSay_t Con_DrawSay = reinterpret_cast<Con_DrawSay_t> (0x1400E91B0);
+
+  using  ScrPlace_ApplyX_t = float* (*) (const ScreenPlacement*, float, int);
+  inline ScrPlace_ApplyX_t ScrPlace_ApplyX = reinterpret_cast<ScrPlace_ApplyX_t> (0x1400EEF90);
+
+  using  ScrPlace_ApplyY_t = float* (*) (const ScreenPlacement*, float, int);
+  inline ScrPlace_ApplyY_t ScrPlace_ApplyY = reinterpret_cast<ScrPlace_ApplyY_t> (0X1400EF080);
+
+  using  ScrPlace_GetFullPlacement_t = ScreenPlacement * (*) ();
+  inline ScrPlace_GetFullPlacement_t ScrPlace_GetFullPlacement = reinterpret_cast<ScrPlace_GetFullPlacement_t> (0x1400EF3A0);
+
+  using ScrPlace_SetupClientViewports_t = double (*) (__int64, int, int, int);
+  inline ScrPlace_SetupClientViewports_t ScrPlace_SetupClientViewports = reinterpret_cast<ScrPlace_SetupClientViewports_t> (0x1400EF4C0);
+
+  using ScrPlace_SetupFullscreenViewports_t = double (*) (void);
+  inline ScrPlace_SetupFullscreenViewports_t ScrPlace_SetupFullscreenViewports = reinterpret_cast<ScrPlace_SetupFullscreenViewports_t> (0x1400EF710);
+
+  using ScrPlace_ApplyRect_t = void (*) (const ScreenPlacement *scrPlace, float *x, float *y, float *w, float *h, int horzAlign, int vertAlign);
+  inline ScrPlace_ApplyRect_t ScrPlace_ApplyRect = reinterpret_cast<ScrPlace_ApplyRect_t> (0x1400EEB90);
+
+  using ScrPlace_EndFrame_t = void (*) (void);
+  inline ScrPlace_EndFrame_t ScrPlace_EndFrame = reinterpret_cast<ScrPlace_EndFrame_t> (0x1400EF360);
+
+  using CL_InitRenderer_t = void (*) (void);
+  inline CL_InitRenderer_t CL_InitRenderer = reinterpret_cast<CL_InitRenderer_t> (0x1400F8740);
+
+  using CL_DrawText_t = void (*) (const ScreenPlacement *scrPlace, const char *text, unsigned int maxChars, Font_s *font, float x, float y, int horzAlign, int vertAlign, float xScale, float yScale, const vec4_t *color, int style);
+  inline CL_DrawText_t CL_DrawText = reinterpret_cast<CL_DrawText_t> (0x1400F6FA0);
+
+  using CL_KeyEvent_t = void (*) (int localClientNum, int key, int down, unsigned int time);
+  inline CL_KeyEvent_t CL_KeyEvent = reinterpret_cast<CL_KeyEvent_t> (0x1400EAA80);
+
+  using R_EndFrame_t = void (*) (void);
+  inline R_EndFrame_t R_EndFrame = reinterpret_cast<R_EndFrame_t> (0x14001C400);
+
+  using R_IssueRenderCommands_t = void (*) (unsigned int type);
+  inline R_IssueRenderCommands_t R_IssueRenderCommands = reinterpret_cast<R_IssueRenderCommands_t> (0x14001A480);
+
+  using R_CheckLostDevice_t = bool (*) (void);
+  inline R_CheckLostDevice_t R_CheckLostDevice = reinterpret_cast<R_CheckLostDevice_t> (0x140032500);
+
+  using R_TextHeight_t = int (*) (Font_s *font);
+  inline R_TextHeight_t R_TextHeight = reinterpret_cast<R_TextHeight_t> (0x1400199C0);
+
+  using R_NormalizedTextScale_t = float (*) (Font_s *font, float scale);
+  inline R_NormalizedTextScale_t R_NormalizedTextScale = reinterpret_cast<R_NormalizedTextScale_t> (0x140019850);
+
+  using R_AddCmdDrawTextInternal_t = void (*) (const char *text, int maxChars, Font_s *font, float x, float y, float xScale, float yScale, float rotation, const vec4_t *color, int style);
+  inline R_AddCmdDrawTextInternal_t R_AddCmdDrawTextInternal = reinterpret_cast<R_AddCmdDrawTextInternal_t> (0x14001B260);
+
+  using Key_IsCatcherActive_t = bool (*) (int localClientNum, int mask);
+  inline Key_IsCatcherActive_t Key_IsCatcherActive = reinterpret_cast<Key_IsCatcherActive_t> (0x1400EB9F0);
+
+  using I_strncat_t = void (*) (char *dest, int size, const char *src);
+  inline I_strncat_t I_strncat = reinterpret_cast<I_strncat_t> (0x14028E430);
+
+  using Field_Clear_t = void (*) (field_t *edit);
+  inline Field_Clear_t Field_Clear = reinterpret_cast<Field_Clear_t> (0x1401FC2B0);
+
+  using Field_Draw_t = void (*) (int localClientNum, field_t *edit, int x, int y, int horzAlign, int vertAlign);
+  inline Field_Draw_t Field_Draw = reinterpret_cast<Field_Draw_t> (0x1400EB160);
+
+  using Cmd_AddCommandInternal_t = void (*) (const char *cmdName, void (__fastcall *function)(), cmd_function_s *allocedCmd);
+  inline Cmd_AddCommandInternal_t Cmd_AddCommandInternal = reinterpret_cast<Cmd_AddCommandInternal_t> (0x1401EC990);
+
+  using Com_InitHunkMemory_t = void (*) (void);
+  inline Com_InitHunkMemory_t Com_InitHunkMemory = reinterpret_cast<Com_InitHunkMemory_t> (0x140281400);
+
+  using Com_GetBuildString_t = char * (*) (void);
+  inline Com_GetBuildString_t Com_GetBuildString = reinterpret_cast<Com_GetBuildString_t> (0x1401EC3F0);
+
+  using va_t = char * (*) (const char *format, ...);
+  inline va_t va = reinterpret_cast<va_t> (0x14028F360);
+
+  using UI_DrawBuildNumber_t = void (*) (unsigned int localClientNum);
+  inline UI_DrawBuildNumber_t UI_DrawBuildNumber = reinterpret_cast<UI_DrawBuildNumber_t> (0x140272D80);
+
   // Game Internal variables
   //
+  constexpr uint32_t KEYCATCH_CONSOLE (1);
+
   inline SOCKET* ip_socket (reinterpret_cast<SOCKET*> (0x1467E8490));
   inline SOCKET* lsp_socket (reinterpret_cast<SOCKET*> (0x1467E8498));
+
+  inline int* s_hunkTotal (reinterpret_cast<int*> (0x1466BC560));
+  inline void* s_hunkData (reinterpret_cast<void*> (0x1466AC838));
+
+  inline WinConData* s_wcd (reinterpret_cast<WinConData*> (0x146808800));
+  inline sharedUiInfo_t* sharedUiInfo (reinterpret_cast<sharedUiInfo_t*> (0x146627790));
+  inline ScreenPlacement* scrPlaceFull (reinterpret_cast<ScreenPlacement*> (0x140714860));
+
+  inline char** com_consoleLines (reinterpret_cast<char**> (0x141C35D90));
+  inline int* com_numConsoleLines (reinterpret_cast<int*> (0x141C35D84));
+
+  inline int* con_fontHeight (reinterpret_cast<int*> (0x14070B1B8));
+  inline int* con_visibleLineCount (reinterpret_cast<int*> (0x14070B1BC));
+  inline int* con_visiblePixelWidth (reinterpret_cast<int*> (0x14070B1C0));
+
+  inline int* s_totalChars (reinterpret_cast<int*> (0x146808E38));
+  inline int* g_console_field_width (reinterpret_cast<int*> (0x140463D50));
+
+  inline ScreenPlacementMode* activeScreenPlacementMode (reinterpret_cast<ScreenPlacementMode*> (0x14071493C));
+
+  inline int* keyCatchers (reinterpret_cast<int*> (0x140719AF0));
 }

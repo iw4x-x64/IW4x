@@ -1,0 +1,23 @@
+{
+  "C_Cpp.errorSquiggles": "enabled",
+  "files.associations": {
+    "*.build": "shellscript",
+    "buildfile": "shellscript",
+    "testscript": "shellscript",
+    "*.manifest": "shellscript",
+    "manifest": "shellscript",
+    "*.c": "cpp",
+    "*.wsb": "xml",
+    "*.idc": "cpp",
+    "*.menu": "gsc",
+    "*.str": "gsc",
+    "*.inc": "cpp",
+    "buildfile-asm": "shellscript",
+    "vector": "cpp",
+    "charconv": "cpp",
+    "ios": "cpp",
+    "istream": "cpp",
+    "xstring": "cpp",
+    "array": "cpp"
+  }
+}

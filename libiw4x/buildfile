@@ -52,6 +52,7 @@ objs{*}: cxx.poptions += -DLIBIW4X_SHARED_BUILD
 
 # Export options.
 #
+lib{iw4x}: bin.lib.prefix = "lib"
 lib{iw4x}:
 {
   cxx.export.poptions = "-I$out_root" "-I$src_root"

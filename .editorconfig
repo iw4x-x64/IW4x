@@ -1,0 +1,60 @@
+# https://editorconfig.org
+#
+# EditorConfig does not officially support global configuration. Still, it will
+# searches upward through the directory tree from the current file's location
+# until it finds a file with root = true (if any). From that point, it applies
+# settings downward through the directory structure.
+#
+# For more context, see the discussion at:
+# https://github.com/editorconfig/editorconfig/issues/465
+
+root = true
+
+[*]
+charset = utf-8
+indent_size = 2
+indent_style = space
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Markdown
+#
+# A paragraph in Markdown consists of one or more consecutive lines of text,
+# separated by one or more blank lines. A blank line is any line that is empty
+# or contains only spaces or tabs.
+#
+# Paragraphs should not begin with spaces or tabs for indentation. Leading
+# whitespace may cause the paragraph to be interpreted as a code block.
+#
+# Markdown allows "hard-wrapped" paragraphs, that is, line breaks within a
+# paragraph do not create <br /> tags by default. This differs from some systems
+# (like Movable Type's “Convert Line Breaks” option), which treat every line
+# break as a hard line break in HTML.
+#
+# To force a line break (<br />) within a paragraph, end the line with two or
+# more spaces followed by a return. Be aware that editor may strip trailing
+# spaces, so we need to make sure it preserves them if we rely on this feature.
+#
+[*.{[Mm][Dd],[Mm][Kk][Dd],[Mm][Dd][Oo][Ww][Nn],[Mm][Kk][Dd][Oo][Ww][Nn],[Mm][Aa][Rr][Kk][Dd][Oo][Ww][Nn]}]
+trim_trailing_whitespace = false
+
+# Batch
+#
+# When using Unix-style line endings (\n), the Batch file label parser may
+# incorrectly skip some labels due to an off-by-one error. This happens because
+# the parser reads input in 512-byte chunks and mistakenly assumes that line
+# endings are two characters (\r\n) rather than one (\n).
+#
+# If a label is skipped because of this, the parser will not skip again until it
+# reaches the next 512-byte boundary. To work around the issue, you can
+# duplicate the label on the following line. As long as the duplicate remains
+# within the 512-byte chunk, it will serve as a fallback and be recognized
+# correctly.
+#
+# Note that the parser also treats the boundary between 512-byte chunks as a new
+# line, which can cause additional misinterpretation. It may ignore whitespace
+# between a colon and the label text on these lines. For example, a comment like
+# :: main section could be misread as the label :main.
+#
+[*.{[Bb][Aa][Tt],[Cc][Mm][Dd]}]
+end_of_line = crlf

@@ -19,6 +19,7 @@ extern "C"
 #include <libiw4x/frame/init.hxx>
 #include <libiw4x/imgui/init.hxx>
 #include <libiw4x/menu/init.hxx>
+#include <libiw4x/console/init.hxx>
 #include <libiw4x/network/init.hxx>
 #include <libiw4x/oob/init.hxx>
 #include <libiw4x/renderer/init.hxx>
@@ -33,10 +34,10 @@ namespace iw4x
 {
   namespace
   {
-    class console
+    class console_window
     {
     public:
-      console ()
+      console_window ()
       {
         // The subtlety here is that Windows has many ways to end up with stdout
         // and stderr pointing *somewhere* (sometimes to an actual console,
@@ -134,7 +135,7 @@ namespace iw4x
 
       // Restore original standard handles and detach from console.
       //
-      ~console ()
+      ~console_window ()
       {
         // Restore original standard handles if they were saved.
         //
@@ -360,7 +361,7 @@ namespace iw4x
         // console by default. Attach to an existing one when available so that
         // diagnostic output become visible in interactive use.
         //
-        console cs;
+        console_window cs;
 
         // Setup cpptrace to generate stack trace from terminate handler.
         //
@@ -485,6 +486,7 @@ namespace iw4x
         scheduler s;
         frame::init (s);
         menu::init (s);
+        console::init (s);
         renderer::init ();
         imgui::init ();
         network::init (s);

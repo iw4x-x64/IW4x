@@ -1,0 +1,24 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "defines": [
+                "_DEBUG",
+                "LIBIW4X_DEVELOP",
+                "LIBIW4X_CPPTRACE",
+                "LIBIW4X_STATIC_BUILD",
+                "LIBIW4X_SHARED_BUILD"
+            ],
+            "windowsSdkVersion": "10.0.26100.0",
+            "compilerPath": "cl.exe",
+            "cStandard": "c17",
+            "cppStandard": "c++23",
+            "intelliSenseMode": "windows-msvc-x64",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/../iw4x-msvc-debug/*/**"
+            ]
+        }
+    ],
+    "version": 4
+}

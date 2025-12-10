@@ -13,6 +13,6 @@ location: https://github.com/wroyca/cpptrace.git#main
 role: prerequisite
 location: https://github.com/wroyca/imgui.git#main
 
-:
-role: prerequisite
-location: https://github.com/build2-packaging/nasm.git#main
+# :
+# role: prerequisite
+# location: https://github.com/build2-packaging/nasm.git#main
