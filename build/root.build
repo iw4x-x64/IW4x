@@ -5,11 +5,16 @@ cxx.internal.scope = current
 cxx.std = latest
 
 using cxx
+using cli
 
 hxx{*}: extension = hxx
 ixx{*}: extension = ixx
 txx{*}: extension = txx
 cxx{*}: extension = cxx
+
+# Module-definition.
+#
+def{*}: extension = def
 
 if ($cxx.target.system == 'win32-msvc')
 {
@@ -26,10 +31,6 @@ if ($cxx.target.system == 'win32-msvc')
   #
   cxx.poptions += -DWINVER=0x0A00 -D_WIN32_WINNT=0x0A00
 }
-
-# Module-definition.
-#
-def{*}: extension = def
 
 # The test target for cross-testing (running tests under Wine, etc).
 #

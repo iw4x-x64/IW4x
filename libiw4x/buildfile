@@ -1,3 +1,4 @@
+import! cli = cli%exe{cli}
 import! nasm = nasm%exe{nasm}
 
 intf_libs = # Interface dependencies.
@@ -9,12 +10,17 @@ import  intf_libs += libboost-asio%lib{boost_asio}
 import  intf_libs += libboost-dll%lib{boost_dll}
 import  intf_libs += libimgui%lib{imgui}
 
-lib{iw4x}: {hxx ixx txx cxx}{** -version} \
-           {hxx            }{    version} \
-           {def            }{**         } \
+lib{iw4x}: {hxx ixx txx cxx}{** -version -iw4x-options} \
+           {hxx            }{    version              } \
+           {def            }{**                       } \
+           {cli.cxx        }{             iw4x-options} \
            $impl_libs $intf_libs
 
 hxx{version}: in{version} $src_root/manifest
+
+cli.cxx{iw4x-options}: cli{iw4x}
+
+cli.options = --cli-namespace iw4x::cli
 
 # There is no built-in rule to synthesize the lib{s,a} -> obj{s,a} -> asm{}
 # dependencies so we have to do it manually.

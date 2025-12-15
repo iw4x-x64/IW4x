@@ -1,0 +1,17 @@
+include <cstdint>; // std::uint64_t
+
+namespace iw4x
+{
+  class options
+  {
+    bool --help
+    {
+      "Print usage information and exit."
+    };
+
+    bool --version
+    {
+      "Print version and exit."
+    };
+  };
+}

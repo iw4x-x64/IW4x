@@ -23,6 +23,9 @@ extern "C"
 #include <libiw4x/oob/init.hxx>
 #include <libiw4x/renderer/init.hxx>
 
+#include <libiw4x/version.hxx>
+#include <libiw4x/iw4x-options.hxx>
+
 using namespace std;
 using namespace std::filesystem;
 using namespace boost::dll;
@@ -385,6 +388,40 @@ namespace iw4x
         {
           cerr << "error: unable to retrieve module information";
           exit (1);
+        }
+
+        // Parse the command line arguments.
+        //
+        // Note that when running in a context without an active output stream,
+        // any attempts to write to 'cout' through our handlers will have no
+        // effect.
+        //
+        // Note also that in cases where a handler is intended to terminate the
+        // program after printing (e.g., --help or --version), it will still
+        // exit as intended. That is, no special handling is performed for the
+        // absence of an active stream.
+        //
+        options opt (__argc, __argv);
+
+        // Handle --version.
+        //
+        if (opt.version ())
+        {
+          cout << "IW4x " << LIBIW4X_VERSION_ID << "\n";
+
+          exit (0);
+        }
+
+        // Handle --help.
+        //
+        if (opt.help ())
+        {
+          cout << "usage: iw4x [options] <names>" << "\n"
+               << "options:"                      << "\n";
+
+          opt.print_usage (cout);
+
+          exit (0);
         }
 
         // Patch runtime checks and service initialization.
