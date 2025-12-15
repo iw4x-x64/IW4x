@@ -1,9 +1,10 @@
 #pragma once
 
-#include <libiw4x/windows/windows.hxx>
-
-#include <libiw4x/types.hxx>
 #include <libiw4x/detour.hxx>
+#include <libiw4x/types.hxx>
+#include <libiw4x/utility.hxx>
+
+#include <libiw4x/windows/windows.hxx>
 
 #include <libiw4x/export.hxx>
 

@@ -1,12 +1,9 @@
 #pragma once
 
 #include <array>
-#include <cassert>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
-#include <ios>
-#include <iostream>
 #include <memory>
 #include <mutex>
 #include <span>
@@ -14,15 +11,13 @@
 #include <stdexcept>
 #include <string>
 #include <system_error>
-#include <type_traits>
 #include <unordered_map>
-#include <utility>
 #include <vector>
 
 namespace iw4x
 {
-  using std::byte;
   using std::size_t;
+  using std::nullptr_t;
 
   using std::int8_t;
   using std::int16_t;
@@ -40,13 +35,8 @@ namespace iw4x
   using std::uintmax_t;
   using std::uintptr_t;
 
-  using std::ios;
-  using std::cerr;
-  using std::cout;
-  using std::endl;
-
-  using std::string;
   using std::ostringstream;
+  using std::string;
 
   using std::array;
   using std::span;
@@ -54,21 +44,14 @@ namespace iw4x
   using std::vector;
 
   using std::function;
-  using std::forward;
 
   using std::unique_ptr;
-  using std::make_unique;
 
   using std::mutex;
-  using std::scoped_lock;
   using std::once_flag;
-  using std::call_once;
+  using std::scoped_lock;
 
-  using std::invalid_argument;
-  using std::runtime_error;
-  using std::system_category;
   using std::system_error;
-
-  using std::is_function_v;
-  using std::remove_pointer_t;
+  using std::runtime_error;
+  using std::invalid_argument;
 }
