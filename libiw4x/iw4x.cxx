@@ -131,27 +131,10 @@ namespace iw4x
           return str.find (substr) != string::npos;
         });
 
-        // Filter out known runtime and system frames that are unhelpful in
+        // Filter out runtime and system frames that are unhelpful in
         // stack traces.
         //
-        return (contains (s, "terminate_handler")                ||
-                contains (s, "__terminate")                      ||
-                contains (s, "std::terminate")                   ||
-                contains (s, "__cxa_rethrow")                    ||
-                contains (s, "__tmainCRTStartup")                ||
-                contains (s, "WinMainCRTStartup")                ||
-                contains (s, "BaseThreadInitThunk")              ||
-                contains (s, "dispatch_exception")               ||
-                contains (s, "call_seh_handlers")                ||
-                contains (s, "call_unhandled_exception_handler") ||
-                contains (s, "call_unhandled_exception_filter")  ||
-                contains (s, "UnhandledExceptionFilter")         ||
-                contains (s, "boost::asio::detail")              ||
-                contains (s, "boost::asio::io_context")          ||
-                contains (n, "ntdll.dll")                        ||
-                contains (n, "kernelbase")                       ||
-                contains (n, "mingw/include")                    ||
-                contains (n, "libboost-asio"))                   == false;
+        return (contains (n, "iw4x") || contains (n, "iw4mp"));
       });
 
       // Register cpptrace terminate handler.
