@@ -1,6 +1,5 @@
 #include <libiw4x/scheduler.hxx>
 
-using namespace std;
 using namespace boost::asio;
 
 namespace iw4x
@@ -9,10 +8,14 @@ namespace iw4x
     : context (make_unique<io_context> ()),
       strands ()
   {
+    // Intentionally left empty by design
+    //
   }
 
   scheduler::~scheduler ()
   {
+    // Intentionally left empty by design
+    //
   }
 
   bool

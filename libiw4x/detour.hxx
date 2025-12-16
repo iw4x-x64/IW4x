@@ -1,5 +1,6 @@
 #pragma once
 
+#include <libiw4x/iw4x.hxx>
 #include <libiw4x/export.hxx>
 
 namespace iw4x

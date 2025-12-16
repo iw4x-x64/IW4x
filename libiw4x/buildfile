@@ -6,7 +6,6 @@ impl_libs = # Implementation dependencies.
 import? intf_libs += libcpptrace%lib{cpptrace}
 import  intf_libs += libzydis%lib{zydis}
 import  intf_libs += libboost-asio%lib{boost_asio}
-import  intf_libs += libboost-dll%lib{boost_dll}
 import  intf_libs += libimgui%lib{imgui}
 
 options = iw4x-options

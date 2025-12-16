@@ -1,20 +1,9 @@
 #include <libiw4x/iw4x.hxx>
 
-#include <array>
-#include <filesystem>
-#include <iostream>
-
-extern "C"
-{
-  #include <io.h>
-}
-
 #if LIBIW4X_CPPTRACE
 #  include <cpptrace/cpptrace.hpp>
 #  include <cpptrace/formatting.hpp>
 #endif
-
-#include <boost/dll/shared_library.hpp>
 
 #include <libiw4x/frame/init.hxx>
 #include <libiw4x/imgui/init.hxx>
@@ -25,10 +14,6 @@ extern "C"
 
 #include <libiw4x/version.hxx>
 #include <libiw4x/iw4x-options.hxx>
-
-using namespace std;
-using namespace std::filesystem;
-using namespace boost::dll;
 
 namespace iw4x
 {
@@ -125,10 +110,8 @@ namespace iw4x
       //
       const_cast<formatter&> (get_default_formatter ())
         .addresses (address_mode::object)
-        // Note that color may not survive terminal line wrapping, since the
-        // terminal handles the wrap itself. Also, the automatic mode tends to
-        // misbehave under Wine, presumably because the console detection does
-        // not recognize the attached terminal.
+        // Automatic mode misbehave under Wine, presumably because the console
+        // detection does not recognize the attached terminal.
         //
         .colors (colors_mode::always)
         .snippets (true)
@@ -180,8 +163,8 @@ namespace iw4x
       //
       SetUnhandledExceptionFilter ([] (EXCEPTION_POINTERS* ep) -> LONG
       {
-        cerr << "unhandled Windows exception at 0x" << hex
-             << ep->ExceptionRecord->ExceptionAddress << dec << endl;
+        cerr << "unhandled Windows exception at 0x"
+             << hex << ep->ExceptionRecord->ExceptionAddress << dec << endl;
 
         generate_trace (1);
 
@@ -222,27 +205,20 @@ namespace iw4x
         setup_cpptrace ();
 #endif
 
-        HMODULE m (nullptr);
-
         // Under normal circumstances, a DLL is unloaded via FreeLibrary once
         // its reference count reaches zero. This is acceptable for auxiliary
         // libraries but unsuitable for modules like ours, which embed deeply
         // into the host process.
         //
-        auto
-        pin ([&m] (void* fp, const string& name)
+        HMODULE m (nullptr);
+        if (!GetModuleHandleEx (GET_MODULE_HANDLE_EX_FLAG_PIN |
+                                  GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS,
+                                reinterpret_cast<LPCTSTR> (DllMain),
+                                &m))
         {
-          if (!GetModuleHandleEx (GET_MODULE_HANDLE_EX_FLAG_PIN |
-                                    GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS,
-                                  reinterpret_cast<LPCTSTR> (fp),
-                                  &m))
-          {
-            cerr << "error: unable to mark '" << name << "' as permanent";
-            exit (1);
-          }
-        });
-
-        pin (reinterpret_cast<void*> (DllMain), "module"), assert (m);
+          cerr << "error: unable to mark module as permanent";
+          exit (1);
+        }
 
         // By default, the process inherits its working directory from whatever
         // environment or launcher invoked it, which may vary across setups and
@@ -371,73 +347,13 @@ namespace iw4x
           });
 
         scheduler s;
-        frame::init (s);
-        menu::init (s);
-        renderer::init ();
-        imgui::init ();
-        network::init (s);
-        oob::init ();
 
-        // Load external modules discovered under the `module` directory.
-        //
-        // We treat this directory as an optional extension point: any DLL
-        // matching `libiw4x-*.dll` naming pattern is considered a candidate
-        // module.
-        //
-        if (path p ("module"); exists (p) && is_directory (p))
-        {
-          for (const auto& e : directory_iterator (p))
-          {
-            // Ignore non-regular entries (directories, symlinks, etc.).
-            //
-            if (!e.is_regular_file ())
-              continue;
-
-            auto m (e.path ());
-            auto n (m.filename ().string ());
-
-            // Only consider DLLs matching `libiw4x-*.dll` naming pattern
-            //
-            if (n.size () < 13 ||
-                n.substr (0, 8) != "libiw4x-" ||
-                n.substr (n.size () - 4) != ".dll")
-              continue;
-
-            try
-            {
-              shared_library lib (m.string (),
-                                  load_mode::rtld_now |
-                                    load_mode::rtld_global);
-
-              // Resolve the module's canonical entry point, if present.
-              //
-              if (string s ("init"); lib.has (s))
-              {
-                // At this point we would normally just invoke the function
-                // returned by `lib.get()`, but in our case we also need to pin
-                // the module to the application lifetime.
-                //
-                void (*fp) () (lib.get<void ()> (s)); fp ();
-
-                // Mark the module as permanent. See `pin()` for the rationale.
-                //
-                pin (reinterpret_cast<void*> (fp), n);
-              }
-            }
-            catch (...)
-            {
-              // Consider failure non-fatal. A single misbehaving DLL should not
-              // compromise startup. The intent is to maintain a best-effort
-              // module environment rather than enforce an all-or-nothing
-              // policy.
-              //
-              // In IW4x this is sufficient: the core provides all required
-              // functionality, and external modules are strictly optional.
-              //
-              cout << "warn: unable to load module '" << n << "'" << endl;
-            }
-          }
-        }
+        frame    ::init (s);
+        menu     ::init (s);
+        renderer ::init ();
+        imgui    ::init ();
+        network  ::init (s);
+        oob      ::init ();
 
         // __scrt_common_main_seh
         //

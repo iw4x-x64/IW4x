@@ -1,13 +1,9 @@
 #pragma once
 
-#include <memory>
-#include <string>
-#include <unordered_map>
-#include <utility>
-
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/strand.hpp>
 
+#include <libiw4x/iw4x.hxx>
 #include <libiw4x/export.hxx>
 
 namespace iw4x
@@ -17,9 +13,8 @@ namespace iw4x
   class LIBIW4X_SYMEXPORT scheduler
   {
   public:
-    using strand_type = boost::asio::strand <
-      boost::asio::io_context::executor_type
-    >;
+    using strand_type =
+      boost::asio::strand<boost::asio::io_context::executor_type>;
 
     scheduler ();
     ~scheduler ();
@@ -32,28 +27,28 @@ namespace iw4x
     // Return false if the name already exists.
     //
     bool
-    create (const std::string& name);
+    create (const string& name);
 
     // Destroy a named strand.
     //
     // Return false if the name does not exist.
     //
     bool
-    destroy (const std::string& name);
+    destroy (const string& name);
 
     // Post work to a named strand.
     //
     // Return false if the strand does not exist.
     //
     template <typename F> bool
-    post (const std::string& name, F&& work)
+    post (const string& name, F&& work)
     {
       strand_type* s (find (name));
 
       if (s == nullptr)
         return false;
 
-      boost::asio::post (*s, std::forward<F> (work));
+      boost::asio::post (*s, forward<F> (work));
       return true;
     }
 
@@ -63,21 +58,21 @@ namespace iw4x
     // Otherwise, poll the entire io_context.
     //
     void
-    poll (const std::string& name);
+    poll (const string& name);
 
     // Check if a named strand exists.
     //
     bool
-    exists (const std::string& name) const;
+    exists (const string& name) const;
 
   private:
-    std::unique_ptr<boost::asio::io_context> context;
-    std::unordered_map<std::string, strand_type> strands;
+    unique_ptr<boost::asio::io_context> context;
+    unordered_map<string, strand_type> strands;
 
     strand_type*
-    find (const std::string& name);
+    find (const string& name);
 
     const strand_type*
-    find (const std::string& name) const;
+    find (const string& name) const;
   };
 }

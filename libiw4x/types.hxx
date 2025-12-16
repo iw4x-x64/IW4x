@@ -3,6 +3,7 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <filesystem>
 #include <functional>
 #include <memory>
 #include <mutex>
@@ -16,8 +17,8 @@
 
 namespace iw4x
 {
-  using std::size_t;
   using std::nullptr_t;
+  using std::size_t;
 
   using std::int8_t;
   using std::int16_t;
@@ -35,6 +36,7 @@ namespace iw4x
   using std::uintmax_t;
   using std::uintptr_t;
 
+  using std::istringstream;
   using std::ostringstream;
   using std::string;
 
@@ -51,7 +53,11 @@ namespace iw4x
   using std::once_flag;
   using std::scoped_lock;
 
-  using std::system_error;
-  using std::runtime_error;
   using std::invalid_argument;
+  using std::out_of_range;
+  using std::runtime_error;
+  using std::system_error;
+
+  using std::filesystem::path;
+  using std::filesystem::directory_iterator;
 }

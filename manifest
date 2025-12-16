@@ -10,7 +10,6 @@ depends: * cli >= 1.2.0
 depends: * nasm >= 2.16.3
 
 depends: libboost-asio >= 1.87.0
-depends: libboost-dll >= 1.87.0
 depends: libcpptrace ? ($config.libiw4x.cpptrace)
 depends: libzydis >= 4.1.0
 depends:

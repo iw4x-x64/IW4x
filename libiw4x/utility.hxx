@@ -8,13 +8,24 @@
 #include <mutex>
 #include <system_error>
 #include <type_traits>
+#include <utility>
+
+extern "C"
+{
+  #include <io.h>
+}
 
 namespace iw4x
 {
   using std::cerr;
   using std::cout;
   using std::endl;
+
   using std::ios;
+  using std::hex;
+  using std::dec;
+
+  using std::in_range;
 
   using std::forward;
 

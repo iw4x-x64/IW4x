@@ -1,15 +1,6 @@
 #include <libiw4x/detour.hxx>
 
-#include <cstddef>
-#include <cstdint>
-#include <stdexcept>
-#include <utility>
-
 #include <Zydis/Zydis.h>
-
-#include <libiw4x/utility-win32.hxx>
-
-using namespace std;
 
 namespace iw4x
 {

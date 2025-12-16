@@ -1,9 +1,6 @@
 #pragma once
 
-#include <libiw4x/types.hxx>
-#include <libiw4x/utility.hxx>
-#include <libiw4x/utility-win32.hxx>
-
+#include <libiw4x/iw4x.hxx>
 #include <libiw4x/detour.hxx>
 #include <libiw4x/scheduler.hxx>
 
