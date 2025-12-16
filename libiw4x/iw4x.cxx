@@ -390,6 +390,28 @@ namespace iw4x
                           &o) != 0)
       {
         memmove (reinterpret_cast<void*> (target), seq.data (), seq.size ());
+
+        // Flushes the instruction cache.
+        //
+        // Note that on x86 and x86-64 architectures, flushing the
+        // instruction cache is generally unnecessary provided that
+        // both code modification and execution occur via the same
+        // linear address. In practice, it's recommended to always
+        // invoke FlushInstructionCache and allow the operating system
+        // to determine whether any action is required.
+        //
+        // Moreover, according to Microsoft documentation, failing to
+        // call FlushInstructionCache after modifying a region of
+        // memory that will become executable is considered "undefined
+        // behavior".
+        //
+        // For reference, see Intel(R) 64 and IA-32 Architectures
+        // Software Developer's Manual, Volume 3A: System Programming
+        // Guide, Part 1, Section 11.6: "Self-Modifying Code".
+        //
+        FlushInstructionCache (GetCurrentProcess (),
+                               reinterpret_cast<const void*> (target),
+                               seq.size ());
       }
       else
         return FALSE;
