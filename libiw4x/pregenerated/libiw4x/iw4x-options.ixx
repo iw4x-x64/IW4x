@@ -292,6 +292,24 @@ namespace iw4x
   {
     return this->version_;
   }
+
+  inline const bool& options::
+  cpptrace_no_colors () const
+  {
+    return this->cpptrace_no_colors_;
+  }
+
+  inline const bool& options::
+  cpptrace_no_snippets () const
+  {
+    return this->cpptrace_no_snippets_;
+  }
+
+  inline const bool& options::
+  cpptrace_no_filter () const
+  {
+    return this->cpptrace_no_filter_;
+  }
 }
 
 // Begin epilogue.

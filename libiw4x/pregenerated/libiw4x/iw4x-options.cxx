@@ -762,7 +762,10 @@ namespace iw4x
   options::
   options ()
   : help_ (),
-    version_ ()
+    version_ (),
+    cpptrace_no_colors_ (),
+    cpptrace_no_snippets_ (),
+    cpptrace_no_filter_ ()
   {
   }
 
@@ -773,7 +776,10 @@ namespace iw4x
            ::iw4x::cli::unknown_mode opt,
            ::iw4x::cli::unknown_mode arg)
   : help_ (),
-    version_ ()
+    version_ (),
+    cpptrace_no_colors_ (),
+    cpptrace_no_snippets_ (),
+    cpptrace_no_filter_ ()
   {
     ::iw4x::cli::argv_scanner s (argc, argv, erase);
     _parse (s, opt, arg);
@@ -787,7 +793,10 @@ namespace iw4x
            ::iw4x::cli::unknown_mode opt,
            ::iw4x::cli::unknown_mode arg)
   : help_ (),
-    version_ ()
+    version_ (),
+    cpptrace_no_colors_ (),
+    cpptrace_no_snippets_ (),
+    cpptrace_no_filter_ ()
   {
     ::iw4x::cli::argv_scanner s (start, argc, argv, erase);
     _parse (s, opt, arg);
@@ -801,7 +810,10 @@ namespace iw4x
            ::iw4x::cli::unknown_mode opt,
            ::iw4x::cli::unknown_mode arg)
   : help_ (),
-    version_ ()
+    version_ (),
+    cpptrace_no_colors_ (),
+    cpptrace_no_snippets_ (),
+    cpptrace_no_filter_ ()
   {
     ::iw4x::cli::argv_scanner s (argc, argv, erase);
     _parse (s, opt, arg);
@@ -817,7 +829,10 @@ namespace iw4x
            ::iw4x::cli::unknown_mode opt,
            ::iw4x::cli::unknown_mode arg)
   : help_ (),
-    version_ ()
+    version_ (),
+    cpptrace_no_colors_ (),
+    cpptrace_no_snippets_ (),
+    cpptrace_no_filter_ ()
   {
     ::iw4x::cli::argv_scanner s (start, argc, argv, erase);
     _parse (s, opt, arg);
@@ -829,7 +844,10 @@ namespace iw4x
            ::iw4x::cli::unknown_mode opt,
            ::iw4x::cli::unknown_mode arg)
   : help_ (),
-    version_ ()
+    version_ (),
+    cpptrace_no_colors_ (),
+    cpptrace_no_snippets_ (),
+    cpptrace_no_filter_ ()
   {
     _parse (s, opt, arg);
   }
@@ -842,9 +860,15 @@ namespace iw4x
     if (p == ::iw4x::cli::usage_para::text)
       os << ::std::endl;
 
-    os << "--help    Print usage information and exit." << ::std::endl;
+    os << "--help                 Print usage information and exit." << ::std::endl;
 
-    os << "--version Print version and exit." << ::std::endl;
+    os << "--version              Print version and exit." << ::std::endl;
+
+    os << "--cpptrace-no-colors   Disable colors in stack traces." << ::std::endl;
+
+    os << "--cpptrace-no-snippets Disable code snippets in stack traces." << ::std::endl;
+
+    os << "--cpptrace-no-filter   Disable filtering in stack trace." << ::std::endl;
 
     p = ::iw4x::cli::usage_para::option;
 
@@ -865,6 +889,12 @@ namespace iw4x
       &::iw4x::cli::thunk< options, &options::help_ >;
       _cli_options_map_["--version"] =
       &::iw4x::cli::thunk< options, &options::version_ >;
+      _cli_options_map_["--cpptrace-no-colors"] =
+      &::iw4x::cli::thunk< options, &options::cpptrace_no_colors_ >;
+      _cli_options_map_["--cpptrace-no-snippets"] =
+      &::iw4x::cli::thunk< options, &options::cpptrace_no_snippets_ >;
+      _cli_options_map_["--cpptrace-no-filter"] =
+      &::iw4x::cli::thunk< options, &options::cpptrace_no_filter_ >;
     }
   };
 

@@ -91,7 +91,7 @@ namespace iw4x
 
 #if LIBIW4X_CPPTRACE
     void
-    setup_cpptrace ()
+    setup_cpptrace (const options& opt)
     {
       using namespace cpptrace;
 
@@ -109,15 +109,23 @@ namespace iw4x
       // here since we're modifying a static object before any traces are
       // generated.
       //
-      const_cast<formatter&> (get_default_formatter ())
+      auto& fmt (const_cast<formatter&> (get_default_formatter ())
         .addresses (address_mode::object)
         // Automatic mode misbehave under Wine, presumably because the console
         // detection does not recognize the attached terminal.
         //
         .colors (colors_mode::always)
         .snippets (true)
-        .symbols (symbol_mode::pretty)
-        .filter ([] (const stacktrace_frame& frame)
+        .symbols (symbol_mode::pretty));
+
+      if (opt.cpptrace_no_colors ())
+        fmt.colors (colors_mode::none);
+
+      if (opt.cpptrace_no_snippets ())
+        fmt.snippets (false);
+
+      if (!opt.cpptrace_no_filter ())
+        fmt.filter ([] (const stacktrace_frame& frame)
       {
         const string& s (frame.symbol);
         const string& n (frame.filename);
@@ -183,10 +191,44 @@ namespace iw4x
         //
         attach_console ();
 
+        // Parse command line arguments.
+        //
+        // Note that when running in a context without an active output stream,
+        // any attempts to write to 'cout' through our handlers will have no
+        // effect.
+        //
+        // Note also that in cases where a handler is intended to terminate the
+        // program after printing (e.g., --help or --version), it will still
+        // exit as intended. That is, no special handling is performed for the
+        // absence of an active stream.
+        //
+        options opt (__argc, __argv);
+
+        // Handle --version.
+        //
+        if (opt.version ())
+        {
+          cout << "IW4x " << LIBIW4X_VERSION_ID << "\n";
+
+          exit (0);
+        }
+
+        // Handle --help.
+        //
+        if (opt.help ())
+        {
+          cout << "usage: iw4x [options] <names>" << "\n"
+               << "options:"                      << "\n";
+
+          opt.print_usage (cout);
+
+          exit (0);
+        }
+
         // Setup cpptrace to generate stack trace from terminate handler.
         //
 #if LIBIW4X_CPPTRACE
-        setup_cpptrace ();
+        setup_cpptrace (opt);
 #endif
 
         // Under normal circumstances, a DLL is unloaded via FreeLibrary once
@@ -257,44 +299,7 @@ namespace iw4x
           exit (1);
         }
 
-        // Parse the command line arguments.
-        //
-        // Note that when running in a context without an active output stream,
-        // any attempts to write to 'cout' through our handlers will have no
-        // effect.
-        //
-        // Note also that in cases where a handler is intended to terminate the
-        // program after printing (e.g., --help or --version), it will still
-        // exit as intended. That is, no special handling is performed for the
-        // absence of an active stream.
-        //
-        options opt (__argc, __argv);
-
-        // Handle --version.
-        //
-        if (opt.version ())
-        {
-          cout << "IW4x " << LIBIW4X_VERSION_ID << "\n";
-
-          exit (0);
-        }
-
-        // Handle --help.
-        //
-        if (opt.help ())
-        {
-          cout << "usage: iw4x [options] <names>" << "\n"
-               << "options:"                      << "\n";
-
-          opt.print_usage (cout);
-
-          exit (0);
-        }
-
-        // Patch runtime checks and service initialization.
-        //
-        // Removes references to Xbox Live and XGameRuntime and disables
-        // related handling paths.
+        // Patch Game Development Kit (GDK) runtime
         //
         ([] (void (*_) (uintptr_t, int, size_t))
           {
