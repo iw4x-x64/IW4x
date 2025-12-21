@@ -1,25 +1,45 @@
 #pragma once
 
-#include <array>
-#include <cstddef>
+// Language support library
+//
 #include <cstdint>
-#include <filesystem>
-#include <functional>
-#include <memory>
-#include <mutex>
-#include <span>
-#include <sstream>
-#include <stdexcept>
-#include <string>
+
+// Diagnostics library
+//
 #include <system_error>
+
+// Memory management library
+//
+#include <memory>
+
+// General utilities library
+//
+#include <functional>
+
+// Containers library
+//
+#include <array>
 #include <unordered_map>
 #include <vector>
 
+// Strings library
+//
+#include <string>
+
+// Input/output library
+//
+#include <cstdio>
+#include <iostream>
+#include <sstream>
+
+// Concurrency support library
+//
+#include <mutex>
+
 namespace iw4x
 {
-  using std::nullptr_t;
-  using std::size_t;
-
+  // Language support
+  //
   using std::int8_t;
   using std::int16_t;
   using std::int32_t;
@@ -36,28 +56,35 @@ namespace iw4x
   using std::uintmax_t;
   using std::uintptr_t;
 
-  using std::istringstream;
-  using std::ostringstream;
-  using std::string;
+  // Diagnostics
+  //
+  using std::system_category;
 
+  // Memory management
+  //
+  using std::unique_ptr;
+
+  // General utilities
+  //
+  using std::function;
+
+  // Containers
+  //
   using std::array;
-  using std::span;
   using std::unordered_map;
   using std::vector;
 
-  using std::function;
+  // Strings
+  //
+  using std::string;
 
-  using std::unique_ptr;
+  // Input/output
+  //
+  using std::ios;
+  using std::size_t;
+  using std::ostringstream;
 
-  using std::mutex;
+  // Concurrency support
+  //
   using std::once_flag;
-  using std::scoped_lock;
-
-  using std::invalid_argument;
-  using std::out_of_range;
-  using std::runtime_error;
-  using std::system_error;
-
-  using std::filesystem::path;
-  using std::filesystem::directory_iterator;
 }

@@ -33,5 +33,8 @@
 #  endif
 #endif
 
+#include <psapi.h> // process status api
+
+// Direct3D 9 Graphics.
+//
 #include <d3d9.h>
-#include <psapi.h>

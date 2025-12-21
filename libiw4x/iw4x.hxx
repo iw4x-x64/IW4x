@@ -16,12 +16,12 @@ namespace iw4x
     //
     // MSVC's linker, on the other hand, requires at least one symbol to be
     // placed in the DLL export table. If no symbol is explicitly marked for
-    // export (e.g. via __declspec(dllexport) or a .def file), MSVC refuses to
-    // link the DLL and reports that no exported symbols exist.
+    // export (e.g. via __declspec(dllexport)), MSVC refuses to link the DLL
+    // and reports that no exported symbols exist.
     //
     // For this reason, we explicitly export DllMain when building with MSVC,
-    // even though this is unnecessary for MinGW and has no functional effect at
-    // runtime.
+    // even though this is unnecessary for MinGW and has no functional effect
+    // at runtime.
     //
     LIBIW4X_SYMEXPORT BOOL WINAPI
     DllMain (HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved);
