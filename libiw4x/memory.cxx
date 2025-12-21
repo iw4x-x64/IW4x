@@ -16,7 +16,10 @@ namespace iw4x
   }};
 
   // @@: We could eventually snapshot the executable with all "write" patches
-  // pre-applied to avoid doing the work at runtime.
+  // pre-applied to avoid doing the work at runtime. Note that if we do this,
+  // any dynamic patches (for example s_cpuCount) must be explicitly excluded
+  // and still applied at runtime, since their values can't be baked into a
+  // snapshot.
   //
   void*
   memwrite (void* dest, int ch, std::size_t count)

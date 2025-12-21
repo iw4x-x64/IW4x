@@ -31,6 +31,7 @@ extern "C"
 // Concurrency support library
 //
 #include <mutex>
+#include <thread>
 
 namespace iw4x
 {
@@ -61,4 +62,5 @@ namespace iw4x
   // Concurrency support
   //
   using std::call_once;
+  using std::thread;
 }

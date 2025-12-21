@@ -24,6 +24,11 @@ namespace iw4x
         {
           memwrite (reinterpret_cast<void*> (address), value, size);
         });
+
+      // Patch s_cpuCount initialization to use hardware concurrency in
+      // Sys_InitMainThread. (Dynamic)
+      //
+      *(uint32_t*) 0x14020DD06 = thread::hardware_concurrency ();
     }
   }
 }
