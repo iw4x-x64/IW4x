@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cassert>
+#include <cstring>
 #include <functional>
 #include <ios>
 #include <iostream>

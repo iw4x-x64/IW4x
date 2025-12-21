@@ -327,7 +327,7 @@ namespace iw4x
           })
         ([] (uintptr_t address, int value, size_t size)
           {
-            memset (reinterpret_cast<void*> (address), value, size);
+            memwrite (reinterpret_cast<void*> (address), value, size);
           });
 
         scheduler s;
