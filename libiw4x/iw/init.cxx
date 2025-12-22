@@ -1,5 +1,7 @@
 #include <libiw4x/iw/init.hxx>
 
+#include <libiw4x/iw/live-win.hxx>
+
 namespace iw4x
 {
   namespace iw
@@ -29,6 +31,10 @@ namespace iw4x
       // Sys_InitMainThread. (Dynamic)
       //
       *(uint32_t*) 0x14020DD06 = thread::hardware_concurrency ();
+
+      // live-win.hxx
+      //
+      detour (Live_RequireUserToPlayOnline, &live_require_user_to_play_online);
     }
   }
 }
