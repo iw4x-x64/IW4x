@@ -4751,8 +4751,11 @@ namespace iw4x
   using  CL_ConnectFromParty_t = void (*) (int, void*, netadr_t, int, int, const char*, const char*);
   inline CL_ConnectFromParty_t CL_ConnectFromParty = reinterpret_cast<CL_ConnectFromParty_t> (0x1400F5220);
 
+  using  Live_RequireUserToPlayAny_t = char (*) (int);
+  inline Live_RequireUserToPlayAny_t Live_RequireUserToPlayAny = reinterpret_cast<Live_RequireUserToPlayAny_t> (0x1402A6ED0);
+
   using  Live_RequireUserToPlayOnline_t = char (*) (int);
-  inline Live_RequireUserToPlayOnline_t Live_RequireUserToPlayOnline = reinterpret_cast<Live_RequireUserToPlayOnline_t> (0x1402A6ED0);
+  inline Live_RequireUserToPlayOnline_t Live_RequireUserToPlayOnline = reinterpret_cast<Live_RequireUserToPlayOnline_t> (0x1402A6F40);
 
   // Game Internal variables
   //
