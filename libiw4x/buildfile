@@ -6,7 +6,6 @@ impl_libs = # Implementation dependencies.
 import? intf_libs += libcpptrace%lib{cpptrace}
 import  intf_libs += libzydis%lib{zydis}
 import  intf_libs += libboost-asio%lib{boost_asio}
-import  intf_libs += libimgui%lib{imgui}
 
 options = iw4x-options
 
@@ -16,27 +15,6 @@ lib{iw4x}: {hxx ixx txx cxx}{** -version -*-options -pregenerated/**} \
            $impl_libs $intf_libs
 
 hxx{version}: in{version} $src_root/manifest
-
-# There is no built-in rule to synthesize the lib{s,a} -> obj{s,a} -> asm{}
-# dependencies so we have to do it manually.
-#
-for n: oob/init
-{
-  libs{iw4x}: objs{$(n).asm.so.o}
-  liba{iw4x}: obja{$(n).asm.a.o}
-
-  objs{$(n).asm.so.o}: file{$(n).asm} $nasm
-  {{
-    diag nasm ($<[0])
-    $nasm -f win64 -o $path($>) $path($<[0])
-  }}
-
-  obja{$(n).asm.a.o}: file{$(n).asm} $nasm
-  {{
-    diag nasm ($<[0])
-    $nasm -f win64 -o $path($>) $path($<[0])
-  }}
-}
 
 # Build options.
 #

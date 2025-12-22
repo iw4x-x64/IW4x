@@ -6,12 +6,8 @@
 #endif
 
 #include <libiw4x/frame/init.hxx>
-#include <libiw4x/imgui/init.hxx>
-#include <libiw4x/iw/init.hxx>
 #include <libiw4x/menu/init.hxx>
-#include <libiw4x/network/init.hxx>
-#include <libiw4x/oob/init.hxx>
-#include <libiw4x/renderer/init.hxx>
+#include <libiw4x/iw/init.hxx>
 
 #include <libiw4x/version.hxx>
 #include <libiw4x/iw4x-options.hxx>
@@ -337,13 +333,9 @@ namespace iw4x
 
         scheduler s;
 
-        frame    ::init (s);
-        menu     ::init (s);
-        renderer ::init ();
-        imgui    ::init ();
-        network  ::init (s);
-        oob      ::init ();
-        iw       ::init ();
+        frame::init (s);
+        menu::init (s);
+        iw::init ();
 
         // __scrt_common_main_seh
         //
