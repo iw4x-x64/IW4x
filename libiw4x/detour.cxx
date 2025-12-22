@@ -8,11 +8,39 @@ namespace iw4x
   constexpr int32_t max_hook_size (32);
   constexpr int64_t max_hook_disp (INT32_MAX);
 
+  namespace
+  {
+    bool
+    is_readable (void* addr, size_t length)
+    {
+      MEMORY_BASIC_INFORMATION mbi;
+      uint8_t* current (static_cast<uint8_t*> (addr));
+      uint8_t* end (current + length);
+
+      while (current < end)
+      {
+        if (!VirtualQuery (current, &mbi, sizeof (mbi)))
+          return false;
+
+        if (mbi.State != MEM_COMMIT ||
+          (mbi.Protect & (PAGE_NOACCESS | PAGE_GUARD)))
+          return false;
+
+        // Move to next region
+        //
+        current = static_cast<uint8_t*> (mbi.BaseAddress) + mbi.RegionSize;
+      }
+
+      return true;
+    }
+  }
+
   void
   detour (void*& t, void* s)
   {
     ZydisDecoder d {};
     ZydisDecoderInit (&d, ZYDIS_MACHINE_MODE_LONG_64, ZYDIS_STACK_WIDTH_64);
+
     ZydisDecodedInstruction ins[max_hook_size];
     ZydisDecodedOperand ops[max_hook_size][ZYDIS_MAX_OPERAND_COUNT];
 
@@ -24,6 +52,12 @@ namespace iw4x
     size_t ds (0), di (0);
     while (ds < min_hook_size && di < max_hook_size)
     {
+      // Double check we aren't about to read off a cliff
+      //
+      if (!is_readable (static_cast<uint8_t*> (t) + ds,
+                        ZYDIS_MAX_INSTRUCTION_LENGTH))
+        throw runtime_error ("instruction straddles unreadable boundary");
+
       if (ZYAN_FAILED (ZydisDecoderDecodeFull (&d,
                                                 static_cast<uint8_t*> (t) + ds,
                                                 ZYDIS_MAX_INSTRUCTION_LENGTH,
@@ -195,7 +229,8 @@ namespace iw4x
           // that it's really just an elaborate swap.
           //
           int64_t dv (ro [n].mem.disp.value);
-          int64_t dr (ra + ri->length + dv - fa + rd - ri->length);
+          int64_t target_abs (ra + ri->length + dv);
+          int64_t dr (target_abs - (fa + rd + ri->length));
 
           if (in_range<int32_t> (dr))
             r.operands [n].mem.displacement = dr;
