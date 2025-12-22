@@ -71,4 +71,46 @@ namespace iw4x
   {
     return memwrite (reinterpret_cast<void*> (dest), ch, count);
   }
+
+  void*
+  memwrite (void* dest, const void* src, size_t count)
+  {
+    // Zero-length operation is no-op by definition (includes nullptr case).
+    //
+    if (count == 0)
+      return dest;
+
+    const uint8_t* s (static_cast<const uint8_t*> (src));
+    uint8_t* d (static_cast<uint8_t*> (dest));
+
+    for (size_t i (0); i < count;)
+    {
+      if (s [i] == 0x90)
+      {
+        size_t n (0);
+        while (i + n < count && s [i + n] == 0x90)
+          n++;
+
+        memwrite (d + i, 0x90, n);
+        i += n;
+      }
+      else
+      {
+        size_t n (0);
+        while (i + n < count && s [i + n] != 0x90)
+          n++;
+
+        memcpy (d + i, s + i, n);
+        i += n;
+      }
+    }
+
+    return dest;
+  }
+
+  void*
+  memwrite (uintptr_t dest, const void* src, size_t count)
+  {
+    return memwrite (reinterpret_cast<void*> (dest), src, count);
+  }
 }

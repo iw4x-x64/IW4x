@@ -380,4 +380,49 @@ main ()
       assert (modified);
     }
   }
+
+    // Test memwrite with string literal (char array)
+  //
+  {
+    vector<uint8_t> buffer (10, 0xCC);
+    uintptr_t dest (reinterpret_cast<uintptr_t> (buffer.data ()));
+
+    memwrite (dest, "Test");
+
+    assert (buffer [0] == 'T');
+    assert (buffer [1] == 'e');
+    assert (buffer [2] == 's');
+    assert (buffer [3] == 't');
+    assert (buffer [4] == 0xCC); // Should be untouched
+  }
+
+  // Test memwrite with empty string literal
+  //
+  {
+    vector<uint8_t> buffer (5, 0xCC);
+    uintptr_t dest (reinterpret_cast<uintptr_t> (buffer.data ()));
+
+    // "" is 1 byte ('\0'). N - 1 should be 0.
+    //
+    memwrite (dest, "");
+
+    assert (buffer [0] == 0xCC);
+  }
+
+  // Test memwrite with raw byte array
+  //
+  {
+    vector<uint8_t> buffer (10, 0x00);
+    uintptr_t dest (reinterpret_cast<uintptr_t> (buffer.data ()));
+
+    const uint8_t payload [] = {0xDE, 0xAD, 0xBE, 0xEF};
+
+    memwrite (dest, payload);
+
+    assert (buffer [0] == 0xDE);
+    assert (buffer [1] == 0xAD);
+    assert (buffer [2] == 0xBE);
+    assert (buffer [3] == 0xEF);
+    assert (buffer [4] == 0x00);
+  }
 }
