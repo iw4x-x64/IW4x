@@ -1,5 +1,7 @@
 #include <libiw4x/iw/init.hxx>
 
+#include <libiw4x/iw/live.hxx>
+#include <libiw4x/iw/live-gdk.hxx>
 #include <libiw4x/iw/live-win.hxx>
 
 namespace iw4x
@@ -31,6 +33,24 @@ namespace iw4x
       // Sys_InitMainThread. (Dynamic)
       //
       *(uint32_t*) 0x14020DD06 = thread::hardware_concurrency ();
+
+      // Patch Content_DoWeHaveContentPack
+      //
+      memcpy ((void*) 0x1402864F0, "\xB0\x01\xC3", 3);
+
+      // Patch Live_IsSignedIn to always return true.
+      //
+      memcpy ((void*) 0x1402A6E40, "\x33\xC0\xFF\xC0\xC3", 5);
+
+      // live.hxx
+      //
+      detour (Live_StartSigninAny, &live_start_signin_any);
+      detour (Live_GetLocalClientName, &live_get_local_client_name);
+
+      // live-gdk.hxx
+      //
+      detour (Live_XSyncWithCloud, &live_xsync_with_cloud);
+      detour (Live_XBaseGameLicenseCheck, &live_xbase_game_license_check);
 
       // live-win.hxx
       //

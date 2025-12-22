@@ -4751,11 +4751,26 @@ namespace iw4x
   using  CL_ConnectFromParty_t = void (*) (int, void*, netadr_t, int, int, const char*, const char*);
   inline CL_ConnectFromParty_t CL_ConnectFromParty = reinterpret_cast<CL_ConnectFromParty_t> (0x1400F5220);
 
+  using  Live_StartSigninAny_t = __int64 (*) (unsigned int);
+  inline Live_StartSigninAny_t Live_StartSigninAny = reinterpret_cast<Live_StartSigninAny_t> (0x1401B5B00);
+
   using  Live_RequireUserToPlayAny_t = char (*) (int);
   inline Live_RequireUserToPlayAny_t Live_RequireUserToPlayAny = reinterpret_cast<Live_RequireUserToPlayAny_t> (0x1402A6ED0);
 
   using  Live_RequireUserToPlayOnline_t = char (*) (int);
   inline Live_RequireUserToPlayOnline_t Live_RequireUserToPlayOnline = reinterpret_cast<Live_RequireUserToPlayOnline_t> (0x1402A6F40);
+
+  using  Live_XSyncWithCloud_t = char (*) (void);
+  inline Live_XSyncWithCloud_t Live_XSyncWithCloud = reinterpret_cast<Live_XSyncWithCloud_t> (0x1401B2A60);
+
+  using  Live_XBaseGameLicenseCheck_t = char (*) (void);
+  inline Live_XBaseGameLicenseCheck_t Live_XBaseGameLicenseCheck = reinterpret_cast<Live_XBaseGameLicenseCheck_t> (0x1401B4ED0);
+
+  using  Live_IsSignedIn_t = bool (*) (int);
+  inline Live_IsSignedIn_t Live_IsSignedIn = reinterpret_cast<Live_IsSignedIn_t> (0x1402A6E40);
+
+  using  Live_GetLocalClientName_t = char * (*) (int);
+  inline Live_GetLocalClientName_t Live_GetLocalClientName = reinterpret_cast<Live_GetLocalClientName_t> (0x1402A6780);
 
   // Game Internal variables
   //
