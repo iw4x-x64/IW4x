@@ -1,10 +1,5 @@
 #include <libiw4x/iw4x.hxx>
 
-#if LIBIW4X_CPPTRACE
-#  include <cpptrace/cpptrace.hpp>
-#  include <cpptrace/formatting.hpp>
-#endif
-
 #include <libiw4x/frame/init.hxx>
 #include <libiw4x/menu/init.hxx>
 #include <libiw4x/iw/init.hxx>
@@ -84,82 +79,6 @@ namespace iw4x
           ios::sync_with_stdio ();
       }
     }
-
-#if LIBIW4X_CPPTRACE
-    void
-    setup_cpptrace (const options& opt)
-    {
-      using namespace cpptrace;
-
-      using formatter        = cpptrace::formatter;
-      using address_mode     = cpptrace::formatter::address_mode;
-      using colors_mode      = cpptrace::formatter::color_mode;
-      using symbol_mode      = cpptrace::formatter::symbol_mode;
-      using stacktrace_frame = cpptrace::stacktrace_frame;
-
-      // Configure the global cpptrace formatter to produce actionable stack
-      // traces for diagnostics (particularly from terminate handlers).
-      //
-      // Note that the default formatter is returned as a const reference, so we
-      // use const_cast to modify it. This is generally unsafe but acceptable
-      // here since we're modifying a static object before any traces are
-      // generated.
-      //
-      auto& fmt (const_cast<formatter&> (get_default_formatter ())
-        .addresses (address_mode::object)
-        // Automatic mode misbehave under Wine, presumably because the console
-        // detection does not recognize the attached terminal.
-        //
-        .colors (colors_mode::always)
-        .snippets (true)
-        .symbols (symbol_mode::pretty));
-
-      if (opt.cpptrace_no_colors ())
-        fmt.colors (colors_mode::none);
-
-      if (opt.cpptrace_no_snippets ())
-        fmt.snippets (false);
-
-      if (!opt.cpptrace_no_filter ())
-        fmt.filter ([] (const stacktrace_frame& frame)
-      {
-        const string& s (frame.symbol);
-        const string& n (frame.filename);
-
-        // Performs an unconstrained search since symbol names are often
-        // decorated and may embed the target substring without any stable
-        // boundary.
-        //
-        auto
-        contains ([&] (const string& str, const string& substr)
-        {
-          return str.find (substr) != string::npos;
-        });
-
-        // Filter out runtime and system frames that are unhelpful in
-        // stack traces.
-        //
-        return (contains (n, "iw4x") || contains (n, "iw4mp"));
-      });
-
-      // Register cpptrace terminate handler.
-      //
-      register_terminate_handler ();
-
-      // Register Windows unhandled exception filter to catch exceptions that
-      // escape the normal C++ exception handling mechanism.
-      //
-      SetUnhandledExceptionFilter ([] (EXCEPTION_POINTERS* ep) -> LONG
-      {
-        cerr << "unhandled Windows exception at 0x"
-             << hex << ep->ExceptionRecord->ExceptionAddress << dec << endl;
-
-        generate_trace (1);
-
-        return EXCEPTION_EXECUTE_HANDLER;
-      });
-    }
-#endif
   }
 
   extern "C"
@@ -220,12 +139,6 @@ namespace iw4x
 
           exit (0);
         }
-
-        // Setup cpptrace to generate stack trace from terminate handler.
-        //
-#if LIBIW4X_CPPTRACE
-        setup_cpptrace (opt);
-#endif
 
         // Under normal circumstances, a DLL is unloaded via FreeLibrary once
         // its reference count reaches zero. This is acceptable for auxiliary

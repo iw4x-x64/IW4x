@@ -1,11 +1,8 @@
-import! nasm = nasm%exe{nasm}
-
 intf_libs = # Interface dependencies.
 impl_libs = # Implementation dependencies.
 
-import? intf_libs += libcpptrace%lib{cpptrace}
-import  intf_libs += libzydis%lib{zydis}
-import  intf_libs += libboost-asio%lib{boost_asio}
+import intf_libs += libzydis%lib{zydis}
+import intf_libs += libboost-asio%lib{boost_asio}
 
 options = iw4x-options
 
@@ -22,9 +19,6 @@ cxx.poptions =+ "-I$out_root" "-I$src_root"
 
 if ($config.libiw4x.develop)
   cxx.poptions += "-DLIBIW4X_DEVELOP"
-
-if ($config.libiw4x.cpptrace)
-  cxx.poptions += "-DLIBIW4X_CPPTRACE"
 
 obja{*}: cxx.poptions += -DLIBIW4X_STATIC_BUILD
 objs{*}: cxx.poptions += -DLIBIW4X_SHARED_BUILD

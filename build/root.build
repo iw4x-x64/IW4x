@@ -44,7 +44,3 @@ test.target = $cxx.target
 #
 config [bool] config.libiw4x.develop ?= false
 develop = $config.libiw4x.develop # shorthand
-
-# Configuration variable.
-#
-source $src_root/build/config/common.build

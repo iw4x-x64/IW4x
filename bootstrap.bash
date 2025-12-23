@@ -121,8 +121,7 @@ bdep init -C @mingw32-debug                                          \
   config.install.filter='include/@false lib/@false share/@false'     \
   config.install.root="$iw4x"                                        \
   config.install.bin="$iw4x"                                         \
-  --wipe                                                             \
-  -- config.libiw4x.cpptrace=true
+  --wipe
 
 # Release configuration.
 #
@@ -141,5 +140,4 @@ bdep init -C @mingw32-release                                        \
   config.install.filter='include/@false lib/@false share/@false'     \
   config.install.root="$iw4x"                                        \
   config.install.bin="$iw4x"                                         \
-  --wipe                                                             \
-  -- config.libiw4x.cpptrace=true
+  --wipe

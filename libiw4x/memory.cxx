@@ -60,7 +60,7 @@ namespace iw4x
     {
       // For all non-NOP cases, fall back to the ordinary byte blast.
       //
-      r = std::memset (dest, ch, count);
+      r = memset (dest, ch, count);
     }
 
     return r;

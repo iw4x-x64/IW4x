@@ -476,15 +476,6 @@ namespace iw4x
     const bool&
     version () const;
 
-    const bool&
-    cpptrace_no_colors () const;
-
-    const bool&
-    cpptrace_no_snippets () const;
-
-    const bool&
-    cpptrace_no_filter () const;
-
     // Print usage information.
     //
     static ::iw4x::cli::usage_para
@@ -506,9 +497,6 @@ namespace iw4x
     public:
     bool help_;
     bool version_;
-    bool cpptrace_no_colors_;
-    bool cpptrace_no_snippets_;
-    bool cpptrace_no_filter_;
   };
 }
 
