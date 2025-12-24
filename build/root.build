@@ -1,9 +1,3 @@
-using in
-
-define cli: file
-
-cli{*}: extension = cli
-
 cxx.internal.scope = current
 
 cxx.std = latest
@@ -19,21 +13,19 @@ cxx{*}: extension = cxx
 #
 def{*}: extension = def
 
+# Silent obsolete CRT security warnings.
+#
 if ($cxx.target.system == 'win32-msvc')
-{
-  # Silent obsolete CRT security warnings.
-  #
   cxx.poptions += -D_CRT_SECURE_NO_WARNINGS -D_SCL_SECURE_NO_WARNINGS
 
-  # ASIO conditionally enables parts of its Windows backend based on
-  # _WIN32_WINNT. Leaving this macros to compiler defaults can result in
-  # different translation units selecting different execution paths, which in
-  # turn leads to inconsistent behavior and, in some cases, ABI mismatches.
-  #
-  # Background discussion: https://stackoverflow.com/a/41068811
-  #
-  cxx.poptions += -DWINVER=0x0A00 -D_WIN32_WINNT=0x0A00
-}
+# ASIO conditionally enables parts of its Windows backend based on
+# _WIN32_WINNT. Leaving this macros to compiler defaults can result in
+# different translation units selecting different execution paths, which in
+# turn leads to inconsistent behavior and, in some cases, ABI mismatches.
+#
+# Background discussion: https://stackoverflow.com/a/41068811
+#
+cxx.poptions += -DWINVER=0x0A00 -D_WIN32_WINNT=0x0A00
 
 # The test target for cross-testing (running tests under Wine, etc).
 #
@@ -43,4 +35,3 @@ test.target = $cxx.target
 # builds.
 #
 config [bool] config.libiw4x.develop ?= false
-develop = $config.libiw4x.develop # shorthand
