@@ -123,21 +123,4 @@ bdep init -C @mingw32-debug                                          \
   config.install.bin="$iw4x"                                         \
   --wipe
 
-# Release configuration.
-#
-bdep init -C @mingw32-release                                        \
-  config.cxx=x86_64-w64-mingw32-g++                                  \
-  config.cc.coptions="-O2                                            \
-                      -ggdb                                          \
-                      -grecord-gcc-switches                          \
-                      -pipe                                          \
-                      -mtune=generic                                 \
-                      -fasynchronous-unwind-tables                   \
-                      -fno-omit-frame-pointer                        \
-                      -mno-omit-leaf-frame-pointer"                  \
-  config.cc.compiledb=./                                             \
-  cc                                                                 \
-  config.install.filter='include/@false lib/@false share/@false'     \
-  config.install.root="$iw4x"                                        \
-  config.install.bin="$iw4x"                                         \
-  --wipe
+b
