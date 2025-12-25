@@ -102,7 +102,7 @@ fi
 
 diag
 diag "Using IW4x installation root: $iw4x"
-diag "Creating @mingw32-debug and @mingw32-release configurations..."
+diag "Creating @mingw32-debug configuration..."
 diag
 
 # Debug configuration.

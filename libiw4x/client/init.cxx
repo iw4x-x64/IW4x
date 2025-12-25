@@ -1,8 +1,6 @@
 #include <libiw4x/client/init.hxx>
 
-#include <libiw4x/client/live.hxx>
-#include <libiw4x/client/live-gdk.hxx>
-#include <libiw4x/client/live-win.hxx>
+#include <libiw4x/client/common.hxx>
 
 namespace iw4x
 {
@@ -11,43 +9,56 @@ namespace iw4x
     void
     init ()
     {
-      // Disable Sys_CheckCrashOrRerun in WinMain.
-      //
-      memwrite (0x1402A92B3, 0x90, 13);
+      memwrite (0x1402A91E5, "\xB0\x01");                                       // Suppress XGameRuntimeInitialize call in WinMain
+      memwrite (0x1402A91E7, 0x90, 3);                                          // ^
 
-      // Skip com_safemode checks in Com_Init.
-      //
-      // com_safemode is only ever set to true by Sys_CheckCrashOrRerun.
-      //
-      memwrite (0x1401FAC87, 0x90, 7);
-      memwrite (0x1401FAC8E, 0xEB, 1);
+      memwrite (0x1402A6A4B, 0x90, 5);                                          // Suppress XCurl call in Live_Init
+      memwrite (0x1402A6368, 0x90, 5);                                          // Suppress XCurl call in Live_Frame
 
-      // Patch Content_DoWeHaveContentPack to always return true
-      //
-      memwrite (0x1402864F0, "\xB0\x01\xC3");
+      memwrite (0x1402A8CFE, 0x90, 5);                                          // Suppress GDK shutdown in Com_Quit_f (avoids crash)
 
-      // Patch Live_IsSignedIn to always return true.
-      //
-      memwrite (0x1402A6E40, "\x33\xC0\xFF\xC0\xC3");
+      memwrite (0x1402A92B3, 0x90, 13);                                         // Suppress Sys_CheckCrashOrRerun call in WinMain
+      memwrite (0x1401FAC87, 0x90, 7);                                          // Suppress com_safemode checks in Com_Init.
+      memwrite (0x1401FAC8E, 0xEB, 1);                                          // ^
 
-      // Patch s_cpuCount initialization to use hardware concurrency in
-      // Sys_InitMainThread. (Dynamic)
+      memwrite (0x1402864F0, "\xB0\x01\xC3");                                   // Patch Content_DoWeHaveContentPack to return true
+
+      // Patch s_cpuCount with hardware concurrency in Sys_InitMainThread.
+      //
+      // Note that this may violate implicit engine assumptions about CPU
+      // topology. Current behavior is stable, but should be monitored for
+      // regressions.
       //
       *(uint32_t*) 0x14020DD06 = thread::hardware_concurrency ();
 
-      // live.hxx
+      // Experimental.
       //
-      detour (Live_StartSigninAny, &live_start_signin_any);
-      detour (Live_GetLocalClientName, &live_get_local_client_name);
+      #if LIBIW4X_DEVELOP
+        memwrite(0x1402A5F70, 0x90, 3); // xboxlive_signed
+        memwrite(0x1402A5F73, 0x74, 1); //
+        memwrite(0x1400F5B86, 0xEB, 1); //
+        memwrite(0x1400F5BAC, 0xEB, 1); //
+        memwrite(0x14010B332, 0xEB, 1); //
+        memwrite(0x1401BA1FE, 0xEB, 1); //
 
-      // live-gdk.hxx
-      //
-      detour (Live_XSyncWithCloud, &live_xsync_with_cloud);
-      detour (Live_XBaseGameLicenseCheck, &live_xbase_game_license_check);
+        memwrite(0x140271ED0, 0xC3, 1); // playlist
+        memwrite(0x1400F6BC4, 0x90, 2); //
 
-      // live-win.hxx
+        memwrite(0x1400FC833, 0xEB, 1); // configstring
+        memwrite(0x1400D2AFC, 0x90, 2); //
+
+        memwrite(0x1400E4DA0, 0x33, 1); // stats
+        memwrite(0x1400E4DA1, 0xC0, 1); //
+        memwrite(0x1400E4DA2, 0xC3, 1); //
+      #endif
+
+      // scheduler
       //
-      detour (Live_RequireUserToPlayOnline, &live_require_user_to_play_online);
+      sched->create ("com_frame");
+
+      // common.hxx
+      //
+      detour (Com_Frame_Try_Block_Function, &com_frame_try_block_function);
     }
   }
 }

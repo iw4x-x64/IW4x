@@ -38,8 +38,8 @@ namespace iw4x
         // why find_item would be called), but let's handle both cases
         // explicitly.
         //
-        throw m.itemCount == 0 ? runtime_error ("item count is empty") :
-                                 runtime_error ("unable to find item: " + name);
+        throw runtime_error (m.itemCount == 0 ? "menu item count is empty"
+                                              : "menu item not found: " + name);
       }
 
       MenuEventHandler*

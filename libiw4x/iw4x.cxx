@@ -1,8 +1,8 @@
 #include <libiw4x/iw4x.hxx>
 
-#include <libiw4x/frame/init.hxx>
-#include <libiw4x/menu/init.hxx>
 #include <libiw4x/client/init.hxx>
+#include <libiw4x/windows/init.hxx>
+#include <libiw4x/menu/init.hxx>
 
 namespace iw4x
 {
@@ -171,48 +171,12 @@ namespace iw4x
           exit (1);
         }
 
-        // Patch Game Development Kit (GDK) runtime
-        //
-        ([] (void (*_) (uintptr_t, int, size_t))
-          {
-            _(0x1401B2FCA, 0x31, 1); // Bypass XGameRuntimeInitialize
-            _(0x1401B2FCB, 0xC0, 1); //
-            _(0x1401B2FCC, 0x90, 3); //
-            _(0x1401B308F, 0x31, 1); //
-            _(0x1401B3090, 0xC0, 1); //
-            _(0x1401B3091, 0x90, 3); //
-
-            _(0x1402A6A4B, 0x90, 5); // Bypass xCurl
-            _(0x1402A6368, 0x90, 5); //
-
-            _(0x1402A5F70, 0x90, 3); // Bypass xboxlive_signed
-            _(0x1402A5F73, 0x74, 1); //
-            _(0x1400F5B86, 0xEB, 1); //
-            _(0x1400F5BAC, 0xEB, 1); //
-            _(0x14010B332, 0xEB, 1); //
-            _(0x1401BA1FE, 0xEB, 1); //
-
-            _(0x140271ED0, 0xC3, 1); // Bypass playlist
-            _(0x1400F6BC4, 0x90, 2); //
-
-            _(0x1400FC833, 0xEB, 1); // Bypass configstring mismatch
-            _(0x1400D2AFC, 0x90, 2); //
-
-            _(0x1400E4DA0, 0x33, 1); // Bypass stats mismatch
-            _(0x1400E4DA1, 0xC0, 1); //
-            _(0x1400E4DA2, 0xC3, 1); //
-          })
-        ([] (uintptr_t address, int value, size_t size)
-          {
-            memwrite (reinterpret_cast<void*> (address), value, size);
-          });
-
         scheduler s;
         sched = &s;
 
-        frame::init ();
-        menu::init ();
         client::init ();
+        menu::init ();
+        windows::init ();
 
         // __scrt_common_main_seh
         //
@@ -249,28 +213,6 @@ namespace iw4x
                           &o) != 0)
       {
         memmove (reinterpret_cast<void*> (target), seq.data (), seq.size ());
-
-        // Flushes the instruction cache.
-        //
-        // Note that on x86 and x86-64 architectures, flushing the
-        // instruction cache is generally unnecessary provided that
-        // both code modification and execution occur via the same
-        // linear address. In practice, it's recommended to always
-        // invoke FlushInstructionCache and allow the operating system
-        // to determine whether any action is required.
-        //
-        // Moreover, according to Microsoft documentation, failing to
-        // call FlushInstructionCache after modifying a region of
-        // memory that will become executable is considered "undefined
-        // behavior".
-        //
-        // For reference, see Intel(R) 64 and IA-32 Architectures
-        // Software Developer's Manual, Volume 3A: System Programming
-        // Guide, Part 1, Section 11.6: "Self-Modifying Code".
-        //
-        FlushInstructionCache (GetCurrentProcess (),
-                               reinterpret_cast<const void*> (target),
-                               seq.size ());
       }
       else
         return FALSE;
