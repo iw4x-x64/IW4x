@@ -27,3 +27,7 @@
 #    include <windows.h>
 #  endif
 #endif
+
+// Process Status API.
+//
+#include <psapi.h>
