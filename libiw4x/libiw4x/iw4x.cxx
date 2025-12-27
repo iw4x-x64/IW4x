@@ -175,6 +175,9 @@ namespace iw4x
         memwrite (0x1402A8CFE, 0x90, 5);                                        // Suppress GDK shutdown in Com_Quit_f (avoids crash)
         memwrite (0x1402A92B3, 0x90, 13);                                       // Suppress Sys_CheckCrashOrRerun call in WinMain
         memwrite (0x1401FAC87, 0x90, 7);                                        // Suppress com_safemode checks in Com_Init (only set by Sys_CheckCrashOrRerun).
+        memwrite (0x1401FAC8E, 0xEB, 1);                                        // ^
+        memwrite (0x1403B1E88, "iw4x.cfg");                                     // Rename "config_mp.cfg" to "iw4x.cfg"
+        memwrite (0x1403B1E90, 0x00, 6);                                        // ^
 
         // Patch s_cpuCount with hardware concurrency in Sys_InitMainThread.
         //
