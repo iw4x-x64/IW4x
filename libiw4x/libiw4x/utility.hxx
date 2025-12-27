@@ -9,6 +9,7 @@ extern "C"
 
 // Diagnostics library
 //
+#include <cassert>
 #include <stdexcept>
 #include <system_error>
 
