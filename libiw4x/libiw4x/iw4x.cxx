@@ -1,8 +1,11 @@
 #include <libiw4x/iw4x.hxx>
-#include <libiw4x/memory.hxx>
+
+#include <libiw4x/client/common.hxx>
 
 namespace iw4x
 {
+  using namespace client;
+
   namespace
   {
     void
@@ -189,6 +192,16 @@ namespace iw4x
         // regressions.
         //
         *(uint32_t*) 0x14020DD06 = thread::hardware_concurrency ();
+
+        // scheduler
+        //
+        scheduler s;
+        sched = &s;
+        sched->create ("com_frame");
+
+        // common.hxx
+        //
+        detour (Com_Frame_Try_Block_Function, &com_frame_try_block_function);
 
         // __scrt_common_main_seh
         //

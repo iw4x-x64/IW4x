@@ -11,6 +11,9 @@
 #pragma once
 
 #include <libiw4x/iw4x.hxx>
+#include <libiw4x/detour.hxx>
+#include <libiw4x/memory.hxx>
+#include <libiw4x/scheduler.hxx>
 
 namespace iw4x
 {
@@ -4620,4 +4623,9 @@ namespace iw4x
     XAssetEntry entry;
     XAssetEntryPoolEntry* next;
   };
+
+  // common
+  //
+  using  Com_Frame_Try_Block_Function_t = int64_t (*) (void);
+  inline Com_Frame_Try_Block_Function_t Com_Frame_Try_Block_Function = reinterpret_cast<Com_Frame_Try_Block_Function_t> (0x1401F9930);
 }
