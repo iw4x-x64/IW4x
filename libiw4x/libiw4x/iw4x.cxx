@@ -173,6 +173,8 @@ namespace iw4x
         memwrite (0x1402A6A4B, 0x90, 5);                                        // Suppress XCurl call in Live_Init
         memwrite (0x1402A6368, 0x90, 5);                                        // Suppress XCurl call in Live_Frame
         memwrite (0x1402A8CFE, 0x90, 5);                                        // Suppress GDK shutdown in Com_Quit_f (avoids crash)
+        memwrite (0x1402A92B3, 0x90, 13);                                       // Suppress Sys_CheckCrashOrRerun call in WinMain
+        memwrite (0x1401FAC87, 0x90, 7);                                        // Suppress com_safemode checks in Com_Init (only set by Sys_CheckCrashOrRerun).
 
         // Patch s_cpuCount with hardware concurrency in Sys_InitMainThread.
         //
