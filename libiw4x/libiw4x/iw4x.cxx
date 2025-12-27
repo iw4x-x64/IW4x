@@ -2,9 +2,34 @@
 
 #include <libiw4x/client/common.hxx>
 
+#include <libiw4x/context.hxx>
+
 namespace iw4x
 {
-  using namespace client;
+  // What we need here is not to "implement a singleton", but to control the
+  // exact shape of the generated code at every access site. A pointer-based
+  // singleton forces the compiler to emit a load of the pointer value,
+  // followed by a dependent load of the requested member. Even when the
+  // pointer is TU-local or constant after initialization, the compiler must
+  // assume that it can be modified across translation units and therefore
+  // cannot fold the access into a single address computation.
+  //
+  // By contrast, a reference bound to an object with static storage duration
+  // gives the compiler a fixed base address. Member accesses become simple
+  // base+offset operations with no intermediate load. For IW4x, this property
+  // is relied upon in detours that execute per-frame or per-instruction, where
+  // the extra dependency chain introduced by pointer chasing is *very*
+  // observable.
+  //
+  // We therefore reserve raw storage with static duration and known alignment
+  // and later materialize the object into that storage with placement-new. The
+  // exported symbol is a reference whose address is resolved by the linker to
+  // the storage itself, not to an indirection cell. From the code generator's
+  // point of view, `ctx` is indistinguishable from a TU-level static object,
+  // except that its construction is manually sequenced.
+  //
+  alignas (context) std::byte ctx_storage [sizeof (context)];
+  context& ctx (reinterpret_cast<context&> (ctx_storage));
 
   namespace
   {
@@ -171,6 +196,13 @@ namespace iw4x
           exit (1);
         }
 
+        using namespace client;
+
+        scheduler sched;
+        sched.create("com_frame");
+
+        new (&ctx_storage) context (sched);
+
         memwrite (0x1402A91E5, "\xB0\x01");                                     // Suppress XGameRuntimeInitialize call in WinMain
         memwrite (0x1402A91E7, 0x90, 3);                                        // ^
         memwrite (0x1402A6A4B, 0x90, 5);                                        // Suppress XCurl call in Live_Init
@@ -192,12 +224,6 @@ namespace iw4x
         // regressions.
         //
         *(uint32_t*) 0x14020DD06 = thread::hardware_concurrency ();
-
-        // scheduler
-        //
-        scheduler s;
-        sched = &s;
-        sched->create ("com_frame");
 
         // common.hxx
         //
