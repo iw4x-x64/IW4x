@@ -1,4 +1,5 @@
 #include <libiw4x/iw4x.hxx>
+#include <libiw4x/memory.hxx>
 
 namespace iw4x
 {
@@ -166,6 +167,20 @@ namespace iw4x
           cerr << "error: unable to retrieve module information";
           exit (1);
         }
+
+        memwrite (0x1402A91E5, "\xB0\x01");                                     // Suppress XGameRuntimeInitialize call in WinMain
+        memwrite (0x1402A91E7, 0x90, 3);                                        // ^
+        memwrite (0x1402A6A4B, 0x90, 5);                                        // Suppress XCurl call in Live_Init
+        memwrite (0x1402A6368, 0x90, 5);                                        // Suppress XCurl call in Live_Frame
+        memwrite (0x1402A8CFE, 0x90, 5);                                        // Suppress GDK shutdown in Com_Quit_f (avoids crash)
+
+        // Patch s_cpuCount with hardware concurrency in Sys_InitMainThread.
+        //
+        // Note that this may violate implicit engine assumptions about CPU
+        // topology. Current behavior is stable, but should be monitored for
+        // regressions.
+        //
+        *(uint32_t*) 0x14020DD06 = thread::hardware_concurrency ();
 
         // __scrt_common_main_seh
         //
