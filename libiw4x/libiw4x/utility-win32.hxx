@@ -1,5 +1,10 @@
 #pragma once
 
+// On MinGW, <winsock2.h> must be included before <windows.h> to avoid
+// conflicts.
+//
+#include <winsock2.h>
+
 // Include Windows.h in a way that avoids the usual namespace pollution.
 //
 // In particular, we temporarily define WIN32_LEAN_AND_MEAN to exclude rarely
@@ -31,3 +36,7 @@
 // Process Status API.
 //
 #include <psapi.h>
+
+// Direct3D 9 Graphics.
+//
+#include <d3d9.h>
