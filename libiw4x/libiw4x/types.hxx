@@ -26,6 +26,10 @@
 //
 #include <string>
 
+// Time library
+//
+#include <chrono>
+
 // Input/output library
 //
 #include <cstdio>
@@ -77,6 +81,10 @@ namespace iw4x
   // Strings
   //
   using std::string;
+
+  // Time
+  //
+  using namespace std::chrono_literals;
 
   // Input/output
   //

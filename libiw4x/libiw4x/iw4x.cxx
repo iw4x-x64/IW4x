@@ -199,13 +199,50 @@ namespace iw4x
 
         using namespace client;
 
-        quill::Backend::start ();
-        quill::Logger* logger (quill::Frontend::create_or_get_logger (
-          "iw4x",
-          quill::Frontend::create_or_get_sink<quill::ConsoleSink> ("cs")));
+        // Start Quill backend thread.
+        //
+        // Note that Quill backend is kept responsive (no sleep) and is allowed
+        // to exit without draining queues to avoid MinGW-specific shutdown
+        // hangs.
+        //
+        quill::Backend::start ({
+          .enable_yield_when_idle               = true,
+          .sleep_duration                       = 0ns,
+          .wait_for_queues_to_empty_before_exit = false,
+          .check_printable_char                 = {},
+          .log_level_short_codes                =
+          {
+            "3", "2", "1", "D", "I", "N", "W", "E", "C", "B", "_"
+          }
+        });
 
+        // Configure Quill log layout.
+        //
+        // @@: It may be tempting to include the name of the calling function
+        // in log output, but this is not reliable in practice. In particular,
+        // calls made from lambdas (and other compiler-generated contexts)
+        // often yield generic names.
+        //
+        quill::PatternFormatterOptions format_options {
+          "%(time) [%(log_level_short_code)] %(message)",
+          "%H:%M:%S.%Qms",
+          quill::Timezone::LocalTime,
+        };
+
+        // Create the main logger instance.
+        //
+        // Note that its lifetime is managed by Quill.
+        //
+        quill::Logger* logger (
+          quill::Frontend::create_or_get_logger (
+            "iw4x",
+            quill::Frontend::create_or_get_sink<quill::ConsoleSink> ("cs"),
+            format_options));
+
+        // In development builds, enable the most verbose tracing level.
+        //
 #if LIBIW4X_DEVELOP
-        logger->set_log_level (quill::LogLevel::TraceL1);
+        logger->set_log_level (quill::LogLevel::TraceL3);
 #endif
 
         scheduler sched;
