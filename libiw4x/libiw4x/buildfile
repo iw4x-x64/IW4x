@@ -6,6 +6,7 @@ import intf_libs += libzydis%lib{zydis}
 
 lib{iw4x}: {hxx ixx txx cxx}{** -version} \
            {hxx            }{    version} \
+           {def            }{**         } \
            $impl_libs $intf_libs
 
 hxx{version}: in{version} $src_root/manifest
