@@ -1,5 +1,6 @@
 #include <libiw4x/windows/init.hxx>
 
+#include <libiw4x/windows/console-api.hxx>
 #include <libiw4x/windows/process-threads-api.hxx>
 
 namespace iw4x
@@ -24,6 +25,8 @@ namespace iw4x
       {
         detour (ExitProcessHk, &exit_process);
       }
+
+      SetConsoleCtrlHandler (console_ctrl_handler, TRUE);
     }
   }
 }

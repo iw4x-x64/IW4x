@@ -1,4 +1,4 @@
-#include <libiw4x/windows/init.hxx>
+#include <libiw4x/windows/process-threads-api.hxx>
 
 namespace iw4x
 {
