@@ -15,8 +15,12 @@ def{*}: extension = def
 
 # Silent obsolete CRT security warnings.
 #
-if ($cxx.target.system == 'win32-msvc')
-  cxx.poptions += -D_CRT_SECURE_NO_WARNINGS -D_SCL_SECURE_NO_WARNINGS
+cxx.poptions += -D_CRT_SECURE_NO_WARNINGS -D_SCL_SECURE_NO_WARNINGS
+
+# Prevent windows.h from defining min/max macros that clash with c++
+# standard library functions (e.g. std::numeric_limits::max)
+#
+cxx.poptions += -DNOMINMAX
 
 # ASIO conditionally enables parts of its Windows backend based on
 # _WIN32_WINNT. Leaving this macros to compiler defaults can result in
