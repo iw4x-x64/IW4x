@@ -30,3 +30,8 @@ cxx.poptions += -DWINVER=0x0A00 -D_WIN32_WINNT=0x0A00
 # The test target for cross-testing (running tests under Wine, etc).
 #
 test.target = $cxx.target
+
+# Pre-defined semantics to distinguish between development and consumption
+# builds.
+#
+config [bool] config.libiw4x.develop ?= false
