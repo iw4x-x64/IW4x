@@ -198,10 +198,19 @@ namespace iw4x
 
         using namespace client;
 
+        quill::Backend::start ();
+        quill::Logger* logger (quill::Frontend::create_or_get_logger (
+          "iw4x",
+          quill::Frontend::create_or_get_sink<quill::ConsoleSink> ("cs")));
+
+#if LIBIW4X_DEVELOP
+        logger->set_log_level (quill::LogLevel::TraceL1);
+#endif
+
         scheduler sched;
         sched.create("com_frame");
 
-        new (&ctx_storage) context (sched);
+        new (&ctx_storage) context (sched, logger);
 
         memwrite (0x1402A91E5, "\xB0\x01");                                     // Suppress XGameRuntimeInitialize call in WinMain
         memwrite (0x1402A91E7, 0x90, 3);                                        // ^
