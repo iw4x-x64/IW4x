@@ -13,6 +13,12 @@ cxx{*}: extension = cxx
 #
 def{*}: extension = def
 
+# Disable a small set of MSVC warnings that are either noise in this codebase
+# or actively unhelpful for our usage patterns.
+#
+if ($cxx.class == 'msvc')
+  cxx.coptions += /wd4251 /wd4275 /wd4800
+
 # Silent obsolete CRT security warnings.
 #
 cxx.poptions += -D_CRT_SECURE_NO_WARNINGS -D_SCL_SECURE_NO_WARNINGS
