@@ -1,6 +1,7 @@
 #include <libiw4x/iw4x.hxx>
 
 #include <libiw4x/client/common.hxx>
+#include <libiw4x/mod/menu.hxx>
 #include <libiw4x/windows/init.hxx>
 
 #include <libiw4x/context.hxx>
@@ -275,6 +276,10 @@ namespace iw4x
         // common.hxx
         //
         detour (Com_Frame_Try_Block_Function, &com_frame_try_block_function);
+
+        // mod
+        //
+        mod::menu ();
 
         // extra
         //
