@@ -50,6 +50,23 @@ namespace iw4x
       return true;
     }
 
+    // Register a task to loop on a named strand.
+    //
+    // The task will be posted for execution exactly once every time
+    // poll() is called for this strand.
+    //
+    // Return false if the strand does not exist.
+    //
+    template <typename F> bool
+    loop (const string& name, F&& work)
+    {
+      if (!exists (name))
+        return false;
+
+      loops [name].emplace_back (forward<F> (work));
+      return true;
+    }
+
     // Poll the io_context, executing ready handlers.
     //
     // If name is provided, poll only that strand's context.
@@ -66,6 +83,7 @@ namespace iw4x
   private:
     unique_ptr<boost::asio::io_context> context;
     unordered_map<string, strand_type> strands;
+    unordered_map<string, vector<function<void ()>>> loops;
 
     strand_type*
     find (const string& name);
@@ -73,17 +91,4 @@ namespace iw4x
     const strand_type*
     find (const string& name) const;
   };
-
-  // `sched` is required by a large portion of the detour surface and therefore
-  // must be reachable from contexts where parameter injection is not possible.
-  // The detour mechanism does not (yet) support passing user-defined state,
-  // and introducing per-detour wrappers solely to thread this dependency would
-  // be structurally redundant and unmaintainable.
-  //
-  // Note that sched instance is registered during `DllMain` execution, from
-  // within the game entry-point detour. Its lifetime is bound to the process
-  // and is expected to remain valid for the entire duration of the
-  // application.
-  //
-  extern LIBIW4X_SYMEXPORT scheduler* sched;
 }

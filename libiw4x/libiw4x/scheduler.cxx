@@ -6,7 +6,8 @@ namespace iw4x
 {
   scheduler::scheduler ()
     : context (make_unique<io_context> ()),
-      strands ()
+      strands (),
+      loops ()
   {
     // Intentionally left empty by design
     //
@@ -28,6 +29,7 @@ namespace iw4x
   bool
   scheduler::destroy (const string& n)
   {
+    loops.erase (n);
     return strands.erase (n) != 0;
   }
 
@@ -38,6 +40,15 @@ namespace iw4x
 
     if (s != nullptr)
     {
+      // Post all recurring tasks associated with this strand.
+      //
+      // They will be added to the queue and executed immediately
+      // in the subsequent context->poll() call below.
+      //
+      if (auto l (loops.find (n)); l != loops.end ())
+        for (auto& task : l->second)
+          boost::asio::post (*s, task);
+
       // Once all queued work has completed, io_context transitions to the
       // stopped state. Any subsequent call to poll(), run(), run_one(), or
       // poll_one() will then return immediately without processing newly added
@@ -72,8 +83,4 @@ namespace iw4x
     auto i (strands.find (n));
     return i != strands.end () ? &i->second : nullptr;
   }
-
-  // Process-wide scheduler instance. See header for details.
-  //
-  scheduler* sched (nullptr);
 }
