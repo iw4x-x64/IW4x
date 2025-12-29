@@ -48,7 +48,7 @@ namespace iw4x
         MenuEventHandler* h (new MenuEventHandler ());
 
         h->eventType = 0;
-        h->eventData.unconditionalScript = strdup (cmd.c_str ());
+        h->eventData.unconditionalScript = _strdup (cmd.c_str ());
 
         return h;
       }
@@ -123,8 +123,6 @@ namespace iw4x
         //
         ([] (const string& menu_name, const string& item_name)
           {
-            LOG_INFO (ctx.log, "patch: expression -> menu: '{}', item: '{}'", menu_name, item_name);
-
             menuDef_t& m (find_menu (menu_name));
             itemDef_s& i (find_item (m, item_name));
 
