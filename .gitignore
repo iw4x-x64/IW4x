@@ -33,3 +33,4 @@
 # Compilation database.
 #
 compile_commands.json
+.idea/
