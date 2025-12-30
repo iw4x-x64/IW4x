@@ -21,9 +21,50 @@ namespace iw4x
   struct Statement_s;
 
   typedef float vec_t;
-  typedef vec_t vec2_t [2];
-  typedef vec_t vec3_t [3];
-  typedef vec_t vec4_t [4];
+
+  union vec2_t
+  {
+    float v [2];
+
+    struct
+    {
+      float x;
+      float y;
+    };
+  };
+
+  union vec3_t
+  {
+    float v [3];
+
+    struct
+    {
+      float x;
+      float y;
+      float z;
+    };
+  };
+
+  union vec4_t
+  {
+    float v [4];
+
+    struct
+    {
+      float x;
+      float y;
+      float z;
+      float w;
+    }; // s1;
+
+    struct
+    {
+      float r;
+      float g;
+      float b;
+      float a;
+    }; // s2;
+  };
 
   enum errorParm_t : int
   {
@@ -490,23 +531,6 @@ namespace iw4x
     DYNENT_TYPE_COUNT = 0x3,
   };
 
-  // 366
-  //
-  enum dvarType
-  {
-    DVAR_TYPE_BOOL = 0x0,
-    DVAR_TYPE_FLOAT = 0x1,
-    DVAR_TYPE_FLOAT_2 = 0x2,
-    DVAR_TYPE_FLOAT_3 = 0x3,
-    DVAR_TYPE_FLOAT_4 = 0x4,
-    DVAR_TYPE_INT = 0x5,
-    DVAR_TYPE_ENUM = 0x6,
-    DVAR_TYPE_STRING = 0x7,
-    DVAR_TYPE_COLOR = 0x8,
-    DVAR_TYPE_FLOAT_3_COLOR = 0x9,
-    DVAR_TYPE_COUNT = 0xA,
-  };
-
   // 368
   //
   enum StructuredDataTypeCategory
@@ -717,6 +741,52 @@ namespace iw4x
     SpeakerMap* speakerMap;
   };
 
+  enum DvarSetSource
+  {
+    DVAR_SOURCE_INTERNAL = 0x0,
+    DVAR_SOURCE_EXTERNAL = 0x1,
+    DVAR_SOURCE_SCRIPT = 0x2,
+    DVAR_SOURCE_DEVGUI = 0x3,
+  };
+
+  enum DvarFlags
+  {
+    DVAR_NONE = 0x0,
+    DVAR_ARCHIVE = 0x1,
+    DVAR_LATCH = 0x2,
+    DVAR_CHEAT = 0x4,
+    DVAR_CODINFO = 0x8,
+    DVAR_SCRIPTINFO = 0x10,
+    DVAR_TEMP = 0x20,
+    DVAR_SAVED = 0x40,
+    DVAR_INTERNAL = 0x80,
+    DVAR_EXTERNAL = 0x100,
+    DVAR_USERINFO = 0x200,
+    DVAR_SERVERINFO = 0x400,
+    DVAR_INIT = 0x800,
+    DVAR_SYSTEMINFO = 0x1000,
+    DVAR_ROM = 0x2000,
+    DVAR_CHANGEABLE_RESET = 0x4000,
+    DVAR_AUTOEXEC = 0x8000,
+  };
+
+  // 366
+  //
+  enum DvarType: __int8
+  {
+    DVAR_TYPE_BOOL = 0x0,
+    DVAR_TYPE_FLOAT = 0x1,
+    DVAR_TYPE_FLOAT_2 = 0x2,
+    DVAR_TYPE_FLOAT_3 = 0x3,
+    DVAR_TYPE_FLOAT_4 = 0x4,
+    DVAR_TYPE_INT = 0x5,
+    DVAR_TYPE_ENUM = 0x6,
+    DVAR_TYPE_STRING = 0x7,
+    DVAR_TYPE_COLOR = 0x8,
+    DVAR_TYPE_FLOAT_3_COLOR = 0x9,
+    DVAR_TYPE_COUNT = 0xA,
+  };
+
   // 791
   //
   union DvarValue
@@ -725,7 +795,7 @@ namespace iw4x
     int integer;
     unsigned int unsignedInt;
     float value;
-    float vector [4];
+    vec4_t vector;
     const char* string;
     char color [4];
   };
@@ -759,22 +829,24 @@ namespace iw4x
     } vector;
   };
 
+
   // 796
   //
-  struct dvar_t
-  {
-    const char* name;
-    const char* description;
-    unsigned int flags;
-    dvarType type;
-    bool modified;
-    DvarValue current;
-    DvarValue latched;
-    DvarValue reset;
-    DvarLimits domain;
-    bool (__cdecl* domainFunc) (dvar_t*, DvarValue);
-    dvar_t* hashNext;
-  };
+struct dvar_t
+{
+  const char *name;
+  DvarFlags flags;
+  DvarType type;
+  bool modified;
+  BYTE pad0[2];
+  DvarValue current;
+  DvarValue latched;
+  DvarValue reset;
+  DvarLimits domain;
+  const char *description;
+  dvar_t *hashNext;
+};
+
 
   struct snd_alias_list_t
   {
@@ -1780,12 +1852,12 @@ namespace iw4x
     bool displayHUDWithKeycatchUI;
     connstate_t connectionState;
     bool invited;
-    char itemsUnlocked [256];
+    char itemsUnlocked[256];
     bool itemsUnlockedInited;
     bool itemsUnlockedLastGameDirty;
-    unsigned short itemsUnlockedLastGame [16];
+    unsigned __int16 itemsUnlockedLastGame[16];
     int itemsUnlockedLastGameCount;
-    char* itemsUnlockedBuffer;
+    char *itemsUnlockedBuffer;
     int itemsUnlockedLocalClientNum;
     int itemsUnlockedControllerIndex;
     int itemsUnlockedStatsSource;
@@ -3453,12 +3525,24 @@ namespace iw4x
     SetLocalVarData* setLocalVarData;
   };
 
+  enum EventType : __int8
+  {
+    EVENT_UNCONDITIONAL = 0x0,
+    EVENT_IF = 0x1,
+    EVENT_ELSE = 0x2,
+    EVENT_SET_LOCAL_VAR_BOOL = 0x3,
+    EVENT_SET_LOCAL_VAR_INT = 0x4,
+    EVENT_SET_LOCAL_VAR_FLOAT = 0x5,
+    EVENT_SET_LOCAL_VAR_STRING = 0x6,
+    EVENT_COUNT = 0x7,
+  };
+
   // 1264
   //
   struct MenuEventHandler
   {
     EventData eventData;
-    char eventType;
+    EventType eventType;
   };
 
   // 1265
@@ -4634,35 +4718,6 @@ namespace iw4x
     XAssetEntryPoolEntry* next;
   };
 
-  enum DvarSetSource
-  {
-    DVAR_SOURCE_INTERNAL = 0x0,
-    DVAR_SOURCE_EXTERNAL = 0x1,
-    DVAR_SOURCE_SCRIPT = 0x2,
-    DVAR_SOURCE_DEVGUI = 0x3,
-  };
-
-  enum DvarFlags
-  {
-    DVAR_NONE = 0x0,
-    DVAR_ARCHIVE = 0x1,
-    DVAR_LATCH = 0x2,
-    DVAR_CHEAT = 0x4,
-    DVAR_CODINFO = 0x8,
-    DVAR_SCRIPTINFO = 0x10,
-    DVAR_TEMP = 0x20,
-    DVAR_SAVED = 0x40,
-    DVAR_INTERNAL = 0x80,
-    DVAR_EXTERNAL = 0x100,
-    DVAR_USERINFO = 0x200,
-    DVAR_SERVERINFO = 0x400,
-    DVAR_INIT = 0x800,
-    DVAR_SYSTEMINFO = 0x1000,
-    DVAR_ROM = 0x2000,
-    DVAR_CHANGEABLE_RESET = 0x4000,
-    DVAR_AUTOEXEC = 0x8000,
-  };
-
   struct WinConData
   {
     HWND* hWnd;
@@ -4680,20 +4735,27 @@ namespace iw4x
 
   struct ScreenPlacement
   {
-    float scaleVirtualToReal [2];
-    float scaleVirtualToFull [2];
-    float scaleRealToVirtual [2];
-    float realViewportPosition [2];
-    float realViewportSize [2];
-    float virtualViewableMin [2];
-    float virtualViewableMax [2];
-    float realViewableMin [2];
-    float realViewableMax [2];
-    float virtualAdjustableMin [2];
-    float virtualAdjustableMax [2];
-    float realAdjustableMin [2];
-    float realAdjustableMax [2];
-    float subScreenLeft [2];
+    vec2_t scaleVirtualToReal;
+    vec2_t scaleVirtualToFull;
+    vec2_t scaleRealToVirtual;
+    vec2_t realViewportPosition;
+    vec2_t realViewportSize;
+    vec2_t virtualViewableMin;
+    vec2_t virtualViewableMax;
+    vec2_t realViewableMin;
+    vec2_t realViewableMax;
+    vec2_t virtualAdjustableMin;
+    vec2_t virtualAdjustableMax;
+    vec2_t realAdjustableMin;
+    vec2_t realAdjustableMax;
+  };
+
+  enum msgwnd_mode_t
+  {
+    MWM_BOTTOMUP_ALIGN_TOP = 0x0,
+    MWM_BOTTOMUP_ALIGN_BOTTOM = 0x1,
+    MWM_TOPDOWN_ALIGN_TOP = 0x2,
+    MWM_TOPDOWN_ALIGN_BOTTOM = 0x3,
   };
 
   struct field_t
@@ -4867,6 +4929,562 @@ namespace iw4x
     SCRMODE_COUNT = 0x3,
   };
 
+  struct vidConfig_t
+  {
+    unsigned int sceneWidth;
+    unsigned int sceneHeight;
+    unsigned int displayWidth;
+    unsigned int displayHeight;
+    unsigned __int16 outputDisplayWidth;
+    unsigned __int16 outputDisplayHeight;
+    unsigned int displayFrequency;
+    bool isToolMode;
+    int isWideScreen;
+    int isHiDef;
+    int isFullscreen;
+    float aspectRatioWindow;
+    float aspectRatioScenePixel;
+    float aspectRatioDisplayPixel;
+    unsigned int maxTextureSize;
+    unsigned int maxTextureMaps;
+    bool deviceSupportsGamma;
+  };
+
+  struct clientLogo_t
+  {
+    int startTime;
+    int duration;
+    int fadein;
+    int fadeout;
+    Material* material [2];
+  };
+
+  struct serverInfo_t
+  {
+    XNADDR xnaddr;
+    XNKEY xnkey;
+    XNKID xnkid;
+    int publicSlots;
+    int publicSlotsUsed;
+    int privateSlots;
+    int privateSlotsUsed;
+    unsigned __int64 nonce;
+    unsigned __int8 netType;
+    unsigned __int8 clients;
+    unsigned __int8 maxClients;
+    unsigned __int8 dirty;
+    char friendlyfire;
+    char killcam;
+    unsigned __int8 hardware;
+    unsigned __int8 mod;
+    unsigned __int8 requestCount;
+    __int16 minPing;
+    __int16 maxPing;
+    __int16 ping;
+    char hostName [32];
+    char mapName [32];
+    char game [24];
+    char gameType [16];
+  };
+
+  struct trDebugLine_t
+  {
+    float start [3];
+    float end [3];
+    float color [4];
+    int depthTest;
+  };
+
+  struct trDebugString_t
+  {
+    float xyz [3];
+    float color [4];
+    float scale;
+    char text [96];
+  };
+
+  struct clientDebugStringInfo_t
+  {
+    int max;
+    int num;
+    trDebugString_t* strings;
+    int* durations;
+  };
+
+  struct clientDebugLineInfo_t
+  {
+    int max;
+    int num;
+    trDebugLine_t* lines;
+    int* durations;
+  };
+
+  struct clientDebug_t
+  {
+    int prevFromServer;
+    int fromServer;
+    clientDebugStringInfo_t clStrings;
+    clientDebugStringInfo_t svStringsBuffer;
+    clientDebugStringInfo_t svStrings;
+    clientDebugLineInfo_t clLines;
+    clientDebugLineInfo_t svLinesBuffer;
+    clientDebugLineInfo_t svLines;
+  };
+
+  struct ClientMatchData
+  {
+    char def [64];
+    unsigned __int8 data [1024];
+  };
+
+  struct gameState_t
+  {
+    int stringOffsets [4083];
+    char stringData [65536];
+    int dataCount;
+  };
+
+  struct clientStatic_t
+  {
+    int quit;
+    int hunkUsersStarted;
+    char servername [256];
+    int rendererStarted;
+    int soundStarted;
+    int uiStarted;
+    int devGuiStarted;
+    int frametime;
+    float frametime_base;
+    int realtime;
+    bool gpuSyncedPrevFrame;
+    bool inputUpdatedPrevFrame;
+    clientLogo_t logo;
+    float mapCenter [3];
+    int numlocalservers;
+    int pingUpdateSource;
+    int serverId;
+    bool allowedAllocSkel;
+    Material* whiteMaterial;
+    Material* consoleMaterial;
+    Font_s* consoleFont;
+    vidConfig_t vidConfig;
+    serverInfo_t localServers [16];
+    clientDebug_t debug;
+    ClientMatchData matchData;
+    XNADDR xnaddrs [18];
+    volatile int scriptError;
+    float debugRenderPos [3];
+    int skelValid;
+    int skelTimeStamp;
+    volatile int skelMemPos;
+    char skelMemory [262144];
+    char* skelMemoryStart;
+    gameState_t gameState;
+  };
+
+  enum LocSelInputState
+  {
+    LOC_SEL_INPUT_NONE = 0x0,
+    LOC_SEL_INPUT_CONFIRM = 0x1,
+    LOC_SEL_INPUT_CANCEL = 0x2,
+  };
+
+  struct KeyState
+  {
+    int down;
+    int repeats;
+    const char *binding;
+  };
+
+  struct PlayerKeyState
+  {
+    field_t chatField;
+    int chat_team;
+    int overstrikeMode;
+    int anyKeyDown;
+    KeyState keys[192];
+    LocSelInputState locSelInputState;
+  };
+
+  enum MaterialVertexDeclType
+  {
+    VERTDECL_GENERIC = 0x0,
+    VERTDECL_PACKED = 0x1,
+    VERTDECL_WORLD = 0x2,
+    VERTDECL_WORLD_T1N0 = 0x3,
+    VERTDECL_WORLD_T1N1 = 0x4,
+    VERTDECL_WORLD_T2N0 = 0x5,
+    VERTDECL_WORLD_T2N1 = 0x6,
+    VERTDECL_WORLD_T2N2 = 0x7,
+    VERTDECL_WORLD_T3N0 = 0x8,
+    VERTDECL_WORLD_T3N1 = 0x9,
+    VERTDECL_WORLD_T3N2 = 0xA,
+    VERTDECL_WORLD_T4N0 = 0xB,
+    VERTDECL_WORLD_T4N1 = 0xC,
+    VERTDECL_WORLD_T4N2 = 0xD,
+    VERTDECL_POS_TEX = 0xE,
+    VERTDECL_STATICMODELCACHE = 0xF,
+    VERTDECL_COUNT = 0x10,
+  };
+
+  struct GfxCmdBufPrimState
+  {
+    IDirect3DDevice9* device;
+    IDirect3DIndexBuffer9* indexBuffer;
+    MaterialVertexDeclType vertDeclType;
+
+    struct
+    {
+      unsigned int stride;
+      IDirect3DVertexBuffer9* vb;
+      unsigned int offset;
+    } streams [2];
+
+    IDirect3DVertexDeclaration9* vertexDecl;
+  };
+
+  struct GfxCmdBufState
+  {
+    char refSamplerState[16];
+    unsigned int samplerState[16];
+    GfxTexture *samplerTexture[16];
+    GfxCmdBufPrimState prim;
+    char buf0[2632];
+    MaterialPixelShader *pixelShader;
+    MaterialVertexShader *vertexShader;
+  };
+
+  struct cgMedia_t
+  {
+    Material* whiteMaterial;
+    Material* teamStatusBar;
+    Material* afkLightbulb;
+    Material* connectionMaterial;
+    Material* youInKillCamMaterial;
+    TracerDef* tracerDefault;
+    Material* tracerThermalOverrideMat;
+    Material* redTracerMaterial;
+    Material* greenTracerMaterial;
+    Material* bulletMaterial;
+    Material* laserMaterial;
+    Material* laserViewmodelMaterial;
+    Material* laserLightMaterial;
+    Material* lagometerMaterial;
+    Material* ropeMaterial;
+    Material* fhj18hudBackground;
+    Material* rangefinderHudBackground;
+    Material* bcpuHudBackground;
+    Material* tacticalInsertionBackground;
+    Material* briefcaseBombBackground;
+    Material* pdaHackerBackground;
+    Material* scopeOverlayEmp;
+    Material* hintMaterials [264];
+    Material* objectiveMaterials [1];
+    Material* friendMaterials [3];
+    Material* partyMaterials [3];
+    Material* damageMaterial;
+    Material* mantleHint;
+    Material* graphline;
+    Font_s* extraBigDevFont;
+    Font_s* inspectorFont;
+    unsigned int grenadeExplodeSound [32];
+    unsigned int rifleGrenadeSound [32];
+    unsigned int rocketExplodeSound [32];
+    unsigned int rocketExplodeXtremeSound [32];
+    unsigned int mortarShellExplodeSound [32];
+    unsigned int tankShellExplodeSound [32];
+    unsigned int weaponImpactsTankArmorSound [16];
+    unsigned int weaponImpactsTankTreadSound [16];
+    unsigned int bulletHitSmallSound [32];
+    unsigned int bulletHitLargeSound [32];
+    unsigned int bulletHitAPSound [32];
+    unsigned int bulletHitXTremeSound [32];
+    unsigned int shotgunHitSound [32];
+    unsigned int boltHitSound [32];
+    unsigned int bladeHitSound [32];
+    unsigned int bulletExitSmallSound [32];
+    unsigned int bulletExitLargeSound [32];
+    unsigned int bulletExitAPSound [32];
+    unsigned int bulletExitXTremeSound [32];
+    unsigned int shotgunExitSound [32];
+    unsigned int boltExitSound [32];
+    unsigned int mantleSound;
+    unsigned int mantleSoundPlayer;
+    unsigned int dtpLaunchSound;
+    unsigned int dtpLaunchSoundPlayer;
+    unsigned int dtpLandSound [9];
+    unsigned int dtpLandSoundPlayer [9];
+    char dtpSlideLoopSound [9][64];
+    char dtpSlideLoopSoundPlayer [9][64];
+    unsigned int dtpSlideStopSound [9];
+    unsigned int dtpSlideStopSoundPlayer [9];
+    unsigned int dtpCollideSound;
+    unsigned int dtpCollideSoundPlayer;
+    unsigned int playerSlidingStart_1p [9];
+    unsigned int playerSlidingStart_3p [9];
+    unsigned int playerSlidingStop_1p [9];
+    unsigned int playerSlidingStop_3p [9];
+    unsigned int bulletWhizby;
+    unsigned int bulletCrack;
+    unsigned int underwaterWhizby;
+    unsigned int deathGurgle;
+    unsigned int meleeHit;
+    unsigned int meleeHitOther;
+    unsigned int meleeKnifeHit;
+    unsigned int meleeKnifeHitOther;
+    unsigned int meleeDogHit;
+    unsigned int meleeDogHitOther;
+    unsigned int meleeKnifeHitShield;
+    unsigned int nightVisionOn;
+    unsigned int nightVisionOff;
+    unsigned int playerSprintGasp;
+    unsigned int playerHeartBeatSound;
+    unsigned int playerBreathInSound;
+    unsigned int playerBreathOutSound;
+    unsigned int playerBreathGaspSound;
+    unsigned int playerSwapOffhand;
+    unsigned int rangeFinderLoopSound;
+    unsigned int sensorGrenadeAlert;
+    unsigned int sonarAttachmentPingSound;
+    unsigned int chargeShotWeaponChargingSound;
+    unsigned int chargeShotWeaponDischargeSound;
+    unsigned int chargeShotWeaponBulletQueueSound [5];
+    unsigned int radarSweepSound;
+    unsigned int radarPingSound;
+    Material* compassping_player;
+    Material* compassping_player_bracket;
+    Material* compassping_playerfiring_shoutcast;
+    Material* compassping_friendlyfiring;
+    Material* compassping_friendlyyelling;
+    Material* compassping_friendlyfakefire;
+    Material* compassping_partyfiring;
+    Material* compassping_partyyelling;
+    Material* compassping_enemy;
+    Material* compassping_enemydirectional;
+    Material* compassping_enemyfiring;
+    Material* compassping_enemyyelling;
+    Material* compassping_enemysatellite;
+    Material* compassping_grenade;
+    Material* compassping_explosion;
+    Material* compassping_firstplace;
+    Material* compassping_generic_player_shoutcast;
+    Material* compassping_generic_playerfiring_shoutcast;
+    Material* compassping_generic_playerfiring;
+    Material* watch_face;
+    Material* watch_hour;
+    Material* watch_minute;
+    Material* watch_second;
+    Material* acoustic_ping;
+    Material* acoustic_wedge;
+    Material* acoustic_grid;
+    Material* compass_scrambler_large;
+    Material* compass_mortar_selector;
+    Material* compass_acoustic_ping;
+    Material* compass_radarline;
+    Material* compass_artillery_friendly;
+    Material* compass_artillery_enemy;
+    Material* compass_mortar_friendly;
+    Material* compass_mortar_enemy;
+    Material* compass_dogs_enemy;
+    Material* compass_incoming_artillery;
+    Material* compass_sentry_white;
+    Material* compass_microwave_turret_white;
+    Material* compass_supplydrop_white;
+    Material* compass_guided_hellfire_missile;
+    Material* compass_guided_drone_missile;
+    Material* compass_tank_turret;
+    Material* grenadeIconFrag;
+    Material* grenadeIconFlash;
+    Material* grenadeIconThrowBack;
+    Material* grenadePointer;
+    Material* offscreenObjectivePointer;
+    Material* clientLastStandWaypoint;
+    Material* clientAutoReviveWaypoint;
+    Material* clientManualReviveWaypoint;
+    Material* clientTeamReviveWaypoint [10];
+    Material* demoTimelineFaded;
+    Material* demoTimelineSolid;
+    Material* demoTimelineCursor;
+    Material* demoTimelineBookmark;
+    Material* demoStatePaused;
+    Material* demoStatePlay;
+    Material* demoStateStop;
+    Material* demoStateJump;
+    Material* demoStateForwardFast;
+    Material* demoStateForwardSlow;
+    Material* demoDollycamTracerMaterial;
+    FxImpactTable* fx;
+    const FxEffectDef* fxNoBloodFleshHit;
+    const FxEffectDef* fxKnifeBlood;
+    const FxEffectDef* fxKnifeNoBlood;
+    const FxEffectDef* fxDogBlood;
+    const FxEffectDef* fxDogNoBlood;
+    const FxEffectDef* fxNonFatalHero;
+    const FxEffectDef* fxSensorGrenadeFriendlyRunner;
+    const FxEffectDef* fxSensorGrenadeEnemyRunner;
+    const FxEffectDef* fxSensorGrenadeTargetingBolt;
+    const FxEffectDef* fxRiotShieldImpact;
+    const FxEffectDef* fxBloodOnRiotshield;
+    const FxEffectDef* fxLaserPoint;
+    const FxEffectDef* fxLaserPointSight;
+    const FxEffectDef* fxLaserPointSightThermal;
+    const FxEffectDef* fxLaserPointVehicle;
+    const FxEffectDef* fxDtpArmSlide1;
+    const FxEffectDef* fxDtpArmSlide2;
+    const FxEffectDef* fxPlayerSliding;
+    const FxEffectDef* fxPuff;
+    const FxEffectDef* heliDustEffect;
+    const FxEffectDef* heliWaterEffect;
+    const FxEffectDef* helicopterLightSmoke;
+    const FxEffectDef* helicopterHeavySmoke;
+    const FxEffectDef* helicopterOnFire;
+    const FxEffectDef* jetAfterburner;
+    const FxEffectDef* physicsWaterEffects [8];
+    const FxEffectDef* infraredHeartbeat;
+    const FxEffectDef* playerLaserSightLight;
+    BYTE pad0 [4020];
+    Font_s* smallDevFont;         // 0x2C98
+    Font_s* bigDevFont;
+    BYTE pad1 [33000];
+    Material* empFilterOverlay;   // 0xAD90
+    Material* nightVisionOverlay;
+    Material* hudIconNVG;
+    Material* hudDpadArrow;
+    Material* hudDpadCircle;
+    Material* hudDpadLeftHighlight;
+    Material* ammoCounterBullet;
+    Material* ammoCounterBeltBullet;
+    Material* ammoCounterRifleBullet;
+    Material* ammoCounterRocket;
+    Material* ammoCounterShotgunShell;
+    Material* ammoCounterSingle;
+    Material* lifeCounterAlive;
+    Material* lifeCounterDead;
+    Material* textDecodeCharacters;
+    Material* textDecodeCharactersGlow;
+  };
+
+
+  struct Message
+  {
+    int startTime;
+    int endTime;
+  };
+
+  struct MessageLine
+  {
+    int messageIndex;
+    int textBufPos;
+    int textBufSize;
+    int typingStartTime;
+    int lastTypingSoundTime;
+    int flags;
+  };
+
+  struct MessageWindow
+  {
+    MessageLine *lines;
+    Message *messages;
+    char *circularTextBuffer;
+    int textBufSize;
+    int lineCount;
+    int padding;
+    int scrollTime;
+    int fadeIn;
+    int fadeOut;
+    int textBufPos;
+    int firstLineIndex;
+    int activeLineCount;
+    int messageIndex;
+  };
+
+  struct MessageBuffer
+  {
+    char gamemsgText[4][2048];
+    MessageWindow gamemsgWindows[4];
+    MessageLine gamemsgLines[4][12];
+    Message gamemsgMessages[4][12];
+  };
+
+  struct Console
+  {
+    char consoleText[512];
+    unsigned int lineOffset;
+    int displayLineOffset;
+    int prevChannel;
+    bool outputVisible;
+    int fontHeight;
+    int visibleLineCount;
+    int visiblePixelWidth;
+    vec2_t screenMin;
+    vec2_t screenMax;
+    MessageBuffer messageBuffer;
+    vec4_t color;
+  };
+
+  struct CmdArgs
+  {
+    int nesting;
+    int localClientNum[8];
+    int controllerIndex[8];
+    int argc[8];
+    const char **argv[8];
+  };
+
+  enum CriticalSection : __int32
+  {
+    CRITSECT_CONSOLE = 0x0,
+    CRITSECT_DEBUG_SOCKET = 0x1,
+    CRITSECT_COM_ERROR = 0x2,
+    CRITSECT_STATMON = 0x3,
+    CRITSECT_SOUND_ALLOC = 0x4,
+    CRITSECT_DEBUG_LINE = 0x5,
+    CRITSECT_ALLOC_MARK = 0x6,
+    CRITSECT_STREAMED_SOUND = 0x7,
+    CRITSECT_FAKELAG = 0x8,
+    CRITSECT_CLIENT_MESSAGE = 0x9,
+    CRITSECT_CLIENT_CMD = 0xA,
+    CRITSECT_DOBJ_ALLOC = 0xB,
+    CRITSECT_START_SERVER = 0xC,
+    CRITSECT_XANIM_ALLOC = 0xD,
+    CRITSECT_KEY_BINDINGS = 0xE,
+    CRITSECT_FX_VIS = 0xF,
+    CRITSECT_SERVER_MESSAGE = 0x10,
+    CRITSECT_SCRIPT_STRING = 0x11,
+    CRITSECT_ASSERT = 0x12,
+    CRITSECT_SCRIPT_DEBUGGER_ALLOC = 0x13,
+    CRITSECT_MISSING_ASSET = 0x14,
+    CRITSECT_PHYSICS = 0x15,
+    CRITSECT_LIVE = 0x16,
+    CRITSECT_AUDIO_PHYSICS = 0x17,
+    CRITSECT_LSP = 0x18,
+    CRITSECT_CINEMATIC_UPDATE = 0x19,
+    CRITSECT_CINEMATIC_TARGET_CHANGE_COMMAND = 0x1A,
+    CRITSECT_CINEMATIC_TARGET_CHANGE_BACKEND = 0x1B,
+    CRITSECT_CINEMATIC_STATUS = 0x1C,
+    CRITSECT_CINEMATIC_SERVER = 0x1D,
+    CRITSECT_FX_ALLOC = 0x1E,
+    CRITSECT_NETTHREAD_OVERRIDE = 0x1F,
+    CRITSECT_DBGSOCKETS_FRAME = 0x20,
+    CRITSECT_DBGSOCKETS_HOST_LOGBUFFER = 0x21,
+    CRITSECT_CBUF = 0x22,
+    CRITSECT_STREAMING = 0x23,
+    CRITSECT_STATS_WRITE = 0x24,
+    CRITSECT_CG_GLASS = 0x25,
+    CRITSECT_COMBOFILE = 0x26,
+    CRITSECT_CONTENT_FILE = 0x27,
+    CRITSECT_SERVER_DEMO_COMPRESS = 0x28,
+    CRITSECT_COM_SET_ERROR_MSG = 0x29,
+    CRITSECT_PHYSICS_ALLOC = 0x2A,
+    CRITSECT_COUNT = 0x2B,
+  };
+
+  struct FastCriticalSection
+  {
+    volatile int readCount;
+    volatile int writeCount;
+  };
+
   // Game internal symbols
   //
 
@@ -4939,6 +5557,9 @@ namespace iw4x
   using Dvar_SetBoolByName_t = void (*) (const char *nname, bool value);
   inline Dvar_SetBoolByName_t Dvar_SetBoolByName = reinterpret_cast<Dvar_SetBoolByName_t> (0x140289000);
 
+  using Dvar_SetFloat_t = void (*) (dvar_t *dvar, float value);
+  inline Dvar_SetFloat_t Dvar_SetFloat = reinterpret_cast<Dvar_SetFloat_t> (0x1402893A0);
+
   using Dvar_SetString_t = void (*) (dvar_t *dvar, const char *value);
   inline Dvar_SetString_t Dvar_SetString = reinterpret_cast<Dvar_SetString_t> (0x140289A80);
 
@@ -4969,10 +5590,16 @@ namespace iw4x
   using Dvar_StringToEnum_t = int (*) (const DvarLimits domain, const char *string);
   inline Dvar_StringToEnum_t Dvar_StringToEnum = reinterpret_cast<Dvar_StringToEnum_t> (0x14028A1C0);
 
-  using Dvar_StringToValue_t = DvarValue * (*) (const dvarType type, const DvarLimits domain, const char *string);
+  // using Dvar_StringToValue_t = DvarValue * (*) (const dvarType type, const DvarLimits domain, const char *string);
+  // inline Dvar_StringToValue_t Dvar_StringToValue = reinterpret_cast<Dvar_StringToValue_t> (0x14028A2C0);
+
+  using Dvar_StringToValue_t = DvarValue * (*) (DvarValue *dvarValue, DvarType type, DvarLimits *domain, const char *string);
   inline Dvar_StringToValue_t Dvar_StringToValue = reinterpret_cast<Dvar_StringToValue_t> (0x14028A2C0);
 
-  using Dvar_StringToColor_t = void (*) (const char *string, vec4_t color);
+  // using Dvar_StringToColor_t = void (*) (const char *string, vec4_t color);
+  // inline Dvar_StringToColor_t Dvar_StringToColor = reinterpret_cast<Dvar_StringToColor_t> (0x14028A090);
+
+  using Dvar_StringToColor_t = void (*) (const char *string, DvarValue *domain);
   inline Dvar_StringToColor_t Dvar_StringToColor = reinterpret_cast<Dvar_StringToColor_t> (0x14028A090);
 
   using Dvar_ValueToString_t = const char * (*) (dvar_t *dvar, DvarValue value);
@@ -4987,10 +5614,10 @@ namespace iw4x
   using Dvar_IsValidName_t = bool (*) (const char *dvarName);
   inline Dvar_IsValidName_t Dvar_IsValidName = reinterpret_cast<Dvar_IsValidName_t> (0x140287550);
 
-  using Dvar_ValueInDomain_t = bool (*) (dvarType type, DvarValue value, DvarLimits domain);
+  using Dvar_ValueInDomain_t = bool (*) (DvarType type, DvarValue value, DvarLimits domain);
   inline Dvar_ValueInDomain_t Dvar_ValueInDomain = reinterpret_cast<Dvar_ValueInDomain_t> (0x14028A550);
 
-  using Dvar_ValuesEqual_t = bool (*) (dvarType type, DvarValue val0, DvarValue val1);
+  using Dvar_ValuesEqual_t = bool (*) (DvarType type, DvarValue val0, DvarValue val1);
   inline Dvar_ValuesEqual_t Dvar_ValuesEqual = reinterpret_cast<Dvar_ValuesEqual_t> (0x14028A860);
 
   using Dvar_AssignResetStringValue_t = void (*) (dvar_t *dvar, DvarValue *dest, const char *string);
@@ -5029,7 +5656,7 @@ namespace iw4x
   using Dvar_RegisterVec4_t = dvar_t * (*) (const char *dvarName, float x, float y, float z, float w, float min, float max, DvarFlags flags, const char *description);
   inline Dvar_RegisterVec4_t Dvar_RegisterVec4 = reinterpret_cast<Dvar_RegisterVec4_t> (0x1402889D0);
 
-  using Dvar_RegisterVariant_t = dvar_t * (*) (const char *dvarName, dvarType type, DvarFlags flags, DvarValue value, DvarLimits domain, const char *description);
+  using Dvar_RegisterVariant_t = dvar_t * (*) (const char *dvarName, DvarType type, DvarFlags flags, DvarValue value, DvarLimits domain, const char *description);
   inline Dvar_RegisterVariant_t Dvar_RegisterVariant = reinterpret_cast<Dvar_RegisterVariant_t> (0x1402882E0);
 
   using  DB_FindXAssetHeader_t = XAssetHeader (*) (XAssetType type, const char* name);
@@ -5044,6 +5671,9 @@ namespace iw4x
   using  Sys_InitMainThread_t = __int64 (*) (void);
   inline Sys_InitMainThread_t Sys_InitMainThread = reinterpret_cast<Sys_InitMainThread_t> (0x14020DC00);
 
+  using Sys_IsMainThread_t = bool (*) (void);
+  inline Sys_IsMainThread_t Sys_IsMainThread = reinterpret_cast<Sys_IsMainThread_t> (0x14020DE70);
+
   using Sys_IsRenderThread_t = bool (*) (void);
   inline Sys_IsRenderThread_t Sys_IsRenderThread = reinterpret_cast<Sys_IsRenderThread_t> (0x14020DEC0);
 
@@ -5052,6 +5682,9 @@ namespace iw4x
 
   using  Win_InitLocalization_t = bool (*) (int);
   inline Win_InitLocalization_t Win_InitLocalization = reinterpret_cast<Win_InitLocalization_t> (0x1402A7CB0);
+
+  using I_stricmp_t = int (*) (const char* s0, const char* s1);
+  inline I_stricmp_t I_stricmp = reinterpret_cast<I_stricmp_t> (0x14028E250);
 
   using  I_strnicmp_t = int (*) (const char *s0, const char *s1, int n);
   inline I_strnicmp_t I_strnicmp = reinterpret_cast<I_strnicmp_t> (0x14028E530);
@@ -5149,8 +5782,17 @@ namespace iw4x
   using ScrPlace_GetActivePlacement_t = ScreenPlacement * (*) (int localClientNum);
   inline ScrPlace_GetActivePlacement_t ScrPlace_GetActivePlacement = reinterpret_cast<ScrPlace_GetActivePlacement_t> (0x1400EF370);
 
-  using  R_AddCmdDrawStretchPic_t = void (*) (float x, float y, float width, float height, float s0, float t0, float s1, float t1, float* color, Material* material);
-  inline R_AddCmdDrawStretchPic_t R_AddCmdDrawStretchPic = reinterpret_cast<R_AddCmdDrawStretchPic_t> (0x14001ACE0);
+  using SetupChatField_t = void (*) (int localClientNum, int teamChat, int widthInPixels);
+  inline SetupChatField_t SetupChatField = reinterpret_cast<SetupChatField_t> (0x1400EA820);
+
+  using Message_Key_t = void (*) (int localClientNum, int key);
+  inline Message_Key_t Message_Key = reinterpret_cast<Message_Key_t> (0x1400EC140);
+
+  using Con_Init_t = void (*) (void);
+  inline Con_Init_t Con_Init = reinterpret_cast<Con_Init_t> (0x1400E9360);
+
+  using CL_InitOnceForAllClients_t = void (*) (void);
+  inline CL_InitOnceForAllClients_t CL_InitOnceForAllClients = reinterpret_cast<CL_InitOnceForAllClients_t> (0x1400F7900);
 
   using  Con_OneTimeInit_t = void (*) ();
   inline Con_OneTimeInit_t Con_OneTimeInit = reinterpret_cast<Con_OneTimeInit_t> (0x1400E9960);
@@ -5161,10 +5803,10 @@ namespace iw4x
   using Con_DrawSay_t = void (*) (int localClientNum, int x, int y);
   inline Con_DrawSay_t Con_DrawSay = reinterpret_cast<Con_DrawSay_t> (0x1400E91B0);
 
-  using  ScrPlace_ApplyX_t = float* (*) (const ScreenPlacement*, float, int);
+  using  ScrPlace_ApplyX_t = float (*) (const ScreenPlacement*, float, int);
   inline ScrPlace_ApplyX_t ScrPlace_ApplyX = reinterpret_cast<ScrPlace_ApplyX_t> (0x1400EEF90);
 
-  using  ScrPlace_ApplyY_t = float* (*) (const ScreenPlacement*, float, int);
+  using  ScrPlace_ApplyY_t = float (*) (const ScreenPlacement*, float, int);
   inline ScrPlace_ApplyY_t ScrPlace_ApplyY = reinterpret_cast<ScrPlace_ApplyY_t> (0X1400EF080);
 
   using  ScrPlace_GetFullPlacement_t = ScreenPlacement * (*) ();
@@ -5175,6 +5817,9 @@ namespace iw4x
 
   using ScrPlace_SetupFullscreenViewports_t = double (*) (void);
   inline ScrPlace_SetupFullscreenViewports_t ScrPlace_SetupFullscreenViewports = reinterpret_cast<ScrPlace_SetupFullscreenViewports_t> (0x1400EF710);
+
+  using ScrPlace_SetupFloatRenderTargetViewport_t = void (*) (float *scaleVirtualToReal, float a2, float a3, float displayWidth, float displayHeight, int displayWidtha, int a7);
+  inline ScrPlace_SetupFloatRenderTargetViewport_t ScrPlace_SetupFloatRenderTargetViewport = reinterpret_cast<ScrPlace_SetupFloatRenderTargetViewport_t> (0x1400EF510);
 
   using ScrPlace_ApplyRect_t = void (*) (const ScreenPlacement *scrPlace, float *x, float *y, float *w, float *h, int horzAlign, int vertAlign);
   inline ScrPlace_ApplyRect_t ScrPlace_ApplyRect = reinterpret_cast<ScrPlace_ApplyRect_t> (0x1400EEB90);
@@ -5200,14 +5845,26 @@ namespace iw4x
   using R_CheckLostDevice_t = bool (*) (void);
   inline R_CheckLostDevice_t R_CheckLostDevice = reinterpret_cast<R_CheckLostDevice_t> (0x140032500);
 
+  using R_RegisterFont_t = Font_s * (*) (const char *fontName);
+  inline R_RegisterFont_t R_RegisterFont = reinterpret_cast<R_RegisterFont_t> (0x140019840);
+
+  using R_TextWidth_t = int (*) (const char *text, int maxChars, Font_s *font);
+  inline R_TextWidth_t R_TextWidth = reinterpret_cast<R_TextWidth_t> (0x140019870);
+
   using R_TextHeight_t = int (*) (Font_s *font);
   inline R_TextHeight_t R_TextHeight = reinterpret_cast<R_TextHeight_t> (0x1400199C0);
 
   using R_NormalizedTextScale_t = float (*) (Font_s *font, float scale);
   inline R_NormalizedTextScale_t R_NormalizedTextScale = reinterpret_cast<R_NormalizedTextScale_t> (0x140019850);
 
-  using R_AddCmdDrawTextInternal_t = void (*) (const char *text, int maxChars, Font_s *font, float x, float y, float xScale, float yScale, float rotation, const vec4_t *color, int style);
+  using  R_AddCmdDrawStretchPic_t = void (*) (float x, float y, float width, float height, float s0, float t0, float s1, float t1, float* color, Material* material);
+  inline R_AddCmdDrawStretchPic_t R_AddCmdDrawStretchPic = reinterpret_cast<R_AddCmdDrawStretchPic_t> (0x14001ACE0);
+
+  using R_AddCmdDrawTextInternal_t = void (*) (const char *text, int maxChars, Font_s *font, float x, float y, float xScale, float yScale, float rotation, float *color, int style);
   inline R_AddCmdDrawTextInternal_t R_AddCmdDrawTextInternal = reinterpret_cast<R_AddCmdDrawTextInternal_t> (0x14001B260);
+
+  using R_AddCmdDrawTextWithCursorInternal_t = void (*) (const char *text, int maxChars, Font_s *font, float x, float y, float w, float xScale, float yScale, const float *color, int style, int cursorPos, char cursor);
+  inline R_AddCmdDrawTextWithCursorInternal_t R_AddCmdDrawTextWithCursorInternal = reinterpret_cast<R_AddCmdDrawTextWithCursorInternal_t> (0x14001B250);
 
   using Key_IsCatcherActive_t = bool (*) (int localClientNum, int mask);
   inline Key_IsCatcherActive_t Key_IsCatcherActive = reinterpret_cast<Key_IsCatcherActive_t> (0x1400EB9F0);
@@ -5221,6 +5878,9 @@ namespace iw4x
   using Field_Draw_t = void (*) (int localClientNum, field_t *edit, int x, int y, int horzAlign, int vertAlign);
   inline Field_Draw_t Field_Draw = reinterpret_cast<Field_Draw_t> (0x1400EB160);
 
+  using Field_AdjustScroll_t = void (*) (const ScreenPlacement *scrPlace, field_t *edit);
+  inline Field_AdjustScroll_t Field_AdjustScroll = reinterpret_cast<Field_AdjustScroll_t> (0x1400EADE0);
+
   using Cmd_AddCommandInternal_t = void (*) (const char *cmdName, void (__fastcall *function)(), cmd_function_s *allocedCmd);
   inline Cmd_AddCommandInternal_t Cmd_AddCommandInternal = reinterpret_cast<Cmd_AddCommandInternal_t> (0x1401EC990);
 
@@ -5233,12 +5893,46 @@ namespace iw4x
   using va_t = char * (*) (const char *format, ...);
   inline va_t va = reinterpret_cast<va_t> (0x14028F360);
 
+  using CG_DrawFullScreenUI_t = void (*) (int localClientNum);
+  inline CG_DrawFullScreenUI_t CG_DrawFullScreenUI = reinterpret_cast<CG_DrawFullScreenUI_t> (0x1400CDDB0);
+
   using UI_DrawBuildNumber_t = void (*) (unsigned int localClientNum);
   inline UI_DrawBuildNumber_t UI_DrawBuildNumber = reinterpret_cast<UI_DrawBuildNumber_t> (0x140272D80);
 
+  using DB_GetXAssetName_t = const char * (*) (XAsset *header);
+  inline DB_GetXAssetName_t DB_GetXAssetName = reinterpret_cast<DB_GetXAssetName_t> (0x140114B20);
+
+  using AngleVectors_t = void (*) (const vec3_t *angles, vec3_t *forward, vec3_t *right, vec3_t *up);
+  inline AngleVectors_t AngleVectors = reinterpret_cast<AngleVectors_t> (0x1402800D0);
+
+  using Cmd_Argv_t = const char * (*) (int argIndex);
+  inline Cmd_Argv_t Cmd_Argv = reinterpret_cast<Cmd_Argv_t> (0x140035D60);
+
+  using Cmd_TokenizeString_t = void (*) (const char *string);
+  inline Cmd_TokenizeString_t Cmd_TokenizeString = reinterpret_cast<Cmd_TokenizeString_t> (0x1401ED560);
+
+  using Cmd_EndTokenizedString_t = void (*) (void);
+  inline Cmd_EndTokenizedString_t Cmd_EndTokenizedString = reinterpret_cast<Cmd_EndTokenizedString_t> (0x1401ECC10);
+
+  using Sys_EnterCriticalSection_t = void (*) (CriticalSection critSect);
+  inline Sys_EnterCriticalSection_t Sys_EnterCriticalSection = reinterpret_cast<Sys_EnterCriticalSection_t> (0x140290600);
+
+  using Sys_LeaveCriticalSection_t = void (*) (CriticalSection critSect);
+  inline Sys_LeaveCriticalSection_t Sys_LeaveCriticalSection = reinterpret_cast<Sys_LeaveCriticalSection_t> (0x140290660);
+
   // Game Internal variables
   //
-  constexpr uint32_t KEYCATCH_CONSOLE (1);
+  inline constexpr uint32_t KEYCATCH_CONSOLE (1);
+  inline constexpr uint32_t KEYCATCH_MESSAGE (32);
+
+  inline CmdArgs* cmd_args  (reinterpret_cast<CmdArgs*> (0x141C17810));
+  inline PlayerKeyState** playerKeys (reinterpret_cast<PlayerKeyState**> (0x14070DA30));
+  inline clientUIActive_t* clientUIActives (reinterpret_cast<clientUIActive_t*> (0x140718FB0));
+
+  inline FastCriticalSection* g_dvarCritSect (reinterpret_cast<FastCriticalSection*> (0x14673D280));
+  inline bool* areDvarsSorted (reinterpret_cast<bool*> (0x14673D270));
+  inline int* dvarCount (reinterpret_cast<int*> (0x1466D3268));
+  inline int** sv_dvar_modifiedFlags (reinterpret_cast<int**> (0x1466D3260));
 
   inline SOCKET* ip_socket (reinterpret_cast<SOCKET*> (0x1467E8490));
   inline SOCKET* lsp_socket (reinterpret_cast<SOCKET*> (0x1467E8498));
@@ -5246,21 +5940,30 @@ namespace iw4x
   inline int* s_hunkTotal (reinterpret_cast<int*> (0x1466BC560));
   inline void* s_hunkData (reinterpret_cast<void*> (0x1466AC838));
 
+  inline cgMedia_t* cgMedia (reinterpret_cast<cgMedia_t*> (0x1404B1D10));
+  inline clientStatic_t* cls (reinterpret_cast<clientStatic_t*> (0x140CA7BB0));
   inline WinConData* s_wcd (reinterpret_cast<WinConData*> (0x146808800));
   inline sharedUiInfo_t* sharedUiInfo (reinterpret_cast<sharedUiInfo_t*> (0x146627790));
   inline ScreenPlacement* scrPlaceFull (reinterpret_cast<ScreenPlacement*> (0x140714860));
+  inline Console* con (reinterpret_cast<Console*> (0x14070AFA8));
 
   inline char** com_consoleLines (reinterpret_cast<char**> (0x141C35D90));
   inline int* com_numConsoleLines (reinterpret_cast<int*> (0x141C35D84));
+  inline int* com_fixedConsolePosition (reinterpret_cast<int*> (0x141C346BC));
+
+  inline int* g_console_field_width (reinterpret_cast<int*> (0x140463D50));
+  inline float* g_console_char_height (reinterpret_cast<float*> (0x140463D54));
 
   inline int* con_fontHeight (reinterpret_cast<int*> (0x14070B1B8));
   inline int* con_visibleLineCount (reinterpret_cast<int*> (0x14070B1BC));
   inline int* con_visiblePixelWidth (reinterpret_cast<int*> (0x14070B1C0));
 
   inline int* s_totalChars (reinterpret_cast<int*> (0x146808E38));
-  inline int* g_console_field_width (reinterpret_cast<int*> (0x140463D50));
+
+  inline float* scaleVirtualToReal (reinterpret_cast<float*>(0x1407147F0));
 
   inline ScreenPlacementMode* activeScreenPlacementMode (reinterpret_cast<ScreenPlacementMode*> (0x14071493C));
+  inline ScreenPlacementMode* scrPlaceFull (reinterpret_cast<ScreenPlacementMode*> (0x140714860));
 
-  inline int* keyCatchers (reinterpret_cast<int*> (0x140719AF0));
+  inline GfxCmdBufState* gfxCmdBufState (reinterpret_cast<GfxCmdBufState*> (0x148F89140));
 }
