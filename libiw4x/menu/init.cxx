@@ -53,7 +53,7 @@ namespace iw4x
       {
         MenuEventHandler* h (new MenuEventHandler ());
 
-        h->eventType = 0;
+        h->eventType = EVENT_UNCONDITIONAL;
         h->eventData.unconditionalScript = strdup (cmd.c_str ());
 
         return h;
@@ -107,7 +107,8 @@ namespace iw4x
                 "exec xblive_hostingprivateparty 1",
                 "exec xblive_privatepartyclient 1",
                 "exec xstartprivatematch",
-                "open menu_xboxlive_privatelobby"
+                "open menu_xboxlive_privatelobby",
+                "exec con_echo"
               }
             );
 

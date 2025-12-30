@@ -20,6 +20,7 @@ extern "C"
 #include <libiw4x/imgui/init.hxx>
 #include <libiw4x/menu/init.hxx>
 #include <libiw4x/console/init.hxx>
+#include <libiw4x/input/init.hxx>
 #include <libiw4x/network/init.hxx>
 #include <libiw4x/oob/init.hxx>
 #include <libiw4x/renderer/init.hxx>
@@ -477,6 +478,14 @@ namespace iw4x
             _(0x1400E4DA0, 0x33, 1); // Bypass stats mismatch
             _(0x1400E4DA1, 0xC0, 1); //
             _(0x1400E4DA2, 0xC3, 1); //
+
+            _(0x1401B5AD4, 0x01, 1); //
+
+            _(0x1402864F0, 0xB0, 1); // Patch Content_DoWeHaveContentPack
+            _(0x1402864F1, 0x01, 1); //
+            _(0x1402864F2, 0xC3, 1); //
+
+            _(0x14024AD68, 0x90, 5); // Disable snd_volume
           })
         ([] (uintptr_t address, int value, size_t size)
           {
@@ -487,6 +496,7 @@ namespace iw4x
         frame::init (s);
         menu::init (s);
         console::init (s);
+        input::init ();
         renderer::init ();
         imgui::init ();
         network::init (s);
