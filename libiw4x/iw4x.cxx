@@ -496,7 +496,7 @@ namespace iw4x
         frame::init (s);
         menu::init (s);
         console::init (s);
-        input::init ();
+        input::init (s);
         renderer::init ();
         imgui::init ();
         network::init (s);

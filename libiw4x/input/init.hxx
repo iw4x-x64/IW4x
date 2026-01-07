@@ -9,6 +9,6 @@ namespace iw4x
   namespace input
   {
     LIBIW4X_SYMEXPORT void
-    init ();
+    init (scheduler&);
   }
 }

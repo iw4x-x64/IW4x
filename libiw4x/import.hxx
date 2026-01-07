@@ -5408,6 +5408,7 @@ struct dvar_t
 
   struct Console
   {
+    MessageWindow consoleWindow;
     char consoleText[512];
     unsigned int lineOffset;
     int displayLineOffset;
@@ -5483,6 +5484,67 @@ struct dvar_t
   {
     volatile int readCount;
     volatile int writeCount;
+  };
+
+  struct GfxCmdHeader
+  {
+    unsigned __int16 id;
+    unsigned __int16 byteCount;
+  };
+
+  struct __declspec (align (8)) GfxCmdDrawText2D
+  {
+    GfxCmdHeader header;
+    float x;
+    float y;
+    float rotation;
+    Font_s* font;
+    float xScale;
+    float yScale;
+    GfxColor color;
+    int maxChars;
+    int renderFlags;
+    int cursorPos;
+    char cursorLetter;
+    GfxColor glowForceColor;
+    int fxBirthTime;
+    int fxLetterTime;
+    int fxDecayStartTime;
+    int fxDecayDuration;
+    const Material* fxMaterial;
+    const Material* fxMaterialGlow;
+    float padding;
+    char text [3];
+  };
+
+  enum GfxRenderCommand
+  {
+    RC_END_OF_LIST = 0x0,
+    RC_SET_MATERIAL_COLOR = 0x1,
+    RC_SAVE_SCREEN = 0x2,
+    RC_SAVE_SCREEN_SECTION = 0x3,
+    RC_CLEAR_SCREEN = 0x4,
+    RC_SET_VIEWPORT = 0x5,
+    RC_SET_SCISSOR = 0x6,
+    RC_CLEAR_SCISSOR = 0x7,
+    RC_FIRST_NONCRITICAL = 0x8,
+    RC_STRETCH_PIC = 0x8,
+    RC_STRETCH_PIC_FLIP_ST = 0x9,
+    RC_STRETCH_PIC_ROTATE_XY = 0xA,
+    RC_STRETCH_PIC_ROTATE_ST = 0xB,
+    RC_STRETCH_RAW = 0xC,
+    RC_DRAW_QUAD_PIC = 0xD,
+    RC_DRAW_FULL_SCREEN_COLORED_QUAD = 0xE,
+    RC_DRAW_TEXT_2D = 0xF,
+    RC_DRAW_TEXT_3D = 0x10,
+    RC_BLEND_SAVED_SCREEN_BLURRED = 0x11,
+    RC_BLEND_SAVED_SCREEN_FLASHED = 0x12,
+    RC_DRAW_POINTS = 0x13,
+    RC_DRAW_LINES = 0x14,
+    RC_DRAW_TRIANGLES = 0x15,
+    RC_DRAW_PROFILE = 0x16,
+    RC_PROJECTION_SET = 0x17,
+    RC_COUNT = 0x18,
   };
 
   // Game internal symbols
@@ -5857,10 +5919,10 @@ struct dvar_t
   using R_NormalizedTextScale_t = float (*) (Font_s *font, float scale);
   inline R_NormalizedTextScale_t R_NormalizedTextScale = reinterpret_cast<R_NormalizedTextScale_t> (0x140019850);
 
-  using  R_AddCmdDrawStretchPic_t = void (*) (float x, float y, float width, float height, float s0, float t0, float s1, float t1, float* color, Material* material);
+  using  R_AddCmdDrawStretchPic_t = void (*) (float x, float y, float width, float height, float s0, float t0, float s1, float t1, const float* color, Material* material);
   inline R_AddCmdDrawStretchPic_t R_AddCmdDrawStretchPic = reinterpret_cast<R_AddCmdDrawStretchPic_t> (0x14001ACE0);
 
-  using R_AddCmdDrawTextInternal_t = void (*) (const char *text, int maxChars, Font_s *font, float x, float y, float xScale, float yScale, float rotation, float *color, int style);
+  using R_AddCmdDrawTextInternal_t = void (*) (const char *text, int maxChars, Font_s *font, float x, float y, float xScale, float yScale, float rotation, const float *color, int style);
   inline R_AddCmdDrawTextInternal_t R_AddCmdDrawTextInternal = reinterpret_cast<R_AddCmdDrawTextInternal_t> (0x14001B260);
 
   using R_AddCmdDrawTextWithCursorInternal_t = void (*) (const char *text, int maxChars, Font_s *font, float x, float y, float w, float xScale, float yScale, const float *color, int style, int cursorPos, char cursor);
@@ -5920,6 +5982,15 @@ struct dvar_t
   using Sys_LeaveCriticalSection_t = void (*) (CriticalSection critSect);
   inline Sys_LeaveCriticalSection_t Sys_LeaveCriticalSection = reinterpret_cast<Sys_LeaveCriticalSection_t> (0x140290660);
 
+  using ColorIndex_t = int64_t (*) (char c);
+  inline ColorIndex_t ColorIndex = reinterpret_cast<ColorIndex_t> (0x14028DCC0);
+
+  using CL_LookupColor_t = void (*) (int64_t localClientNum, uint8_t c, float *color);
+  inline CL_LookupColor_t CL_LookupColor = reinterpret_cast<CL_LookupColor_t> (0x1400F1630);
+
+  using AddBaseDrawConsoleTextCmd_t = GfxCmdDrawText2D * (*) (const char *textPool, int poolSize, int firstChar, int charCount, Font_s *font, float x, float y, float xScale, float yScale, const float *color, int style);
+  inline AddBaseDrawConsoleTextCmd_t AddBaseDrawConsoleTextCmd = reinterpret_cast<AddBaseDrawConsoleTextCmd_t> (0x14001B630);
+
   // Game Internal variables
   //
   inline constexpr uint32_t KEYCATCH_CONSOLE (1);
@@ -5943,8 +6014,6 @@ struct dvar_t
   inline cgMedia_t* cgMedia (reinterpret_cast<cgMedia_t*> (0x1404B1D10));
   inline clientStatic_t* cls (reinterpret_cast<clientStatic_t*> (0x140CA7BB0));
   inline WinConData* s_wcd (reinterpret_cast<WinConData*> (0x146808800));
-  inline sharedUiInfo_t* sharedUiInfo (reinterpret_cast<sharedUiInfo_t*> (0x146627790));
-  inline ScreenPlacement* scrPlaceFull (reinterpret_cast<ScreenPlacement*> (0x140714860));
   inline Console* con (reinterpret_cast<Console*> (0x14070AFA8));
 
   inline char** com_consoleLines (reinterpret_cast<char**> (0x141C35D90));
@@ -5962,8 +6031,9 @@ struct dvar_t
 
   inline float* scaleVirtualToReal (reinterpret_cast<float*>(0x1407147F0));
 
+  inline sharedUiInfo_t* sharedUiInfo (reinterpret_cast<sharedUiInfo_t*> (0x146627790));
+  inline ScreenPlacement* scrPlaceFull (reinterpret_cast<ScreenPlacement*> (0x140714860));
   inline ScreenPlacementMode* activeScreenPlacementMode (reinterpret_cast<ScreenPlacementMode*> (0x14071493C));
-  inline ScreenPlacementMode* scrPlaceFull (reinterpret_cast<ScreenPlacementMode*> (0x140714860));
 
   inline GfxCmdBufState* gfxCmdBufState (reinterpret_cast<GfxCmdBufState*> (0x148F89140));
 }
