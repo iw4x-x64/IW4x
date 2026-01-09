@@ -71,63 +71,70 @@ namespace iw4x
     void
     menu ()
     {
-      // Must runs only after the menu graph is actually there to work with.
-      //
       ctx.sched.post ("com_frame", [] ()
       {
-        ([] (auto&& action, auto&& expression)
-          {
-            action
-            (
-              "main_text",
-              "@PLATFORM_PLAY_ONLINE_CAPS",
-              {
-                "play mouse_click",
-                "open menu_xboxlive"
-              }
-            );
-
-            action
-            (
-              "menu_xboxlive",
-              "@MENU_PRIVATE_MATCH_CAPS",
-              {
-                "play mouse_click",
-                "exec xcheckezpatch",
-                "exec default_xboxlive.cfg",
-                "exec xblive_rankedmatch 0",
-                "exec ui_enumeratesaved exec xblive_privatematch 1",
-                "exec onlinegame 0",
-                "exec xblive_hostingprivateparty 1",
-                "exec xblive_privatepartyclient 1",
-                "exec xstartprivatematch",
-                "open menu_xboxlive_privatelobby"
-              }
-            );
-
-            expression ("menu_xboxlive_privatelobby", "@MENU_START_GAME_CAPS");
-            expression ("menu_xboxlive_privatelobby", "@MENU_GAME_SETUP_CAPS");
-          })
-
-        // Action.
+        // Helper: Replace the action of a menu item with a custom script.
         //
-        ([] (const string& menu_name, const string& item_name, const vector<string>& cmds)
-          {
-            menuDef_t& m (find_menu (menu_name));
-            itemDef_s& i (find_item (m, item_name));
+        auto action = [] (const string& menu,
+                          const string& item,
+                          const vector<string>& cmds)
+        {
+          menuDef_t& m (find_menu (menu));
+          itemDef_s& i (find_item (m, item));
 
-            i.action = make_handler_set (cmds);
-          },
+          i.action = make_handler_set (cmds);
+        };
 
-        // Expression.
+        // Helper: Clear the disabled expression of an item to force it
+        // enabled.
         //
-        ([] (const string& menu_name, const string& item_name)
-          {
-            menuDef_t& m (find_menu (menu_name));
-            itemDef_s& i (find_item (m, item_name));
+        auto expression = [] (const string& menu, const string& item)
+        {
+          menuDef_t& m (find_menu (menu));
+          itemDef_s& i (find_item (m, item));
 
-            i.disabledExp = nullptr;
-          }));
+          i.disabledExp = nullptr;
+        };
+
+        // Enable "Play Online".
+        //
+        // Normally requires GDK checks, but we bypass that and simply open the
+        // xboxlive menu.
+        //
+        action ("main_text",
+                "@PLATFORM_PLAY_ONLINE_CAPS",
+                {
+                  "play mouse_click",
+                  "open menu_xboxlive"
+                });
+
+        // Configure Private Match.
+        //
+        // We need to execute a sequence of setup commands so that server state
+        // is correct for a private lobby.
+        //
+        action ("menu_xboxlive",
+                "@MENU_PRIVATE_MATCH_CAPS",
+                {
+                  "play mouse_click",
+                  "exec xcheckezpatch",
+                  "exec default_xboxlive.cfg",
+                  "exec xblive_rankedmatch 0",
+                  "exec ui_enumeratesaved exec xblive_privatematch 1",
+                  "exec onlinegame 0",
+                  "exec xblive_hostingprivateparty 1",
+                  "exec xblive_privatepartyclient 1",
+                  "exec xstartprivatematch",
+                  "open menu_xboxlive_privatelobby"
+                });
+
+        // Unlock lobby.
+        //
+        // Force-enable the "Start Game" and "Game Setup" buttons in the private
+        // lobby, as the engine thinks we don't have permissions.
+        //
+        expression ("menu_xboxlive_privatelobby", "@MENU_START_GAME_CAPS");
+        expression ("menu_xboxlive_privatelobby", "@MENU_GAME_SETUP_CAPS");
       });
     }
   }
