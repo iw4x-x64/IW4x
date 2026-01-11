@@ -5,17 +5,31 @@
 
 namespace iw4x
 {
+  // Low-level hook installation.
+  //
+  // We pass target by reference because the detour implementation often
+  // overwrites it with the trampoline (pointer to the original function) so
+  // we can call the original behavior later.
+  //
   LIBIW4X_SYMEXPORT void
-  detour (void*& target, void* source);
+  detour (void*& t, void* s);
 
+  // Type-erased wrapper.
+  //
+  // We really don't want to type reinterpret_cast<void*> (...) every single
+  // time we hook a function. This template handles the ugly casting dance for
+  // us.
+  //
   inline void
-  detour (auto& target, auto source)
+  detour (auto& t, auto s)
   {
-    void* t = reinterpret_cast<void*> (target);
-    void* s = reinterpret_cast<void*> (source);
+    void* pt (reinterpret_cast<void*> (t));
+    void* ps (reinterpret_cast<void*> (s));
 
-    detour (t, s);
+    detour (pt, ps);
 
-    target = reinterpret_cast<decltype (target)> (t);
+    // Update the caller's pointer with the trampoline.
+    //
+    t = reinterpret_cast<decltype (t)> (pt);
   }
 }
