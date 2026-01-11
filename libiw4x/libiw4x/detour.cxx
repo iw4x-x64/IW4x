@@ -1,9 +1,6 @@
 #include <libiw4x/detour.hxx>
 
-#include <windows.h>
 #include <Zydis/Zydis.h>
-
-using namespace std;
 
 namespace iw4x
 {

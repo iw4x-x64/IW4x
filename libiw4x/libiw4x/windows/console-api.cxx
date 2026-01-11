@@ -11,20 +11,24 @@ namespace iw4x
     // trying to avoid (see process-trheads-api.cxx for context).
     //
     BOOL WINAPI
-    console_ctrl_handler (DWORD type)
+    console_ctrl_handler (DWORD t)
     {
-      switch (type)
+      switch (t)
       {
         case CTRL_C_EVENT:
         case CTRL_BREAK_EVENT:
         case CTRL_CLOSE_EVENT:
         case CTRL_LOGOFF_EVENT:
         case CTRL_SHUTDOWN_EVENT:
+        {
           // 0xC000013A is STATUS_CONTROL_C_EXIT. It's the standard code
-          // returned when an application is terminated by Ctrl+C.
+          // for this kind of termination, so use that.
+          //
           exit_process (0xC000013A);
           return TRUE;
+        }
       }
+
       return FALSE;
     }
   }
