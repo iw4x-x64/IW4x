@@ -5,9 +5,7 @@ using namespace boost::asio;
 namespace iw4x
 {
   scheduler::scheduler ()
-    : context (make_unique<io_context> ()),
-      strands (),
-      loops ()
+    : context (make_unique<io_context> ())
   {
     // Intentionally left empty by design
     //
@@ -22,6 +20,9 @@ namespace iw4x
   bool
   scheduler::create (const string& n)
   {
+    // We treat existence as a failure to create because we expect unique
+    // names.
+    //
     auto r (strands.try_emplace (n, make_strand (*context)));
     return r.second;
   }
@@ -29,7 +30,17 @@ namespace iw4x
   bool
   scheduler::destroy (const string& n)
   {
+    // Clean up the loop registry first.
+    //
+    // Note that we ignore the result here: whether there were loops attached
+    // or not doesn't determine the success of the 'destroy' operation. We
+    // just want to ensure that *if* there were any, they are gone.
+    //
     loops.erase (n);
+
+    // The operation is considered successful only if the strand itself
+    // existed and was removed.
+    //
     return strands.erase (n) != 0;
   }
 
@@ -38,30 +49,34 @@ namespace iw4x
   {
     strand_type* s (find (n));
 
-    if (s != nullptr)
-    {
-      // Post all recurring tasks associated with this strand.
-      //
-      // They will be added to the queue and executed immediately
-      // in the subsequent context->poll() call below.
-      //
-      if (auto l (loops.find (n)); l != loops.end ())
-        for (auto& task : l->second)
-          boost::asio::post (*s, task);
+    // If the strand doesn't exist, we can't really post tasks to it. We could
+    // theoretically poll the global context anyway, but it's safer to bail
+    // out to avoid masking logic errors in the caller.
+    //
+    if (s == nullptr)
+      return;
 
-      // Once all queued work has completed, io_context transitions to the
-      // stopped state. Any subsequent call to poll(), run(), run_one(), or
-      // poll_one() will then return immediately without processing newly added
-      // tasks.
-      //
-      // To actually permit a second (or later) round of work submission, we
-      // must first explicitly restart() the context before invoking poll()
-      // again.
-      //
-      if (context->stopped ())
-        context->restart ();
-      context->poll ();
+    // Inject the recurring "loop" tasks for this specific strand.
+    //
+    if (auto l (loops.find (n)); l != loops.end ())
+    {
+      for (const auto& task : l->second)
+        boost::asio::post (*s, task);
     }
+
+    // Now drive the context.
+    //
+    // If the context has run out of work (stopped), we need to kick it back
+    // to life before we can poll again. Otherwise, the tasks we just posted
+    // will sit in the queue forever.
+    //
+    if (context->stopped ())
+      context->restart ();
+
+    // Note that this runs *all* ready handlers on the context, not just the
+    // ones for our strand.
+    //
+    context->poll ();
   }
 
   bool
