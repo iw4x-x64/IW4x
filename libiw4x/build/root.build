@@ -1,0 +1,12 @@
+cxx.std = latest
+
+using cxx
+
+hxx{*}: extension = hxx
+ixx{*}: extension = ixx
+txx{*}: extension = txx
+cxx{*}: extension = cxx
+
+# Provide the linker with information about exports.
+#
+def{*}: extension = def
