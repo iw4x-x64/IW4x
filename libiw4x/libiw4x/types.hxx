@@ -39,6 +39,7 @@
 // Concurrency support library
 //
 #include <mutex>
+#include <future>
 
 namespace iw4x
 {
@@ -84,6 +85,7 @@ namespace iw4x
 
   // Time
   //
+  using std::chrono::seconds;
   using namespace std::chrono_literals;
 
   // Input/output
@@ -95,4 +97,6 @@ namespace iw4x
   // Concurrency support
   //
   using std::once_flag;
+  using std::future;
+  using std::future_status;
 }

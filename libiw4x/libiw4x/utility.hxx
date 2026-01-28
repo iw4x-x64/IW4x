@@ -33,6 +33,7 @@ extern "C"
 //
 #include <mutex>
 #include <thread>
+#include <future>
 
 namespace iw4x
 {
@@ -64,4 +65,5 @@ namespace iw4x
   //
   using std::call_once;
   using std::thread;
+  using std::launch;
 }
