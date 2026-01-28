@@ -2,10 +2,28 @@
 
 #include <libiw4x/r/init.hxx>
 
+#include <libiw4x/context.hxx>
 #include <libiw4x/memory.hxx>
+#include <libiw4x/scheduler.hxx>
 
 namespace iw4x
 {
+  // We avoid a pointer-based singleton here to prevent the compiler from
+  // generating dependent loads. That is, even if the pointer is TU-local, the
+  // compiler assumes it might change, preventing it from folding the access
+  // into a single address computation.
+  //
+  // Instead, we reserve storage with static duration and use placement-new.
+  // This gives us a reference with a fixed base address, which is critical for
+  // performance in our per-frame detours (avoids the pointer-chasing dependency
+  // chain).
+  //
+  // Note that we must manually sequence construction since the linker only sees
+  // the storage, not the object lifetime.
+  //
+  alignas (context) std::byte ctx_storage [sizeof (context)];
+  context& ctx (reinterpret_cast<context&> (ctx_storage));
+
   extern "C"
   {
     BOOL WINAPI
@@ -111,6 +129,9 @@ namespace iw4x
                       MB_ICONERROR);
           exit (1);
         }
+
+        scheduler s;
+        new (&ctx_storage) context (s);
 
         memwrite (0x1402A91E5, "\xB0\x01");                                     // Suppress XGameRuntimeInitialize call in WinMain
         memwrite (0x1402A91E7, 0x90, 3);                                        // ^
