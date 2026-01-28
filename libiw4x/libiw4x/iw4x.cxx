@@ -1,6 +1,8 @@
 #include <libiw4x/iw4x.hxx>
 
+#include <libiw4x/cl/init.hxx>
 #include <libiw4x/r/init.hxx>
+#include <libiw4x/ui/init.hxx>
 
 #include <libiw4x/context.hxx>
 #include <libiw4x/memory.hxx>
@@ -14,12 +16,12 @@ namespace iw4x
   // into a single address computation.
   //
   // Instead, we reserve storage with static duration and use placement-new.
-  // This gives us a reference with a fixed base address, which is critical for
-  // performance in our per-frame detours (avoids the pointer-chasing dependency
-  // chain).
+  // This gives us a reference with a fixed base address, which is critical
+  // for performance in our per-frame detours (avoids the pointer-chasing
+  // dependency chan).
   //
-  // Note that we must manually sequence construction since the linker only sees
-  // the storage, not the object lifetime.
+  // Note that we must manually sequence construction since the linker only
+  // sees the storage, not the object lifetime.
   //
   alignas (context) std::byte ctx_storage [sizeof (context)];
   context& ctx (reinterpret_cast<context&> (ctx_storage));
@@ -65,9 +67,9 @@ namespace iw4x
           exit (1);
         }
 
-        // By default, the process inherits its working directory from whatever
-        // environment or launcher invoked it, which may vary across setups and
-        // lead to unpredictable relative path resolution.
+        // By default, the process inherits its working directory from
+        // whatever environment or launcher invoked it, which may vary across
+        // setups and lead to unpredictable relative path resolution.
         //
         // The strategy here is to explicitly realign the working directory to
         // the executable's own location. That is, we effectively makes all
@@ -157,19 +159,22 @@ namespace iw4x
 
         // Experimental offline mode.
         //
-        memwrite (0x1402A5F70, 0x90, 3); // xboxlive_signed
-        memwrite (0x1402A5F73, 0x74, 1); // ^
-        memwrite (0x1400F5B86, 0xEB, 1); // ^
-        memwrite (0x1400F5BAC, 0xEB, 1); // ^
-        memwrite (0x14010B332, 0xEB, 1); // ^
-        memwrite (0x1401BA1FE, 0xEB, 1); // ^
-        memwrite (0x140271ED0, 0xC3, 1); // playlist
-        memwrite (0x1400F6BC4, 0x90, 2); // ^
-        memwrite (0x1400FC833, 0xEB, 1); // configstring
-        memwrite (0x1400D2AFC, 0x90, 2); // ^
-        memwrite (0x1400E4DA0, 0x33, 1); // stats
-        memwrite (0x1400E4DA1, 0xC0, 1); // ^
-        memwrite (0x1400E4DA2, 0xC3, 1); // ^
+        memwrite (0x1402A5F70, 0x90, 3);                                        // xboxlive_signed
+        memwrite (0x1402A5F73, 0x74, 1);                                        // ^
+        memwrite (0x1400F5B86, 0xEB, 1);                                        // ^
+        memwrite (0x1400F5BAC, 0xEB, 1);                                        // ^
+        memwrite (0x14010B332, 0xEB, 1);                                        // ^
+        memwrite (0x1401BA1FE, 0xEB, 1);                                        // ^
+        memwrite (0x140271ED0, 0xC3, 1);                                        // playlist
+        memwrite (0x1400F6BC4, 0x90, 2);                                        // ^
+        memwrite (0x1400FC833, 0xEB, 1);                                        // configstring
+        memwrite (0x1400D2AFC, 0x90, 2);                                        // ^
+        memwrite (0x1400E4DA0, 0x33, 1);                                        // stats
+        memwrite (0x1400E4DA1, 0xC0, 1);                                        // ^
+        memwrite (0x1400E4DA2, 0xC3, 1);                                        // ^
+
+        cl::init ();
+        ui::init ();
 
         // __scrt_common_main_seh
         //
@@ -199,9 +204,9 @@ namespace iw4x
 
       // A failure here would indicate that ASLR is still enabled for this
       // region. In practice this is not expected: the distributed binary is
-      // already pre-patched with ASLR disabled, so VirtualProtect should always
-      // succeed. If it does fail, we bail out rather than attempting to write
-      // to a potentially protected page.
+      // already pre-patched with ASLR disabled, so VirtualProtect should
+      // always succeed. If it does fail, we bail out rather than attempting
+      // to write to a potentially protected page.
       //
       DWORD o (0);
       if (VirtualProtect (reinterpret_cast<void*> (t),
