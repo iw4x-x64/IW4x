@@ -134,6 +134,22 @@ namespace iw4x
         //
         *(uint32_t*) 0x14020DD06 = thread::hardware_concurrency ();
 
+        // Experimental offline mode.
+        //
+        memwrite (0x1402A5F70, 0x90, 3); // xboxlive_signed
+        memwrite (0x1402A5F73, 0x74, 1); // ^
+        memwrite (0x1400F5B86, 0xEB, 1); // ^
+        memwrite (0x1400F5BAC, 0xEB, 1); // ^
+        memwrite (0x14010B332, 0xEB, 1); // ^
+        memwrite (0x1401BA1FE, 0xEB, 1); // ^
+        memwrite (0x140271ED0, 0xC3, 1); // playlist
+        memwrite (0x1400F6BC4, 0x90, 2); // ^
+        memwrite (0x1400FC833, 0xEB, 1); // configstring
+        memwrite (0x1400D2AFC, 0x90, 2); // ^
+        memwrite (0x1400E4DA0, 0x33, 1); // stats
+        memwrite (0x1400E4DA1, 0xC0, 1); // ^
+        memwrite (0x1400E4DA2, 0xC3, 1); // ^
+
         // __scrt_common_main_seh
         //
         return reinterpret_cast<int (*) ()> (0x140358D48) ();
