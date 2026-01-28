@@ -223,5 +223,26 @@ namespace iw4x
       //
       return TRUE;
     }
+
+    // Force 'High Performance Graphics'.
+    //
+    // Official documentation states that this mechanism is not supported when
+    // invoked from a DLL. Turn out that in practice, user reports and field
+    // testing indicate that it does actually take effect and is in fact
+    // required for hybrid (Optimus) system. We therefore enable it here despite
+    // the documented limitation.
+    //
+    // https://docs.nvidia.com/gameworks/content/technologies/desktop/optimus
+    // https://gpuopen.com/learn/amdpowerxpressrequesthighperformance/
+    //
+    // @@: AmdPowerXpressRequestHighPerformance has a history of causing
+    // instability in some games. While we currently enable it,
+    // this should be treated as a potential fault surface. If IW4x
+    // exhibits similar crash patterns, the correct response is likely
+    // to introduce a conditional or opt-out rather than remove it
+    // outright.
+    //
+    LIBIW4X_SYMEXPORT DWORD NvOptimusEnablement = 0x00000001;
+    LIBIW4X_SYMEXPORT DWORD AmdPowerXpressRequestHighPerformance = 0x00000001;
   }
 }
