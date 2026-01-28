@@ -1,7 +1,3 @@
-#include <string>
-#include <iostream>
-#include <stdexcept>
-
 #include <libiw4x/r/overlay/r-imgui.hxx>
 #include <libiw4x/r/backend/r-d3d9.hxx>
 
@@ -51,7 +47,7 @@ namespace iw4x
         //
         explicit
         state (IDirect3DDevice9* d)
-            : b (nullptr)
+          : b (nullptr)
         {
           // If we fail to create a block (e.g. device lost), we just bail.
           //
@@ -197,9 +193,6 @@ namespace iw4x
 
         ImGuiIO& io (ImGui::GetIO ());
         io.MouseDrawCursor = true;
-        // We manage config manually; don't save to disk or we'll litter the
-        // game directory.
-        io.IniFilename = nullptr;
 
         HWND h (find_wnd (d));
         if (!h)

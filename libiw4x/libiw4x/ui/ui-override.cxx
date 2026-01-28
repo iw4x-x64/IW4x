@@ -99,12 +99,6 @@ namespace iw4x
         // buffer for the script, which it presumably reads during event
         // dispatch.
         //
-        // By using _strdup, we are allocating a C-style string that we detach
-        // from our management. If the engine doesn't free this when the menu
-        // is destroyed, we have a small leak. Given this only happens once
-        // during our init phase, we accept the leak to avoid use-after-free
-        // issues if we tried to manage the lifetime ourselves.
-        //
         h->eventType = 0;
         h->eventData.unconditionalScript = _strdup (c.c_str ());
 
@@ -120,8 +114,8 @@ namespace iw4x
         hs->eventHandlers = new MenuEventHandler* [cs.size ()];
 
         // Populate the handler array. If any make_handler call throws (bad
-        // alloc), we leak the previous ones and the set itself. However, in
-        // that OOM scenario, the game is dead anyway.
+        // alloc), we leak the previous ones and the set itself (in that OOM
+        // scenario, the game is dead anyway).
         //
         for (size_t i (0); i != cs.size (); ++i)
           hs->eventHandlers[i] = make_handler (cs[i]);
@@ -133,28 +127,10 @@ namespace iw4x
     void
     override ()
     {
-      // We hook into "com_frame" rather than an initialization callback because
-      // the UI assets might not be fully loaded when our module initializes.
-      //
-      // By posting to the scheduler, we ensure we run after the engine has
-      // spun up the renderer and loaded the fastfiles.
-      //
       ctx.sched.post ("com_frame", [] ()
       {
-        // We wrap the individual operations in a try-catch block.
-        //
-        // If one menu fails to patch (e.g. the asset is missing in a specific
-        // mod or the user has a corrupt fastfile), we want to warn but allow
-        // the rest of the UI to load. Crashing the whole game because one
-        // button is missing is poor UX.
-        //
         try
         {
-          // Helper: Replace the action of a menu item with a custom script.
-          //
-          // We capture the lookups inside the helper to keep the main block
-          // readable.
-          //
           auto action = [] (const string& m,
                             const string& i,
                             const vector<string>& cs)
@@ -169,9 +145,6 @@ namespace iw4x
             id.action = make_handler_set (cs);
           };
 
-          // Helper: Clear the disabled expression of an item to force it
-          // enabled.
-          //
           auto expression = [] (const string& m, const string& i)
           {
             menuDef_t& md (find_menu (m));
@@ -183,11 +156,6 @@ namespace iw4x
             id.disabledExp = nullptr;
           };
 
-          // Enable "Play Online".
-          //
-          // We bypass the GDK checks (which check for permissions/Gold status)
-          // and jump straight to the xboxlive menu.
-          //
           action ("main_text",
                   "@PLATFORM_PLAY_ONLINE_CAPS",
                   {
@@ -196,13 +164,6 @@ namespace iw4x
                   });
 
           // Configure Private Match.
-          //
-          // This sequence is derived from tracing the original game scripts. We
-          // have to execute these specific Dvars to prime the server state for
-          // a private lobby.
-          //
-          // If we miss the "xstartprivatematch" or "onlinegame 0" calls, the
-          // lobby will often fail to connect or will list itself publicly.
           //
           action ("menu_xboxlive",
                   "@MENU_PRIVATE_MATCH_CAPS",
@@ -221,20 +182,12 @@ namespace iw4x
 
           // Unlock lobby buttons.
           //
-          // The engine logic defaults "Start Game" and "Game Setup" to
-          // disabled if it thinks we don't have host permissions. By nuke'ing
-          // the expression, we force the UI to let us click them.
-          //
           expression ("menu_xboxlive_privatelobby", "@MENU_START_GAME_CAPS");
           expression ("menu_xboxlive_privatelobby", "@MENU_GAME_SETUP_CAPS");
         }
         catch (const runtime_error& e)
         {
-          // We assume stderr is piped somewhere useful (like the console log)
-          // in this environment.
-          //
-          std::cerr << "ui::override: failed to patch menu: "
-                    << e.what () << std::endl;
+          cerr << "error: unable to patch menu: " << e.what () << endl;
         }
       });
     }

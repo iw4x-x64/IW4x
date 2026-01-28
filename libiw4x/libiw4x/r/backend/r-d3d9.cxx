@@ -1,18 +1,5 @@
 #include <libiw4x/r/backend/r-d3d9.hxx>
 
-#include <vector>
-#include <iostream>
-#include <cstdlib>
-#include <stdexcept>
-#include <functional>
-
-#include <d3d9.h>
-#include <psapi.h>
-
-#pragma comment(lib, "d3d9.lib")
-
-using namespace std;
-
 namespace iw4x
 {
   namespace r
@@ -28,8 +15,15 @@ namespace iw4x
       // Signatures.
       //
       using end_fn = HRESULT (APIENTRY*) (IDirect3DDevice9*);
-      using rst_fn = HRESULT (APIENTRY*) (IDirect3DDevice9*, D3DPRESENT_PARAMETERS*);
-      using crt_fn = HRESULT (APIENTRY*) (IDirect3D9*, UINT, D3DDEVTYPE, HWND, DWORD, D3DPRESENT_PARAMETERS*, IDirect3DDevice9**);
+      using rst_fn = HRESULT (APIENTRY*) (IDirect3DDevice9*,
+                                          D3DPRESENT_PARAMETERS*);
+      using crt_fn = HRESULT (APIENTRY*) (IDirect3D9*,
+                                          UINT,
+                                          D3DDEVTYPE,
+                                          HWND,
+                                          DWORD,
+                                          D3DPRESENT_PARAMETERS*,
+                                          IDirect3DDevice9**);
 
       // Trampolines.
       //
@@ -48,7 +42,7 @@ namespace iw4x
       patch (void** vt, int i, void* f)
       {
         DWORD p;
-        void* a (&vt[i]);
+        void* a (&vt [i]);
 
         if (!VirtualProtect (a, sizeof (void*), PAGE_EXECUTE_READWRITE, &p))
         {
@@ -56,7 +50,7 @@ namespace iw4x
           exit (1);
         }
 
-        vt[i] = f;
+        vt [i] = f;
 
         if (!VirtualProtect (a, sizeof (void*), p, &p))
         {
@@ -76,11 +70,13 @@ namespace iw4x
       HRESULT APIENTRY
       h_end (IDirect3DDevice9* d)
       {
-        if (!o_end) throw logic_error ("end_scene called without original");
+        if (!o_end)
+          throw logic_error ("end_scene called without original");
 
         try
         {
-          for (auto& c : cbs_f) c (d);
+          for (auto& c : cbs_f)
+            c (d);
         }
         catch (...)
         {
@@ -100,13 +96,15 @@ namespace iw4x
       HRESULT APIENTRY
       h_rst (IDirect3DDevice9* d, D3DPRESENT_PARAMETERS* pp)
       {
-        if (!o_rst) throw logic_error ("reset called without original");
+        if (!o_rst)
+          throw logic_error ("reset called without original");
 
         // Phase 1: Device is lost. Release resources.
         //
         try
         {
-          for (auto& c : cbs_l) c ();
+          for (auto& c : cbs_l)
+            c ();
         }
         catch (...)
         {
@@ -122,7 +120,8 @@ namespace iw4x
           //
           try
           {
-            for (auto& c : cbs_r) c ();
+            for (auto& c : cbs_r)
+              c ();
           }
           catch (...)
           {
@@ -132,14 +131,15 @@ namespace iw4x
 
           void** vt (*reinterpret_cast<void***> (d));
 
-          // External overlays (Steam, Discord, etc.) often re-hook the
-          // vtable immediately after a Reset, overwriting our EndScene
-          // hook. We have to check if we are still the owner; if not,
-          // force our way back in.
+          // External overlays (Steam, Discord, etc.) often re-hook the vtable
+          // immediately after a Reset, overwriting our EndScene hook. We have
+          // to check if we are still the owner; if not, force our way back
+          // in.
           //
-          if (vt[42] != h_end)
+          if (vt [42] != h_end)
           {
-            if (!o_end) o_end = reinterpret_cast<end_fn> (vt[42]);
+            if (!o_end)
+              o_end = reinterpret_cast<end_fn> (vt [42]);
             patch (vt, 42, reinterpret_cast<void*> (h_end));
           }
         }
@@ -162,7 +162,13 @@ namespace iw4x
       // the renderer.
       //
       HRESULT APIENTRY
-      h_crt (IDirect3D9* i, UINT a, D3DDEVTYPE t, HWND w, DWORD f, D3DPRESENT_PARAMETERS* pp, IDirect3DDevice9** out)
+      h_crt (IDirect3D9* i,
+             UINT a,
+             D3DDEVTYPE t,
+             HWND w,
+             DWORD f,
+             D3DPRESENT_PARAMETERS* pp,
+             IDirect3DDevice9** out)
       {
         HRESULT r (o_crt (i, a, t, w, f, pp, out));
 
@@ -174,8 +180,8 @@ namespace iw4x
           // Capture the original function pointers so we can trampoline
           // back to the driver.
           //
-          if (!o_rst) o_rst = reinterpret_cast<rst_fn> (vt[16]);
-          if (!o_end) o_end = reinterpret_cast<end_fn> (vt[42]);
+          if (!o_rst) o_rst = reinterpret_cast<rst_fn> (vt [16]);
+          if (!o_end) o_end = reinterpret_cast<end_fn> (vt [42]);
 
           // Install our hooks into the active device.
           //
@@ -236,9 +242,7 @@ namespace iw4x
       void** vt (*reinterpret_cast<void***> (d));
 
       if (!o_crt)
-      {
-        o_crt = reinterpret_cast<crt_fn> (vt[16]);
-      }
+        o_crt = reinterpret_cast<crt_fn> (vt [16]);
 
       // We hook the dummy interface's CreateDevice. Since all interfaces
       // created by this DLL share the same vtable logic, this hook will

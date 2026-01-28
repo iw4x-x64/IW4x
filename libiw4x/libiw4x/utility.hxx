@@ -43,6 +43,7 @@ namespace iw4x
   using std::out_of_range;
   using std::runtime_error;
   using std::system_error;
+  using std::logic_error;
 
   // Memory management
   //
