@@ -120,6 +120,8 @@ namespace iw4x
         memwrite (0x1402A92B3, 0x90, 13);                                       // Suppress Sys_CheckCrashOrRerun in WinMain
         memwrite (0x1401FAC87, 0x90, 7);                                        // Suppress com_safemode in Com_Init (only set by Sys_CheckCrashOrRerun).
         memwrite (0x1401FAC8E, 0xEB, 1);                                        // ^
+        memwrite (0x1403B1E88, "iw4x.cfg");                                     // Rename "config_mp.cfg" to "iw4x.cfg"
+        memwrite (0x1403B1E90, 0x00, 6);                                        // ^
 
         // __scrt_common_main_seh
         //
