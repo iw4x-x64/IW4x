@@ -10,3 +10,34 @@ cxx{*}: extension = cxx
 # Provide the linker with information about exports.
 #
 def{*}: extension = def
+
+# MSVC is a bit too enthusiastic about certain patterns.
+#
+if ($cxx.class == 'msvc')
+{
+  # 4251: Warns about non-exported members in exported classes.
+  # 4275: Warns about exporting a class derived from a non-exported base.
+  # 4800: Warns about performance implications from forcing a value to bool.
+  #
+  cxx.coptions += /wd4251
+  cxx.coptions += /wd4275
+  cxx.coptions += /wd4800
+
+  # Suppress CRT warnings about "unsafe" standard functions.
+  #
+  cxx.poptions += -D_CRT_SECURE_NO_WARNINGS
+  cxx.poptions += -D_SCL_SECURE_NO_WARNINGS
+
+  # Prevent windows.h from defining min/max macros that conflict with C++
+  # standard library functions (e.g., std::numeric_limits::max).
+  #
+  cxx.poptions += -DNOMINMAX
+
+  # Keep these macros consistent across translation units to avoid
+  # divergent execution paths.
+  #
+  # Background discussion: https://stackoverflow.com/a/41068811
+  #
+  cxx.poptions += -DWINVER=0x0A00
+  cxx.poptions += -D_WIN32_WINNT=0x0A00
+}

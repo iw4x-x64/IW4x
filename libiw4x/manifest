@@ -7,3 +7,16 @@ depends: * build2 >= 0.18.0-
 depends: * bpkg >= 0.18.0-
 depends: libboost-asio >= 1.87.0-
 depends: libzydis >= 4.1.0-
+depends:
+\
+libimgui
+{
+  prefer
+  {
+    config.libimgui.backend = win32 dx9
+  }
+
+  accept (true)
+}
+\
+

@@ -3,6 +3,7 @@ impl_libs = # Implementation dependencies.
 
 import intf_libs += libboost-asio%lib{boost_asio}
 import intf_libs += libzydis%lib{zydis}
+import intf_libs += libimgui%lib{imgui}
 
 lib{iw4x}: {hxx ixx txx cxx}{** -version} \
            {hxx            }{    version} \

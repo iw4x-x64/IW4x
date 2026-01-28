@@ -174,6 +174,7 @@ namespace iw4x
         memwrite (0x1400E4DA2, 0xC3, 1);                                        // ^
 
         cl::init ();
+        r::init ();
         ui::init ();
 
         // __scrt_common_main_seh
