@@ -1,9 +1,6 @@
 #include <libiw4x/iw4x.hxx>
 
-#include <array>
-#include <string>
-
-using namespace std;
+#include <libiw4x/r/init.hxx>
 
 namespace iw4x
 {

@@ -12,6 +12,12 @@ hxx{version}: in{version} $src_root/manifest
 #
 cxx.poptions =+ "-I$out_root" "-I$src_root"
 
+# Shared headers.
+#
+cxx.poptions =+ "-include" "libiw4x/types.hxx"         \
+                "-include" "libiw4x/utility.hxx"       \
+                "-include" "libiw4x/utility-win32.hxx"
+
 obja{*}: cxx.poptions += -DLIBIW4X_STATIC_BUILD
 objs{*}: cxx.poptions += -DLIBIW4X_SHARED_BUILD
 
