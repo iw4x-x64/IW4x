@@ -6,6 +6,8 @@
 
 #include <libiw4x/client/init.hxx>
 #include <libiw4x/ui/init.hxx>
+#include <libiw4x/win32/init.hxx>
+#include <libiw4x/windows/init.hxx>
 
 namespace iw4x
 {
@@ -24,6 +26,78 @@ namespace iw4x
   //
   alignas (context) std::byte ctx_storage [sizeof (context)];
   context& ctx (reinterpret_cast<context&> (ctx_storage));
+
+  namespace
+  {
+    void
+    attach_console ()
+    {
+      // The subtlety here is that Windows has many ways to end up with stdout
+      // and stderr pointing *somewhere* (sometimes to an actual console,
+      // sometimes to a pipe, sometimes to a completely invalid handle). We do
+      // not want to attach to `CONOUT$` in cases where the existing handles are
+      // already valid and intentional, as this would silently discard the real
+      // output sink.
+      //
+      // Instead, we first check `_fileno(stdout)` and `_fileno(stderr)`. That
+      // is, MSVCRT sets these up at startup and will return `-2`
+      // (`_NO_CONSOLE_FILENO`) if the file is invalid. This check is more
+      // trustworthy than calling `GetStdHandle()`, which can return stale
+      // handle IDs that may already be reused for unrelated objects by the time
+      // we run.
+      //
+      if (_fileno (stdout) >= 0 || _fileno (stderr) >= 0)
+      {
+        // If either `_fileno()` is valid, we go one step further: `_fileno()`
+        // itself had a bug (http://crbug.com/358267) in SUBSYSTEM:WINDOWS
+        // builds for certain MSVC versions (VS2010 to VS2013), so we
+        // double-check by calling `_get_osfhandle()` to confirm that the
+        // underlying OS handle is valid. Only if both streams are invalid do
+        // we attempt to attach a console.
+        //
+        intptr_t stdout_handle (_get_osfhandle (_fileno (stdout)));
+        intptr_t stderr_handle (_get_osfhandle (_fileno (stderr)));
+
+        if (stdout_handle >= 0 || stderr_handle >= 0)
+          return;
+      }
+
+      // At this point, both standard streams appear invalid, so we attempt to
+      // attach to the parent's console. Note that this call may fail for
+      // expected reasons such as being already attached or the parent having
+      // exited, and in all such cases the failure is non-fatal and we simply
+      // bail out.
+      //
+      if (AttachConsole (ATTACH_PARENT_PROCESS) != 0)
+      {
+        // Once attached, rebind `stdout` and `stderr` to `CONOUT$` using
+        // `freopen()`. Also duplicate their low-level descriptors (1 for
+        // stdout, 2 for stderr) so that code using the raw file descriptor API
+        // observes the same handles.
+        //
+        // Note that failure to rebind is non-fatal. Console output is
+        // diagnostic-only and has no bearing on core functionality. We
+        // therefore avoid exceptions and suppress all errors unconditionally.
+        //
+        bool stdout_rebound (false);
+        bool stderr_rebound (false);
+
+        if (freopen ("CONOUT$", "w", stdout) != nullptr &&
+            _dup2 (_fileno (stdout), 1) != -1)
+          stdout_rebound = true;
+
+        if (freopen ("CONOUT$", "w", stderr) != nullptr &&
+            _dup2 (_fileno (stderr), 2) != -1)
+          stderr_rebound = true;
+
+        // If stream were rebound, realign iostream objects (`cout`, `cerr`,
+        // etc.) with C FILE streams.
+        //
+        if (stdout_rebound && stderr_rebound)
+          ios::sync_with_stdio ();
+      }
+    }
+  }
 
   extern "C"
   {
@@ -47,6 +121,8 @@ namespace iw4x
         // __security_init_cookie
         //
         reinterpret_cast<void (*) ()> (0x1403598CC) ();
+
+        attach_console ();
 
         // Under normal circumstances, a DLL is unloaded via FreeLibrary once
         // its reference count reaches zero. This is acceptable for auxiliary
@@ -131,8 +207,54 @@ namespace iw4x
           exit (1);
         }
 
+        // Start Quill backend thread.
+        //
+        // Note that Quill backend is kept responsive (no sleep) and is allowed
+        // to exit without draining queues to avoid MinGW-specific shutdown
+        // hangs.
+        //
+        quill::Backend::start ({
+          .enable_yield_when_idle               = true,
+          .sleep_duration                       = 0ns,
+          .wait_for_queues_to_empty_before_exit = false,
+          .check_printable_char                 = {},
+          .log_level_short_codes                =
+          {
+            "3", "2", "1", "D", "I", "N", "W", "E", "C", "B", "_"
+          }
+        });
+
+        // Configure Quill log layout.
+        //
+        // @@: It may be tempting to include the name of the calling function
+        // in log output, but this is not reliable in practice. In particular,
+        // calls made from lambdas (and other compiler-generated contexts)
+        // often yield generic names.
+        //
+        quill::PatternFormatterOptions format_options {
+          "%(time) [%(log_level_short_code)] %(message)",
+          "%H:%M:%S.%Qms",
+          quill::Timezone::LocalTime,
+        };
+
+        // Create the main logger instance.
+        //
+        // Note that its lifetime is managed by Quill.
+        //
+        quill::Logger* l (
+          quill::Frontend::create_or_get_logger (
+            "iw4x",
+            quill::Frontend::create_or_get_sink<quill::ConsoleSink> ("cs"),
+            format_options));
+
+        // In development builds, enable the most verbose tracing level.
+        //
+#if LIBIW4X_DEVELOP
+        l->set_log_level (quill::LogLevel::TraceL3);
+#endif
+
         scheduler s;
-        new (&ctx_storage) context (s);
+        new (&ctx_storage) context (s, l);
 
         memwrite (0x1402A91E5, "\xB0\x01");                                     // Suppress XGameRuntimeInitialize call in WinMain
         memwrite (0x1402A91E7, 0x90, 3);                                        // ^
@@ -158,22 +280,24 @@ namespace iw4x
 
         // Experimental offline mode.
         //
-        memwrite (0x1402A5F70, 0x90, 3);                                        // xboxlive_signed
-        memwrite (0x1402A5F73, 0x74, 1);                                        // ^
-        memwrite (0x1400F5B86, 0xEB, 1);                                        // ^
-        memwrite (0x1400F5BAC, 0xEB, 1);                                        // ^
-        memwrite (0x14010B332, 0xEB, 1);                                        // ^
-        memwrite (0x1401BA1FE, 0xEB, 1);                                        // ^
-        memwrite (0x140271ED0, 0xC3, 1);                                        // playlist
-        memwrite (0x1400F6BC4, 0x90, 2);                                        // ^
-        memwrite (0x1400FC833, 0xEB, 1);                                        // configstring
-        memwrite (0x1400D2AFC, 0x90, 2);                                        // ^
-        memwrite (0x1400E4DA0, 0x33, 1);                                        // stats
-        memwrite (0x1400E4DA1, 0xC0, 1);                                        // ^
-        memwrite (0x1400E4DA2, 0xC3, 1);                                        // ^
+        // memwrite (0x1402A5F70, 0x90, 3);                                        // xboxlive_signed
+        // memwrite (0x1402A5F73, 0x74, 1);                                        // ^
+        // memwrite (0x1400F5B86, 0xEB, 1);                                        // ^
+        // memwrite (0x1400F5BAC, 0xEB, 1);                                        // ^
+        // memwrite (0x14010B332, 0xEB, 1);                                        // ^
+        // memwrite (0x1401BA1FE, 0xEB, 1);                                        // ^
+        // memwrite (0x140271ED0, 0xC3, 1);                                        // playlist
+        // memwrite (0x1400F6BC4, 0x90, 2);                                        // ^
+        // memwrite (0x1400FC833, 0xEB, 1);                                        // configstring
+        // memwrite (0x1400D2AFC, 0x90, 2);                                        // ^
+        // memwrite (0x1400E4DA0, 0x33, 1);                                        // stats
+        // memwrite (0x1400E4DA1, 0xC0, 1);                                        // ^
+        // memwrite (0x1400E4DA2, 0xC3, 1);                                        // ^
 
         client::init ();
         ui::init ();
+        win32::init ();
+        windows::init ();
 
         // __scrt_common_main_seh
         //

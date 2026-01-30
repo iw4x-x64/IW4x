@@ -1,5 +1,11 @@
 #pragma once
 
+#include <quill/Backend.h>
+#include <quill/Frontend.h>
+#include <quill/LogMacros.h>
+#include <quill/Logger.h>
+#include <quill/sinks/ConsoleSink.h>
+
 #include <libiw4x/export.hxx>
 
 namespace iw4x
@@ -8,14 +14,19 @@ namespace iw4x
   //
   class scheduler;
 
+  // Logger backend
+  //
+  using logger = quill::Logger;
+
   // Process-wide execution context.
   //
   struct LIBIW4X_SYMEXPORT context
   {
     scheduler& sched;
+    logger* log;
 
     explicit
-    context (scheduler&);
+    context (scheduler&, logger*);
   };
 
   // `context` is required by a large portion of the detour surface and

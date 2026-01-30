@@ -163,6 +163,8 @@ namespace iw4x
                   "@PLATFORM_PLAY_ONLINE_CAPS",
                   {
                     "play mouse_click",
+                    "exec xsignin;",
+                    "exec xbasegamelicensecheck;",
                     "open menu_xboxlive"
                   });
 

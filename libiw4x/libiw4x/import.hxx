@@ -4624,12 +4624,33 @@ namespace iw4x
     XAssetEntryPoolEntry* next;
   };
 
-  // common
+  // Internal variables.
   //
-  using  Com_Frame_Try_Block_Function_t = int64_t (*) (void);
-  inline Com_Frame_Try_Block_Function_t Com_Frame_Try_Block_Function = reinterpret_cast<Com_Frame_Try_Block_Function_t> (0x1401F9930);
+  inline uint32_t& g_waitForConnectionDialogState = *reinterpret_cast<uint32_t*>(0x1467E3128);
+
+  // Internal functions.
+  //
 
   using  DB_FindXAssetHeader_t = XAssetHeader (*) (XAssetType, const char* name);
   inline DB_FindXAssetHeader_t DB_FindXAssetHeader = reinterpret_cast<DB_FindXAssetHeader_t> (0x140129220);
 
+  // qcommon/common.cpp
+  //
+  using  Com_Frame_Try_Block_Function_t = int64_t (*) (void);
+  inline Com_Frame_Try_Block_Function_t Com_Frame_Try_Block_Function = reinterpret_cast<Com_Frame_Try_Block_Function_t> (0x1401F9930);
+
+  // win32/win-live.cpp
+  //
+  using  Live_StartSigninAny_t = __int64 (*) (unsigned int);
+  inline Live_StartSigninAny_t Live_StartSigninAny = reinterpret_cast<Live_StartSigninAny_t> (0x1401B5B00);
+
+  // ui_mp/ui_main_mp.cpp
+  //
+  using  UI_OpenMenu_t = __int64 (*) (__int64 a1, const char *menuName);
+  inline UI_OpenMenu_t UI_OpenMenu = reinterpret_cast<UI_OpenMenu_t> (0x140271ED0);
+
+  // ??
+  //
+  using  Live_BaseGameLicenseCheck_t = bool (*) ();
+  inline Live_BaseGameLicenseCheck_t Live_BaseGameLicenseCheck = reinterpret_cast<Live_BaseGameLicenseCheck_t> (0x1401B4ED0);
 }
