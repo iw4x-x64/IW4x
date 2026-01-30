@@ -56,6 +56,7 @@ namespace iw4x
   // Time
   //
   using namespace std::chrono_literals;
+  using std::chrono::seconds;
 
   // Input/output
   //
@@ -69,4 +70,5 @@ namespace iw4x
   //
   using std::call_once;
   using std::thread;
+  using std::launch;
 }

@@ -4,6 +4,9 @@
 #include <libiw4x/memory.hxx>
 #include <libiw4x/scheduler.hxx>
 
+#include <libiw4x/client/init.hxx>
+#include <libiw4x/ui/init.hxx>
+
 namespace iw4x
 {
   // We avoid a pointer-based singleton here to prevent the compiler from
@@ -168,6 +171,9 @@ namespace iw4x
         memwrite (0x1400E4DA0, 0x33, 1);                                        // stats
         memwrite (0x1400E4DA1, 0xC0, 1);                                        // ^
         memwrite (0x1400E4DA2, 0xC3, 1);                                        // ^
+
+        client::init ();
+        ui::init ();
 
         // __scrt_common_main_seh
         //
