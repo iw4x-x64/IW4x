@@ -3,18 +3,10 @@
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/strand.hpp>
 
-#include <libiw4x/iw4x.hxx>
 #include <libiw4x/export.hxx>
 
 namespace iw4x
 {
-  // The central scheduler for the IW4x modification.
-  //
-  // The idea here is to wrap the Boost.Asio io_context to provide a named
-  // "strand" registry and decouple call sites (who just need to know the name,
-  // e.g., "networking", "logic") from the lifetime management of the actual
-  // execution contexts.
-  //
   class LIBIW4X_SYMEXPORT scheduler
   {
   public:

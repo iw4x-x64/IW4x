@@ -1,11 +1,12 @@
 #include <libiw4x/memory.hxx>
+#include <cstring>
 
 namespace iw4x
 {
   // Intel architectural NOP sequences.
   //
-  // See Intel 64 and IA-32 Architectures Software Developer's Manual,
-  // Volume 2B, Instruction Set Reference N-Z, Table 4-12.
+  // See Intel 64 and IA-32 Architectures Software Developer's Manual, Volume
+  // 2B, Instruction Set Reference N-Z, Table 4-12.
   //
   // We use these instead of repeated 0x90 to reduce the pressure on the
   // instruction decoder.
@@ -26,7 +27,7 @@ namespace iw4x
   void*
   memwrite (void* d, int c, size_t n)
   {
-    // Zero-length operation is no-op by definition.
+    // Empty op is a no-op.
     //
     if (n == 0)
       return d;
@@ -34,20 +35,16 @@ namespace iw4x
     // If this is a request for 0x90 (NOP) fill, we try to be smart and use
     // the optimal multi-byte sequences.
     //
-    // @@ We could eventually snapshot the executable with all "write"
-    //    patches pre-applied to avoid doing this work at runtime.
-    //
     if (c == 0x90)
     {
       auto p (static_cast<uint8_t*> (d));
 
-      // We only have sequences up to 9 bytes. Fill the bulk with the largest
-      // available sequence.
+      // We only have sequences up to 9 bytes.
       //
       size_t q (n / 9);
       size_t r (n % 9);
 
-      const uint8_t* s (nops[8].data ()); // 9-byte sequence.
+      const uint8_t* s (nops[8].data ());
 
       // To avoid the overhead of calling memcpy inside the loop (which creates
       // a massive stall for such small writes), we cast the sequence to a

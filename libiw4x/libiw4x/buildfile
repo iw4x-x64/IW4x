@@ -2,7 +2,6 @@ intf_libs = # Interface dependencies.
 impl_libs = # Implementation dependencies.
 
 import intf_libs += libboost-asio%lib{boost_asio}
-import intf_libs += libquill%lib{quill}
 import intf_libs += libzydis%lib{zydis}
 
 lib{iw4x}: {hxx ixx txx cxx}{** -version} \
@@ -11,6 +10,21 @@ lib{iw4x}: {hxx ixx txx cxx}{** -version} \
            $impl_libs $intf_libs
 
 hxx{version}: in{version} $src_root/manifest
+
+# Shared headers.
+#
+if ($cxx.class == 'msvc')
+{
+  cxx.poptions =+ "/FI" "libiw4x/types.hxx"              \
+                  "/FI" "libiw4x/utility.hxx"            \
+                  "/FI" "libiw4x/utility-win32.hxx"
+}
+else
+{
+  cxx.poptions =+ "-include" "libiw4x/types.hxx"         \
+                  "-include" "libiw4x/utility.hxx"       \
+                  "-include" "libiw4x/utility-win32.hxx"
+}
 
 # Build options.
 #

@@ -6,7 +6,6 @@ license: GPL-3.0-or-later ; GNU General Public License v3.0 or later.
 depends: * build2 >= 0.18.0-
 depends: * bpkg >= 0.18.0-
 depends: libboost-asio >= 1.87.0
-depends: libquill >= 10.1.0
 depends: libzydis >= 4.1.0
 
 # CI configuration.

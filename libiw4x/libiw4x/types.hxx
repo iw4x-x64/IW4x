@@ -71,6 +71,7 @@ namespace iw4x
   // General utilities
   //
   using std::function;
+  using std::forward;
 
   // Containers
   //

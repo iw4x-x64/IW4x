@@ -4,8 +4,8 @@
 
 namespace iw4x
 {
-  context::context (scheduler& s, logger* l)
-    : sched (s), log (l)
+  context::context (scheduler& s)
+    : sched (s)
   {
     // Intentionally left empty by design
     //
