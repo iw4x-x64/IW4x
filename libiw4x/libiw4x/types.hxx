@@ -6,6 +6,7 @@
 
 // Diagnostics library
 //
+#include <stdexcept>
 #include <system_error>
 
 // Memory management library
@@ -25,10 +26,6 @@
 // Strings library
 //
 #include <string>
-
-// Time library
-//
-#include <chrono>
 
 // Input/output library
 //
@@ -62,7 +59,10 @@ namespace iw4x
 
   // Diagnostics
   //
-  using std::system_category;
+  using std::invalid_argument;
+  using std::out_of_range;
+  using std::runtime_error;
+  using std::system_error;
 
   // Memory management
   //
@@ -81,10 +81,6 @@ namespace iw4x
   // Strings
   //
   using std::string;
-
-  // Time
-  //
-  using namespace std::chrono_literals;
 
   // Input/output
   //

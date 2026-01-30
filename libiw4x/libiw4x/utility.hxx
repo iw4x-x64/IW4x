@@ -25,6 +25,10 @@ extern "C"
 //
 #include <cstring>
 
+// Time library
+//
+#include <chrono>
+
 // Input/output library
 //
 #include <iostream>
@@ -38,10 +42,7 @@ namespace iw4x
 {
   // Diagnostics
   //
-  using std::invalid_argument;
-  using std::out_of_range;
-  using std::runtime_error;
-  using std::system_error;
+  using std::system_category;
 
   // Memory management
   //
@@ -51,6 +52,10 @@ namespace iw4x
   //
   using std::forward;
   using std::in_range;
+
+  // Time
+  //
+  using namespace std::chrono_literals;
 
   // Input/output
   //
