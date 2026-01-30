@@ -4648,9 +4648,4 @@ namespace iw4x
   //
   using  UI_OpenMenu_t = __int64 (*) (__int64 a1, const char *menuName);
   inline UI_OpenMenu_t UI_OpenMenu = reinterpret_cast<UI_OpenMenu_t> (0x140271ED0);
-
-  // ??
-  //
-  using  Live_BaseGameLicenseCheck_t = bool (*) ();
-  inline Live_BaseGameLicenseCheck_t Live_BaseGameLicenseCheck = reinterpret_cast<Live_BaseGameLicenseCheck_t> (0x1401B4ED0);
 }

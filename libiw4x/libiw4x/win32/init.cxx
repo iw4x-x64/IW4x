@@ -12,7 +12,6 @@ namespace iw4x
       LOG_TRACE_L3(ctx.log, __func__);
 
       detour (Live_StartSigninAny, &live_start_signin_any);
-      detour (Live_BaseGameLicenseCheck, &live_base_game_license_check);
 
       return true;
     }

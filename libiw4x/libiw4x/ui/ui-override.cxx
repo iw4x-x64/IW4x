@@ -164,7 +164,6 @@ namespace iw4x
                   {
                     "play mouse_click",
                     "exec xsignin;",
-                    "exec xbasegamelicensecheck;",
                     "open menu_xboxlive"
                   });
 
