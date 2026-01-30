@@ -49,9 +49,21 @@ namespace iw4x
 
       const uint8_t* s (nops[8].data ()); // 9-byte sequence.
 
+      // To avoid the overhead of calling memcpy inside the loop (which creates
+      // a massive stall for such small writes), we cast the sequence to a
+      // 64-bit integer.
+      //
+      // We know the 9-byte sequence is effectively a uint64 + a uint8.
+      //
+      // Note: this assumes unaligned access is safe, which it is on x64.
+      //
+      auto u (*reinterpret_cast<const uint64_t*> (s));
+      auto b (s[8]);
+
       for (size_t i (0); i != q; ++i)
       {
-        memcpy (p, s, 9);
+        *reinterpret_cast<uint64_t*> (p) = u;
+        p[8] = b;
         p += 9;
       }
 
@@ -80,42 +92,49 @@ namespace iw4x
     if (n == 0)
       return d;
 
-    auto pd (static_cast<uint8_t*> (d));
-    auto ps (static_cast<const uint8_t*> (s));
+    auto p (static_cast<uint8_t*> (d));
+    auto q (static_cast<const uint8_t*> (s));
 
-    // Iterate over the source buffer. We are looking for runs of 0x90 which
-    // we interpret as "placeholders for optimized NOPs".
+    // Iterate over the source buffer. We are looking for runs of 0x90 which we
+    // interpret as "placeholders for optimized NOPs".
     //
-    // Note: This implicitly assumes the source buffer represents code. If
-    // were are copying raw data where 0x90 is a valid value (e.g., offsets
-    // or immediate values), this logic will corrupt it by expanding single
-    // bytes into multi-byte opcodes.
+    // Note: We implicitly assume the source buffer represents code. If we are
+    // copying raw data where 0x90 is a valid value (e.g., offsets or immediate
+    // values), this logic will corrupt it.
     //
     for (size_t i (0); i < n;)
     {
-      // If we hit a NOP placeholder, see how long the run is.
+      // Check if we hit a NOP placeholder.
       //
-      if (ps[i] == 0x90)
+      if (q[i] == 0x90)
       {
-        size_t c (0);
-        while (i + c < n && ps[i + c] == 0x90)
-          c++;
+        size_t l (0);
+        while (i + l < n && q[i + l] == 0x90)
+          l++;
 
         // Delegate to the smart filler.
         //
-        memwrite (pd + i, 0x90, c);
-        i += c;
+        memwrite (p + i, 0x90, l);
+        i += l;
       }
       else
       {
-        // Otherwise, find the next NOP or end of buffer and copy the chunk.
+        // Otherwise, we want to find the next NOP or the end of the buffer as
+        // quickly as possible.
         //
-        size_t c (0);
-        while (i + c < n && ps[i + c] != 0x90)
-          c++;
+        // We use memchr here as it will use SIMD internally to scan for the
+        // 0x90 byte much faster than a scalar loop would.
+        //
+        auto m (memchr (q + i, 0x90, n - i));
 
-        memcpy (pd + i, ps + i, c);
-        i += c;
+        size_t l (m
+                  ? static_cast<const uint8_t*> (m) - (q + i)
+                  : n - i);
+
+        // Bulk copy the non-NOP code.
+        //
+        memcpy (p + i, q + i, l);
+        i += l;
       }
     }
 
