@@ -1,15 +1,29 @@
 #pragma once
 
-#include <iosfwd>
-#include <string>
-
 #include <libiw4x/export.hxx>
+
+#include <libiw4x/utility-win32.hxx>
 
 namespace iw4x
 {
-  // Print a greeting for the specified name into the specified
-  // stream. Throw std::invalid_argument if the name is empty.
-  //
-  LIBIW4X_SYMEXPORT void
-  say_hello (std::ostream&, const std::string& name);
+  extern "C"
+  {
+    // MinGW and MSVC differ in how they treat exports for DLLs.
+    //
+    // MinGW (via GNU ld) allows producing a DLL with no explicitly exported
+    // symbols. In that model, DllMain is treated as a special entry point
+    // discovered by name and does not need to appear in the export table.
+    //
+    // MSVC's linker, on the other hand, requires at least one symbol to be
+    // placed in the DLL export table. If no symbol is explicitly marked for
+    // export (e.g. via __declspec(dllexport)), MSVC refuses to link the DLL
+    // and reports that no exported symbols exist.
+    //
+    // For this reason, we explicitly export DllMain when building with MSVC,
+    // even though this is unnecessary for MinGW and has no functional effect
+    // at runtime.
+    //
+    LIBIW4X_SYMEXPORT BOOL
+    DllMain (HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved);
+  }
 }
