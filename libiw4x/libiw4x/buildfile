@@ -8,6 +8,18 @@ lib{iw4x}: {hxx ixx txx cxx}{** -version} \
 
 hxx{version}: in{version} $src_root/manifest
 
+# Shared headers.
+#
+if ($cxx.class == 'msvc')
+  cxx.poptions =+ "/FI" "libiw4x/types.hxx"              \
+                  "/FI" "libiw4x/utility.hxx"            \
+                  "/FI" "libiw4x/utility-win32.hxx"
+
+if ($cxx.class == 'gcc')
+  cxx.poptions =+ "-include" "libiw4x/types.hxx"         \
+                  "-include" "libiw4x/utility.hxx"       \
+                  "-include" "libiw4x/utility-win32.hxx"
+
 # Build options.
 #
 cxx.poptions =+ "-I$out_root" "-I$src_root"

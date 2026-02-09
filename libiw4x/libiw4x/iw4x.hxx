@@ -24,6 +24,6 @@ namespace iw4x
     // at runtime.
     //
     LIBIW4X_SYMEXPORT BOOL
-    DllMain (HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved);
+    DllMain (HINSTANCE, DWORD reason, LPVOID);
   }
 }

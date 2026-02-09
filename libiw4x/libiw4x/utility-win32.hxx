@@ -27,3 +27,11 @@
 #    include <windows.h>
 #  endif
 #endif
+
+// Process Status API.
+//
+#include <psapi.h>
+
+// Pseudo variable.
+//
+extern "C" IMAGE_DOS_HEADER __ImageBase;
