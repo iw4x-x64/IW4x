@@ -40,3 +40,7 @@
 // Direct3D 9 Graphics.
 //
 #include <d3d9.h>
+
+// Linker pseudo-variable.
+//
+extern "C" IMAGE_DOS_HEADER __ImageBase;
