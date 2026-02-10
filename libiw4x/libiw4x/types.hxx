@@ -12,6 +12,10 @@
 //
 #include <string>
 
+// Input/output library
+//
+#include <iostream>
+
 namespace iw4x
 {
   // Language support
@@ -39,4 +43,8 @@ namespace iw4x
   // Strings
   //
   using std::string;
+
+  // Input/output
+  //
+  using std::ios;
 }

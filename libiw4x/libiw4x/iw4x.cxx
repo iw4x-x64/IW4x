@@ -5,9 +5,73 @@ namespace iw4x
   namespace
   {
     void
-    main (int argc, char* argv[])
+    attach_console ()
     {
-      // ...
+      // The subtlety here is that Windows has many ways to end up with stdout
+      // and stderr pointing *somewhere* (sometimes to an actual console,
+      // sometimes to a pipe, sometimes to a completely invalid handle). We do
+      // not want to attach to `CONOUT$` in cases where the existing handles are
+      // already valid and intentional, as this would silently discard the real
+      // output sink.
+      //
+      // Instead, we first check `_fileno(stdout)` and `_fileno(stderr)`. That
+      // is, MSVCRT sets these up at startup and will return `-2`
+      // (`_NO_CONSOLE_FILENO`) if the file is invalid. This check is more
+      // trustworthy than calling `GetStdHandle()`, which can return stale
+      // handle IDs that may already be reused for unrelated objects by the time
+      // we run.
+      //
+      if (_fileno (stdout) >= 0 || _fileno (stderr) >= 0)
+      {
+        // If either `_fileno()` is valid, we go one step further: `_fileno()`
+        // itself had a bug (http://crbug.com/358267) in SUBSYSTEM:WINDOWS
+        // builds for certain MSVC versions (VS2010 to VS2013), so we
+        // double-check by calling `_get_osfhandle()` to confirm that the
+        // underlying OS handle is valid. Only if both streams are invalid do
+        // we attempt to attach a console.
+        //
+        intptr_t o (_get_osfhandle (_fileno (stdout)));
+        intptr_t e (_get_osfhandle (_fileno (stderr)));
+
+        if (o >= 0 || e >= 0)
+          return;
+      }
+
+      // At this point, both standard streams appear invalid, so we attempt to
+      // attach to the parent's console. Note that this call may fail for
+      // expected reasons such as being already attached or the parent having
+      // exited, and in all such cases the failure is non-fatal and we simply
+      // bail out.
+      //
+      if (AttachConsole (ATTACH_PARENT_PROCESS) != 0)
+      {
+        // Once attached, rebind `stdout` and `stderr` to `CONOUT$` using
+        // `freopen()`. Also duplicate their low-level descriptors (1 for
+        // stdout, 2 for stderr) so that code using the raw file descriptor API
+        // observes the same handles.
+        //
+        // Note that failure to rebind is non-fatal. Console output is
+        // diagnostic-only and has no bearing on core functionality. We
+        // therefore avoid exceptions and suppress all errors unconditionally.
+        //
+        bool o (freopen ("CONOUT$", "w", stdout) != nullptr &&
+          _dup2 (_fileno (stdout), 1) != -1);
+
+        bool e (freopen ("CONOUT$", "w", stderr) != nullptr &&
+          _dup2 (_fileno (stderr), 2) != -1);
+
+        // If stream were rebound, realign iostream objects (`cout`, `cerr`,
+        // etc.) with C FILE streams.
+        //
+        if (o && e)
+          ios::sync_with_stdio ();
+      }
+    }
+
+    int
+    main (int argc, char *argv[])
+    {
+      attach_console ();
     }
   }
 
@@ -131,6 +195,8 @@ namespace iw4x
           exit (1);
         }
 
+        // 
+        //
         main (__argc, __argv);
 
         // __scrt_common_main_seh
