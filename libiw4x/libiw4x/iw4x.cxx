@@ -221,6 +221,34 @@ namespace iw4x
           exit (1);
         }
 
+        // Windows has this notion of EcoQoS (Power Throttling) which
+        // effectively throttles the CPU for background processes. Since we
+        // often look like one to the OS, we need to explicitly opt-out to get
+        // full performance.
+        //
+        PROCESS_POWER_THROTTLING_STATE pt {};
+
+        pt.Version = PROCESS_POWER_THROTTLING_CURRENT_VERSION;
+        pt.ControlMask = PROCESS_POWER_THROTTLING_EXECUTION_SPEED;
+        pt.StateMask = 0;
+
+        // Try to apply the settings. If the OS refuses this for the current
+        // process (unlikely, but maybe rights issues or a very weird
+        // environment), bail out as we can't guarantee the performance
+        // characteristics we need.
+        //
+        if (!SetProcessInformation (GetCurrentProcess (),
+                                    ProcessPowerThrottling,
+                                    &pt,
+                                    sizeof (pt)))
+        {
+          MessageBox (nullptr,
+                      "unable to disable power throttling",
+                      "error",
+                      MB_ICONERROR);
+          exit (1);
+        }
+
         // Start Quill backend thread.
         //
         // Note that Quill backend is kept responsive (no sleep) and is allowed
