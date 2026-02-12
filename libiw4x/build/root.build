@@ -10,3 +10,9 @@ cxx{*}: extension = cxx
 # Provide the linker with information about exports.
 #
 def{*}: extension = def
+
+# Pre-defined semantics to distinguish between development and consumption
+# builds.
+#
+config [bool] config.libiw4x.develop ?= false
+develop = $config.libiw4x.develop # shorthand

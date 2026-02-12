@@ -72,6 +72,7 @@ namespace iw4x
     main (int argc, char *argv[])
     {
       attach_console ();
+      return 0;
     }
   }
 
@@ -164,8 +165,12 @@ namespace iw4x
           exit (1);
         }
 
-        // Relax module's memory protection to permit writes to segments that
-        // are otherwise read-only.
+        // Make the entire image writable and executable. We need "Write to
+        // patch the instructions and "Execute" to keep running them.
+        //
+        // Note that we unprotect the whole image (SizeOfImage) rather than
+        // parsing headers to locate specific code sections. That is, we want to
+        // avoid dealing with PE section alignment nuances.
         //
         MODULEINFO mi;
         if (GetModuleInformation (GetCurrentProcess (),
@@ -195,7 +200,35 @@ namespace iw4x
           exit (1);
         }
 
-        // 
+        // Windows has this notion of EcoQoS (Power Throttling) which
+        // effectively throttles the CPU for background processes. Since we
+        // often look like one to the OS, we need to explicitly opt-out to get
+        // full performance.
+        //
+        PROCESS_POWER_THROTTLING_STATE pt {};
+
+        pt.Version = PROCESS_POWER_THROTTLING_CURRENT_VERSION;
+        pt.ControlMask = PROCESS_POWER_THROTTLING_EXECUTION_SPEED;
+        pt.StateMask = 0;
+
+        // Try to apply the settings. If the OS refuses this for the current
+        // process (unlikely, but maybe rights issues or a very weird
+        // environment), bail out as we can't guarantee the performance
+        // characteristics we need.
+        //
+        if (!SetProcessInformation (GetCurrentProcess (),
+                                    ProcessPowerThrottling,
+                                    &pt,
+                                    sizeof (pt)))
+        {
+          MessageBox (nullptr,
+                      "unable to disable power throttling",
+                      "error",
+                      MB_ICONERROR);
+          exit (1);
+        }
+
+        //
         //
         main (__argc, __argv);
 
