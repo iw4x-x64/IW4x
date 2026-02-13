@@ -45,3 +45,4 @@ test.target = $cxx.target
 # builds.
 #
 config [bool] config.libiw4x.develop ?= false
+develop = $config.libiw4x.develop # shorthand
