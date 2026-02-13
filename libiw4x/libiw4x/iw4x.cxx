@@ -55,10 +55,10 @@ namespace iw4x
         // underlying OS handle is valid. Only if both streams are invalid do
         // we attempt to attach a console.
         //
-        intptr_t stdout_handle (_get_osfhandle (_fileno (stdout)));
-        intptr_t stderr_handle (_get_osfhandle (_fileno (stderr)));
+        intptr_t o (_get_osfhandle (_fileno (stdout)));
+        intptr_t e (_get_osfhandle (_fileno (stderr)));
 
-        if (stdout_handle >= 0 || stderr_handle >= 0)
+        if (o >= 0 || e >= 0)
           return;
       }
 
@@ -79,21 +79,16 @@ namespace iw4x
         // diagnostic-only and has no bearing on core functionality. We
         // therefore avoid exceptions and suppress all errors unconditionally.
         //
-        bool stdout_rebound (false);
-        bool stderr_rebound (false);
+        bool o (freopen ("CONOUT$", "w", stdout) != nullptr &&
+          _dup2 (_fileno (stdout), 1) != -1);
 
-        if (freopen ("CONOUT$", "w", stdout) != nullptr &&
-            _dup2 (_fileno (stdout), 1) != -1)
-          stdout_rebound = true;
-
-        if (freopen ("CONOUT$", "w", stderr) != nullptr &&
-            _dup2 (_fileno (stderr), 2) != -1)
-          stderr_rebound = true;
+        bool e (freopen ("CONOUT$", "w", stderr) != nullptr &&
+          _dup2 (_fileno (stderr), 2) != -1);
 
         // If stream were rebound, realign iostream objects (`cout`, `cerr`,
         // etc.) with C FILE streams.
         //
-        if (stdout_rebound && stderr_rebound)
+        if (o && e)
           ios::sync_with_stdio ();
       }
     }
@@ -190,8 +185,12 @@ namespace iw4x
           exit (1);
         }
 
-        // Relax module's memory protection to permit writes to segments that
-        // are otherwise read-only.
+        // Make the entire image writable and executable. We need "Write to
+        // patch the instructions and "Execute" to keep running them.
+        //
+        // Note that we unprotect the whole image (SizeOfImage) rather than
+        // parsing headers to locate specific code sections. That is, we want to
+        // avoid dealing with PE section alignment nuances.
         //
         MODULEINFO mi;
         if (GetModuleInformation (GetCurrentProcess (),
@@ -220,6 +219,7 @@ namespace iw4x
                       MB_ICONERROR);
           exit (1);
         }
+
 
         // Windows has this notion of EcoQoS (Power Throttling) which
         // effectively throttles the CPU for background processes. Since we
