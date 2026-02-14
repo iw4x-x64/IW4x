@@ -1,0 +1,11 @@
+/// \dir iw4x
+/// \brief The \c iw4x project.
+
+/// \dir libiw4x
+/// \brief The \c libiw4x package.
+
+/// \dir libiw4x/libiw4x
+/// \brief The \c libiw4x package source.
+
+/// \namespace iw4x
+/// \brief The \c libiw4x root namespace.
