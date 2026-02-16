@@ -37,7 +37,7 @@ namespace iw4x
     bool
     post (const string& name, F&& work)
     {
-      strand_type* s (find (name));
+      const strand_type* s (find (name));
 
       if (s == nullptr)
         return false;
@@ -88,9 +88,6 @@ namespace iw4x
     // Helper to look up a strand without exposing the map iterator. Returns
     // nullptr if not found.
     //
-    strand_type*
-    find (const string& name);
-
     const strand_type*
     find (const string& name) const;
 
