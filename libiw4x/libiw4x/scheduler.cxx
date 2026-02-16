@@ -30,7 +30,7 @@ namespace iw4x
   void
   scheduler::poll (const string& n)
   {
-    const strand_type* s (find (n));
+    const strand_t* s (find (n));
 
     // If the strand doesn't exist, we can't really post tasks to it. We could
     // theoretically poll the global context anyway, but it's safer to bail
@@ -54,7 +54,7 @@ namespace iw4x
     context->poll ();
   }
 
-  const scheduler::strand_type*
+  const scheduler::strand_t*
   scheduler::find (const string& n) const
   {
     auto i (strands.find (n));

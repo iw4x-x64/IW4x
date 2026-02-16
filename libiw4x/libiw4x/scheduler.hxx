@@ -27,10 +27,10 @@ namespace iw4x
   //
   class LIBIW4X_SYMEXPORT scheduler
   {
-  public:
-    using strand_type =
-      boost::asio::strand<boost::asio::io_context::executor_type>;
+    using exec_t = boost::asio::io_context::executor_type;
+    using strand_t = boost::asio::strand<exec_t>;
 
+  public:
     scheduler ();
     ~scheduler ();
 
@@ -55,7 +55,7 @@ namespace iw4x
     bool
     post (const string& name, F&& work)
     {
-      const strand_type* s (find (name));
+      const strand_t* s (find (name));
 
       if (s == nullptr)
         return false;
@@ -73,11 +73,11 @@ namespace iw4x
     // Helper to look up a strand without exposing the map iterator. Returns
     // nullptr if not found.
     //
-    const strand_type*
+    const strand_t*
     find (const string& name) const;
 
   private:
     unique_ptr<boost::asio::io_context> context;
-    unordered_map<string, strand_type> strands;
+    unordered_map<string, strand_t> strands;
   };
 }
