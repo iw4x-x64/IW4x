@@ -7,6 +7,24 @@
 
 namespace iw4x
 {
+  // NOTE:
+  //
+  // We use Boost.Asio as the backing scheduler. Note that this is not exactly
+  // a perfect fit: Asio is fundamentally an I/O reactor designed for
+  // multiplexing, whereas we need a set of independently tickable, logical
+  // schedulers.
+  //
+  // That is, we are layering our specific isolation semantics on top of
+  // their threading model. It works, but creates some friction (and overhead)
+  // regarding strand semantics vs. true isolation.
+  //
+  // TODO:
+  //
+  // Replace with sender/receiver-based implementation that more directly
+  // models the execution semantics we intend to expose.
+  //
+  // https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2024/p2300r10.html
+  //
   class LIBIW4X_SYMEXPORT scheduler
   {
   public:
