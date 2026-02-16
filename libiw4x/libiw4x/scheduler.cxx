@@ -39,14 +39,6 @@ namespace iw4x
     if (s == nullptr)
       return;
 
-    // Inject the recurring "loop" tasks for this specific strand.
-    //
-    if (auto l (loops.find (n)); l != loops.end ())
-    {
-      for (const auto& task : l->second)
-        boost::asio::post (*s, task);
-    }
-
     // Now drive the context.
     //
     // If the context has run out of work (stopped), we need to kick it back
@@ -60,12 +52,6 @@ namespace iw4x
     // ones for our strand.
     //
     context->poll ();
-  }
-
-  bool
-  scheduler::exists (const string& n) const
-  {
-    return find (n) != nullptr;
   }
 
   const scheduler::strand_type*

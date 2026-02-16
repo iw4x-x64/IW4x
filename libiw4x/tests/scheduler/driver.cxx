@@ -15,10 +15,8 @@ main ()
   // Test strand creation.
   //
   assert (s.create ("strand1"));
-  assert (s.exists ("strand1"));
   assert (!s.create ("strand1")); // Already exists.
   assert (s.create ("strand2"));
-  assert (s.exists ("strand2"));
 
   // Test posting work to strands.
   //

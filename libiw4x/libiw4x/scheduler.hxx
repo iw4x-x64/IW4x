@@ -46,43 +46,10 @@ namespace iw4x
       return true;
     }
 
-    // Register a task to be executed cyclically on a named strand.
-    //
-    // Unlike a timer, these tasks are driven by the poll() heartbeat. They
-    // are posted for execution exactly once every time we poll this specific
-    // strand (or the global context).
-    //
-    // Useful for game-loop logic that needs to run "every tick".
-    //
-    template <typename F>
-    bool
-    loop (const string& name, F&& work)
-    {
-      // We can't loop on a strand that doesn't exist.
-      //
-      if (!exists (name))
-        return false;
-
-      loops[name].emplace_back (forward<F> (work));
-      return true;
-    }
-
     // Drive the execution context.
     //
-    // This pumps the underlying io_context. If a specific name is provided,
-    // we only inject the 'loop' tasks for that specific strand before
-    // polling.
-    //
-    // Note: If name is empty/omitted, we execute the loop tasks for ALL
-    // registered strands.
-    //
     void
-    poll (const string& name = string ());
-
-    // Check if a named strand is currently registered.
-    //
-    bool
-    exists (const string& name) const;
+    poll (const string& name);
 
   private:
     // Helper to look up a strand without exposing the map iterator. Returns
@@ -94,9 +61,5 @@ namespace iw4x
   private:
     unique_ptr<boost::asio::io_context> context;
     unordered_map<string, strand_type> strands;
-
-    // Tasks that need to run on every poll cycle, grouped by strand name.
-    //
-    unordered_map<string, vector<function<void ()>>> loops;
   };
 }
