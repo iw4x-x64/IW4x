@@ -28,15 +28,6 @@ namespace iw4x
     bool
     create (const string& name);
 
-    // Destroy a named strand.
-    //
-    // Note that this does not cancel pending handlers associated with this
-    // strand, but simply removes the reference from the map. Return false
-    // if the name is not found.
-    //
-    bool
-    destroy (const string& name);
-
     // Post a unit of work to the specified named strand.
     //
     // Return false if the strand hasn't been created yet. We forward the

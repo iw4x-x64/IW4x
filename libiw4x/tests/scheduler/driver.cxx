@@ -58,36 +58,6 @@ main ()
     assert (!executed);
   }
 
-  // Test strand destruction.
-  //
-  assert (s.destroy ("strand1"));
-  assert (!s.exists ("strand1"));
-  assert (!s.destroy ("strand1")); // Already destroyed.
-
-  // Test posting to destroyed strand.
-  //
-  {
-    bool executed (false);
-
-    assert (!s.post ("strand1", [&executed] () { executed = true; }));
-    assert (!executed);
-  }
-
-  // Test recreation after destruction.
-  //
-  assert (s.create ("strand1"));
-  assert (s.exists ("strand1"));
-
-  {
-    bool executed (false);
-
-    assert (s.post ("strand1", [&executed] () { executed = true; }));
-
-    s.poll ("strand1");
-
-    assert (executed);
-  }
-
   // Test work ordering on same strand.
   //
   {

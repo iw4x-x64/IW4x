@@ -27,23 +27,6 @@ namespace iw4x
     return r.second;
   }
 
-  bool
-  scheduler::destroy (const string& n)
-  {
-    // Clean up the loop registry first.
-    //
-    // Note that we ignore the result here: whether there were loops attached
-    // or not doesn't determine the success of the 'destroy' operation. We
-    // just want to ensure that *if* there were any, they are gone.
-    //
-    loops.erase (n);
-
-    // The operation is considered successful only if the strand itself
-    // existed and was removed.
-    //
-    return strands.erase (n) != 0;
-  }
-
   void
   scheduler::poll (const string& n)
   {
