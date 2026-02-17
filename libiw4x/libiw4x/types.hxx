@@ -61,6 +61,7 @@ namespace iw4x
   // Diagnostics
   //
   using std::invalid_argument;
+  using std::logic_error;
   using std::out_of_range;
   using std::runtime_error;
   using std::system_error;

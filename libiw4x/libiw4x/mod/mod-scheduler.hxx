@@ -5,9 +5,12 @@
 
 namespace iw4x
 {
-  namespace win32
+  namespace mod
   {
-    LIBIW4X_SYMEXPORT bool
-    init ();
+    class LIBIW4X_SYMEXPORT scheduler
+    {
+    public:
+      scheduler ();
+    };
   }
 }

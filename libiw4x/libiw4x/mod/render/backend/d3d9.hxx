@@ -5,9 +5,8 @@
 
 namespace iw4x
 {
-  namespace ui
+  namespace mod
   {
-    LIBIW4X_SYMEXPORT void
-    run_override ();
+
   }
 }

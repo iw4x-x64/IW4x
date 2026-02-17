@@ -1,8 +1,8 @@
-#include <libiw4x/ui/ui-override.hxx>
+#include <libiw4x/mod/mod-ui.hxx>
 
 namespace iw4x
 {
-  namespace ui
+  namespace mod
   {
     namespace
     {
@@ -127,8 +127,8 @@ namespace iw4x
       }
     }
 
-    void
-    run_override ()
+    ui::
+    ui ()
     {
       ctx.sched.post ("com_frame", [] ()
       {

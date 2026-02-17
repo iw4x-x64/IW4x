@@ -4624,28 +4624,143 @@ namespace iw4x
     XAssetEntryPoolEntry* next;
   };
 
-  // Internal variables.
-  //
-  inline uint32_t& g_waitForConnectionDialogState = *reinterpret_cast<uint32_t*>(0x1467E3128);
-
-  // Internal functions.
+  // Game internal symbols
   //
 
-  using  DB_FindXAssetHeader_t = XAssetHeader (*) (XAssetType, const char* name);
+  using  NET_Config_t = int (*) (int);
+  inline NET_Config_t NET_Config = reinterpret_cast<NET_Config_t> (0x1402A9510);
+
+  using  NET_GetDvars_t = bool (*) ();
+  inline NET_GetDvars_t NET_GetDvars = reinterpret_cast<NET_GetDvars_t> (0x1402A9900);
+
+  using  NET_SendPacket_t = bool (*) (size_t, char*, int*);
+  inline NET_SendPacket_t NET_SendPacket = reinterpret_cast<NET_SendPacket_t> (0x1402AA1B0);
+
+  using  NET_StringToAdr_t = bool (*) (const char*, netadr_t*);
+  inline NET_StringToAdr_t NET_StringToAdr = reinterpret_cast<NET_StringToAdr_t> (0x14020A260);
+
+  using  NET_OutOfBandPrint_t = void (*) (int, netadr_t*, const char*, ...);
+  inline NET_OutOfBandPrint_t NET_OutOfBandPrint = reinterpret_cast<NET_OutOfBandPrint_t> (0x140209FC0);
+
+  using  Dvar_RegisterString_t = long long (*) (long long, long long, int, long long);
+  inline Dvar_RegisterString_t Dvar_RegisterString = reinterpret_cast<Dvar_RegisterString_t> (0x140288590);
+
+  using  Dvar_RegisterInt_t = long long (*) (long long, int, int, int, int, long long);
+  inline Dvar_RegisterInt_t Dvar_RegisterInt = reinterpret_cast<Dvar_RegisterInt_t> (0x1402881F0);
+
+  using  Dvar_FindVar_t = dvar_t* (*) (const char* name);
+  inline Dvar_FindVar_t Dvar_FindVar = reinterpret_cast<Dvar_FindVar_t> (0x140287170);
+
+  using  Dvar_SetString_t = long long (*) (long long, long long);
+  inline Dvar_SetString_t Dvar_SetString = reinterpret_cast<Dvar_SetString_t> (0x140289A80);
+
+  using  Dvar_SetFromStringByName_t = dvar_t* (*) (const char*, const char*);
+  inline Dvar_SetFromStringByName_t Dvar_SetFromStringByName = reinterpret_cast<Dvar_SetFromStringByName_t> (0x140289570);
+
+  using  Dvar_RegisterBool_t = long long (*) (long long, long long, int, long long);
+  inline Dvar_RegisterBool_t Dvar_RegisterBool = reinterpret_cast<Dvar_RegisterBool_t> (0x140287CE0);
+
+  using  DB_FindXAssetHeader_t = XAssetHeader (*) (XAssetType type, const char* name);
   inline DB_FindXAssetHeader_t DB_FindXAssetHeader = reinterpret_cast<DB_FindXAssetHeader_t> (0x140129220);
 
-  // qcommon/common.cpp
-  //
-  using  Com_Frame_Try_Block_Function_t = int64_t (*) (void);
+  using  Com_Frame_Try_Block_Function_t = int64_t (*) ();
   inline Com_Frame_Try_Block_Function_t Com_Frame_Try_Block_Function = reinterpret_cast<Com_Frame_Try_Block_Function_t> (0x1401F9930);
 
-  // win32/win-live.cpp
-  //
-  using  Live_StartSigninAny_t = __int64 (*) (unsigned int);
-  inline Live_StartSigninAny_t Live_StartSigninAny = reinterpret_cast<Live_StartSigninAny_t> (0x1401B5B00);
+  using  Sys_InitializeCriticalSections_t = void (*) (void);
+  inline Sys_InitializeCriticalSections_t Sys_InitializeCriticalSections = reinterpret_cast<Sys_InitializeCriticalSections_t> (0x140290620);
 
-  // ui_mp/ui_main_mp.cpp
+  using  Sys_InitMainThread_t = __int64 (*) (void);
+  inline Sys_InitMainThread_t Sys_InitMainThread = reinterpret_cast<Sys_InitMainThread_t> (0x14020DC00);
+
+  using  XGameRuntimeInitialize_t = char (*) (void);
+  inline XGameRuntimeInitialize_t XGameRuntimeInitialize = reinterpret_cast<XGameRuntimeInitialize_t> (0x1401B2FB0);
+
+  using  Win_InitLocalization_t = char (*) (DWORD *);
+  inline Win_InitLocalization_t Win_InitLocalization = reinterpret_cast<Win_InitLocalization_t> (0x1402A7CB0);
+
+  using  I_strnicmp_t = __int64 (*) (__int64, unsigned __int8 *, int);
+  inline I_strnicmp_t I_strnicmp = reinterpret_cast<I_strnicmp_t> (0x14028E530);
+
+  using  sprintf_t = int (*) (char *const Buffer, const char *const Format, ...);
+  inline sprintf_t sprintf = reinterpret_cast<sprintf_t> (0x14002F320);
+
+  using  Sys_CheckCrashOrRerun_t = __int64 (*) (void);
+  inline Sys_CheckCrashOrRerun_t Sys_CheckCrashOrRerun = reinterpret_cast<Sys_CheckCrashOrRerun_t> (0x1402A7F50);
+
+  using  Com_InitParse_t = __int64 (*) (void);
+  inline Com_InitParse_t Com_InitParse = reinterpret_cast<Com_InitParse_t> (0x14028CEA0);
+
+  using  Dvar_Init_t = unsigned __int8 * (*) (void);
+  inline Dvar_Init_t Dvar_Init = reinterpret_cast<Dvar_Init_t> (0x140287520);
+
+  using  InitTiming_t = void (*) (void);
+  inline InitTiming_t InitTiming = reinterpret_cast<InitTiming_t> (0x140290330);
+
+  using  Sys_GetCpuCount_t = __int64 (*) (void);
+  inline Sys_GetCpuCount_t Sys_GetCpuCount = reinterpret_cast<Sys_GetCpuCount_t> (0x14020DB90);
+
+  using  Sys_SystemMemoryMB_t = __int64 (*) (void);
+  inline Sys_SystemMemoryMB_t Sys_SystemMemoryMB = reinterpret_cast<Sys_SystemMemoryMB_t> (0x1402A4BD0);
+
+  using  Sys_DetectVideoCard_t = IDirect3D9 * (*) (__int64, char *);
+  inline Sys_DetectVideoCard_t Sys_DetectVideoCard = reinterpret_cast<Sys_DetectVideoCard_t> (0x1402A4810);
+
+  using  Sys_SupportsSSE_t = bool (*) (void);
+  inline Sys_SupportsSSE_t Sys_SupportsSSE = reinterpret_cast<Sys_SupportsSSE_t> (0x1402A4B90);
+
+  using  Sys_DetectCpuVendorAndName_t = int (*) (char *Str1, char *);
+  inline Sys_DetectCpuVendorAndName_t Sys_DetectCpuVendorAndName = reinterpret_cast<Sys_DetectCpuVendorAndName_t> (0x1402A46D0);
+
+  using  Sys_SetAutoConfigureGHz_t = void (*) (__int64);
+  inline Sys_SetAutoConfigureGHz_t Sys_SetAutoConfigureGHz = reinterpret_cast<Sys_SetAutoConfigureGHz_t> (0x1402A4A90);
+
+  using  Sys_RecordAccessibilityShortcutSettings_t = BOOL (*) (void);
+  inline Sys_RecordAccessibilityShortcutSettings_t Sys_RecordAccessibilityShortcutSettings = reinterpret_cast<Sys_RecordAccessibilityShortcutSettings_t> (0x1402AD020);
+
+  using  Sys_AllowAccessibilityShortcutKeys_t = int (*) (char);
+  inline Sys_AllowAccessibilityShortcutKeys_t Sys_AllowAccessibilityShortcutKeys = reinterpret_cast<Sys_AllowAccessibilityShortcutKeys_t> (0x1402ACF30);
+
+  using  I_strncpyz_t = char * (*) (char *, const char *, int);
+  inline I_strncpyz_t I_strncpyz = reinterpret_cast<I_strncpyz_t> (0x14028E500);
+
+  using  Sys_CreateSplashWindow_t = __int16 (*) (void);
+  inline Sys_CreateSplashWindow_t Sys_CreateSplashWindow = reinterpret_cast<Sys_CreateSplashWindow_t> (0x1402AA510);
+
+  using  Sys_ShowSplashWindow_t = BOOL (*) (void);
+  inline Sys_ShowSplashWindow_t Sys_ShowSplashWindow = reinterpret_cast<Sys_ShowSplashWindow_t> (0x1402AA7E0);
+
+  using  Com_Error_t = void (*) (int, const char *, __int64, __int64);
+  inline Com_Error_t Com_Error = reinterpret_cast<Com_Error_t> (0x1401F8FD0);
+
+  using  Sys_Milliseconds_t = __int64 (*) (void);
+  inline Sys_Milliseconds_t Sys_Milliseconds = reinterpret_cast<Sys_Milliseconds_t> (0x1402AA460);
+
+  using  Session_InitDvars_t = char * (*) (void);
+  inline Session_InitDvars_t Session_InitDvars = reinterpret_cast<Session_InitDvars_t> (0x140247930);
+
+  using  Com_Init_t = void (*) (const char *);
+  inline Com_Init_t Com_Init = reinterpret_cast<Com_Init_t> (0x1401FA2F0);
+
+  using  Cbuf_AddText_t = void (*) (int, char *);
+  inline Cbuf_AddText_t Cbuf_AddText = reinterpret_cast<Cbuf_AddText_t> (0x1401EC4A0);
+
+  using  Sys_CheckQuitRequest_t = void (*) (void);
+  inline Sys_CheckQuitRequest_t Sys_CheckQuitRequest = reinterpret_cast<Sys_CheckQuitRequest_t> (0x1402A8210);
+
+  using  Com_Frame_t = void (*) (void);
+  inline Com_Frame_t Com_Frame = reinterpret_cast<Com_Frame_t> (0x1401F9890);
+
+  using  Win_ShutdownLocalization_t = void (*) (void);
+  inline Win_ShutdownLocalization_t Win_ShutdownLocalization = reinterpret_cast<Win_ShutdownLocalization_t> (0x1402A7ED0);
+
+  using  Win_GetLocalizationFilename_t = char * (*) (void);
+  inline Win_GetLocalizationFilename_t Win_GetLocalizationFilename = reinterpret_cast<Win_GetLocalizationFilename_t> (0x1402A7CA0);
+
+  using  CL_ConnectFromParty_t = void (*) (int, void*, netadr_t, int, int, const char*, const char*);
+  inline CL_ConnectFromParty_t CL_ConnectFromParty = reinterpret_cast<CL_ConnectFromParty_t> (0x1400F5220);
+
+  // Game Internal variables
   //
-  using  UI_OpenMenu_t = __int64 (*) (__int64 a1, const char *menuName);
-  inline UI_OpenMenu_t UI_OpenMenu = reinterpret_cast<UI_OpenMenu_t> (0x140271ED0);
+  inline SOCKET* ip_socket (reinterpret_cast<SOCKET*> (0x1467E8490));
+  inline SOCKET* lsp_socket (reinterpret_cast<SOCKET*> (0x1467E8498));
 }

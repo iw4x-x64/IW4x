@@ -5,9 +5,12 @@
 
 namespace iw4x
 {
-  namespace client
+  namespace mod
   {
-    LIBIW4X_SYMEXPORT int64_t
-    com_frame_try_block_function ();
+    class LIBIW4X_SYMEXPORT network
+    {
+    public:
+      network ();
+    };
   }
 }

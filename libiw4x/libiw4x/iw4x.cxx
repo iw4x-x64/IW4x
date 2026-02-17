@@ -4,9 +4,12 @@
 #include <libiw4x/memory.hxx>
 #include <libiw4x/scheduler.hxx>
 
-#include <libiw4x/client/init.hxx>
-#include <libiw4x/ui/init.hxx>
-#include <libiw4x/win32/init.hxx>
+#include <libiw4x/mod/mod-network.hxx>
+#include <libiw4x/mod/mod-oob.hxx>
+#include <libiw4x/mod/mod-render.hxx>
+#include <libiw4x/mod/mod-scheduler.hxx>
+#include <libiw4x/mod/mod-ui.hxx>
+
 #include <libiw4x/windows/init.hxx>
 
 namespace iw4x
@@ -337,9 +340,12 @@ namespace iw4x
         memwrite (0x1400E4DA1, 0xC0, 1);                                          // ^
         memwrite (0x1400E4DA2, 0xC3, 1);                                          // ^
 
-        client::init ();
-        ui::init ();
-        win32::init ();
+        mod::network ();
+        mod::oob ();
+        mod::render ();
+        mod::scheduler ();
+        mod::ui ();
+
         windows::init ();
 
         // __scrt_common_main_seh
