@@ -1,3 +1,5 @@
+d = $config.libiw4x.doxygen
+
 # Define the file types.
 #
 # We distinguish between the configuration input and the tagfile/XML output
@@ -14,7 +16,7 @@ doxytag{*}: extension = doxytag
 # Note that we guard this with $develop to avoid triggering the requirement
 # in distribution builds.
 #
-if $develop
+if $d
   import! doxygen = doxygen%exe{doxygen}
 
 # Root-level target.
@@ -22,7 +24,7 @@ if $develop
 # Similar to the import, we only include this in the develop build to avoid
 # enforcing documentation generation on consumers of the package.
 #
-./: doxytag{libiw4x}: include = $develop
+./: doxytag{libiw4x}: include = $d
 
 # The Doxygen generation recipe.
 #
@@ -33,7 +35,7 @@ if $develop
                     $src_root/../libiw4x/libiw4x/hxx{**} \
                     $doxygen
 %
-if $develop
+if $d
 {{
   o = $directory($>[0])    # Target output directory.
   c = $path($<[0])         # Source config file.
