@@ -1,5 +1,8 @@
 #include <libiw4x/iw4x.hxx>
 
+#include <libiw4x/mod/mod-scheduler.hxx>
+#include <libiw4x/mod/mod-ui.hxx>
+
 namespace iw4x
 {
   namespace
@@ -265,6 +268,12 @@ namespace iw4x
         // regressions.
         //
         *(uint32_t*) 0x14020DD06 = thread::hardware_concurrency ();
+
+        //
+        //
+
+        mod::scheduler ();
+        mod::ui ();
 
         // __scrt_common_main_seh
         //

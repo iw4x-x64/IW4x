@@ -4,7 +4,7 @@
 
 namespace iw4x
 {
-  struct frame_domain {};
+  struct com_frame_domain {};
 
   // Callable type aliases.
   //
