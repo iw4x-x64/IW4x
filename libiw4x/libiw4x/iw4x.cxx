@@ -228,9 +228,13 @@ namespace iw4x
           exit (1);
         }
 
-        //
-        //
-        main (__argc, __argv);
+        attach_console ();
+
+        memcpy ((void*) 0x1402A91E5, "\xB0\x01", 2);                            // Suppress XGameRuntimeInitialize call in WinMain
+        memset ((void*) 0x1402A91E7, 0x90, 3);                                  // ^
+        memset ((void*) 0x1402A6A4B, 0x90, 5);                                  // Suppress XCurl call in Live_Init
+        memset ((void*) 0x1402A6368, 0x90, 5);                                  // Suppress XCurl call in Live_Frame
+        memset ((void*) 0x1402A8CFE, 0x90, 5);                                  // Suppress GDK shutdown in Com_Quit_f (avoids crash)
 
         // __scrt_common_main_seh
         //
