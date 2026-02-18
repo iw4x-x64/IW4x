@@ -1,63 +1,185 @@
 #include <libiw4x/scheduler.hxx>
 
-using namespace boost::asio;
-
 namespace iw4x
 {
-  scheduler::scheduler ()
-    : context (make_unique<io_context> ())
+  // logical_scheduler
+  //
+
+  logical_scheduler::
+  logical_scheduler ()
+    : async_head_ (nullptr)
   {
-    // Intentionally left empty by design
+    // Pre-allocate queue capacity to avoid heap allocations during the steady
+    // state (tick).
     //
+    // We assume 512 entries as a safe upper bound for a single frame. If we
+    // exceed this, we will reallocate, which is fine, but we want to avoid it
+    // in the common case.
+    //
+    pending_.reserve (512);
+    active_.reserve (512);
   }
 
-  scheduler::~scheduler ()
+  logical_scheduler::
+  ~logical_scheduler ()
   {
-    // Intentionally left empty by design
+    // Drain and discard any remaining async nodes.
     //
+    // Note that these may exist if the scheduler is destroyed before a final
+    // tick has a chance to run (e.g., during a fast process shutdown where
+    // other threads might have still posted work).
+    //
+    async_node* n (async_head_.exchange (nullptr, memory_order_acquire));
+
+    while (n != nullptr)
+    {
+      async_node* d (n);
+      n = n->next;
+      delete d;
+    }
   }
 
-  bool
-  scheduler::create (const string& n)
+  void logical_scheduler::
+  post (task work)
   {
-    // We treat existence as a failure to create because we expect unique
-    // names.
+    assert (work);
+
+    // Fast path: same-thread post.
     //
-    auto r (strands.try_emplace (n, make_strand (*context)));
-    return r.second;
+    // Just push it onto the pending queue.
+    //
+    scheduled_entry e;
+    e.work = std::move (work);
+
+    pending_.push_back (std::move (e));
   }
 
-  void
-  scheduler::poll (const string& n)
+  void logical_scheduler::
+  post (task work, asynchronous)
   {
-    const strand_t* s (find (n));
+    assert (work);
 
-    // If the strand doesn't exist, we can't really post tasks to it. We could
-    // theoretically poll the global context anyway, but it's safer to bail
-    // out to avoid masking logic errors in the caller.
+    // Prepare the entry.
     //
-    if (s == nullptr)
+    scheduled_entry e;
+    e.work = std::move (work);
+
+    // Allocate the node.
+    //
+    // Note that this is a heap allocation on the hot path for cross-thread
+    // posts. While not ideal, it isolates the cost to the async boundary.
+    //
+    // @@: Look into lock-free object pool if this proves to be a bottleneck.
+    //
+    async_node* n (new async_node);
+    n->entry = std::move (e);
+
+    // Push to the stack.
+    //
+    // The release semantics on success make the node contents visible to the
+    // draining thread. Relaxed load on failure is fine, that is, we will
+    // retry with the updated head immediately.
+    //
+    async_node* h (async_head_.load (memory_order_relaxed));
+
+    for (;;)
+    {
+      n->next = h;
+
+      if (async_head_.compare_exchange_weak (h,
+                                             n,
+                                             memory_order_release,
+                                             memory_order_relaxed))
+        break;
+    }
+  }
+
+  void logical_scheduler::
+  drain_async ()
+  {
+    // Pop the entire stack.
+    //
+    async_node* n (async_head_.exchange (nullptr, memory_order_acquire));
+
+    if (n == nullptr)
       return;
 
-    // Now drive the context.
+    // The stack yields nodes in LIFO order. This is generally not what we want
+    // for task execution (we prefer FIFO). So we reverse the list.
     //
-    // If the context has run out of work (stopped), we need to kick it back
-    // to life before we can poll again. Otherwise, the tasks we just posted
-    // will sit in the queue forever.
-    //
-    if (context->stopped ())
-      context->restart ();
+    async_node* r (nullptr);
+    while (n != nullptr)
+    {
+      async_node* nx (n->next);
+      n->next = r;
+      r = n;
+      n = nx;
+    }
 
-    // Note that this runs *all* ready handlers on the context, not just the
-    // ones for our strand.
+    // Now transfer entries into the local pending queue and free the nodes.
     //
-    context->poll ();
+    // Note that we do this in a batch to minimize vector resizing overhead,
+    // though strictly speaking we are just moving the implementation details
+    // of the loop here.
+    //
+    while (r != nullptr)
+    {
+      async_node* d (r);
+      r = r->next; // advance before move/delete
+
+      pending_.push_back (std::move (d->entry));
+      delete d;
+    }
   }
 
-  const scheduler::strand_t*
-  scheduler::find (const string& n) const
+  void logical_scheduler::
+  tick ()
   {
-    auto i (strands.find (n));
-    return i != strands.end () ? &i->second : nullptr;
+    // Thread ownership claim/verification.
+    //
+    // The first time we tick, we claim ownership of the scheduler. Subsequent
+    // ticks must happen on the same thread to maintain the single-consumer
+    // invariant for the vectors.
+    //
+    {
+      namespace this_thread = std::this_thread;
+
+      thread::id tid (this_thread::get_id ());
+
+      if (owner_ == thread::id {})
+        owner_ = tid;
+      else
+        assert (owner_ == tid);
+    }
+
+    // Drain any pending cross-thread posts into our local pending buffer.
+    //
+    drain_async ();
+
+    // We swap `pending_` (which contains tasks accumulated since the last
+    // tick) with `active_` (which is empty).
+    //
+    // This allows us to iterate over `active_` without holding any locks
+    // and allows `post()` to safely append to `pending_` while we are
+    // executing.
+    //
+    pending_.swap (active_);
+
+    // Run the tasks. Note that if a task throws, we currently let it
+    // propagate out of tick(), which will likely terminate the application.
+    // This is intentional: tasks should handle their own exceptions or be
+    // exception-free.
+    //
+    for (auto& e : active_)
+    {
+      if (e.work)
+        e.work ();
+    }
+
+    // Clear the executed tasks. Note that while it destroys the function
+    // objects and resets the vector size, it will keeps the capacity for the
+    // next frame.
+    //
+    active_.clear ();
   }
 }

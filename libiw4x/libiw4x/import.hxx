@@ -10,7 +10,6 @@
 
 #pragma once
 
-#include <libiw4x/context.hxx>
 #include <libiw4x/detour.hxx>
 #include <libiw4x/memory.hxx>
 #include <libiw4x/scheduler.hxx>

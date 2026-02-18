@@ -35,8 +35,9 @@
 
 // Concurrency support library
 //
-#include <mutex>
+#include <atomic>
 #include <future>
+#include <mutex>
 
 namespace iw4x
 {
@@ -74,6 +75,7 @@ namespace iw4x
   //
   using std::function;
   using std::forward;
+  using std::move_only_function;
 
   // Containers
   //
@@ -93,7 +95,11 @@ namespace iw4x
 
   // Concurrency support
   //
-  using std::once_flag;
-  using std::future;
+  using std::atomic;
   using std::future_status;
+  using std::future;
+  using std::once_flag;
+  using std::memory_order_acquire;
+  using std::memory_order_release;
+  using std::memory_order_relaxed;
 }

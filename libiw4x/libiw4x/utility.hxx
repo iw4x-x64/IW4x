@@ -69,6 +69,7 @@ namespace iw4x
   // Concurrency support
   //
   using std::call_once;
-  using std::thread;
+  using std::jthread;
   using std::launch;
+  using std::thread;
 }

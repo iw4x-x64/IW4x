@@ -1,6 +1,5 @@
 #include <libiw4x/iw4x.hxx>
 
-#include <libiw4x/context.hxx>
 #include <libiw4x/memory.hxx>
 #include <libiw4x/scheduler.hxx>
 
@@ -14,22 +13,6 @@
 
 namespace iw4x
 {
-  // We avoid a pointer-based singleton here to prevent the compiler from
-  // generating dependent loads. That is, even if the pointer is TU-local, the
-  // compiler assumes it might change, preventing it from folding the access
-  // into a single address computation.
-  //
-  // Instead, we reserve storage with static duration and use placement-new.
-  // This gives us a reference with a fixed base address, which is critical
-  // for performance in our per-frame detours (avoids the pointer-chasing
-  // dependency chan).
-  //
-  // Note that we must manually sequence construction since the linker only
-  // sees the storage, not the object lifetime.
-  //
-  alignas (context) std::byte ctx_storage [sizeof (context)];
-  context& ctx (reinterpret_cast<context&> (ctx_storage));
-
   namespace
   {
     void
@@ -251,55 +234,6 @@ namespace iw4x
                       MB_ICONERROR);
           exit (1);
         }
-
-        // Start Quill backend thread.
-        //
-        // Note that Quill backend is kept responsive (no sleep) and is allowed
-        // to exit without draining queues to avoid MinGW-specific shutdown
-        // hangs.
-        //
-        quill::Backend::start ({
-          .enable_yield_when_idle               = true,
-          .sleep_duration                       = 0ns,
-          .wait_for_queues_to_empty_before_exit = false,
-          .check_printable_char                 = {},
-          .log_level_short_codes                =
-          {
-            "3", "2", "1", "D", "I", "N", "W", "E", "C", "B", "_"
-          }
-        });
-
-        // Configure Quill log layout.
-        //
-        // @@: It may be tempting to include the name of the calling function
-        // in log output, but this is not reliable in practice. In particular,
-        // calls made from lambdas (and other compiler-generated contexts)
-        // often yield generic names.
-        //
-        quill::PatternFormatterOptions format_options {
-          "%(time) [%(log_level_short_code)] %(message)",
-          "%H:%M:%S.%Qms",
-          quill::Timezone::LocalTime,
-        };
-
-        // Create the main logger instance.
-        //
-        // Note that its lifetime is managed by Quill.
-        //
-        quill::Logger* l (
-          quill::Frontend::create_or_get_logger (
-            "iw4x",
-            quill::Frontend::create_or_get_sink<quill::ConsoleSink> ("cs"),
-            format_options));
-
-        // In development builds, enable the most verbose tracing level.
-        //
-#if LIBIW4X_DEVELOP
-        l->set_log_level (quill::LogLevel::TraceL3);
-#endif
-
-        scheduler s;
-        new (&ctx_storage) context (s, l);
 
         memwrite (0x1402A91E5, "\xB0\x01");                                       // Suppress XGameRuntimeInitialize call in WinMain
         memwrite (0x1402A91E7, 0x90, 3);                                          // ^

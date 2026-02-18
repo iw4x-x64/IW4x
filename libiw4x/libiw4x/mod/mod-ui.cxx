@@ -130,7 +130,7 @@ namespace iw4x
     ui::
     ui ()
     {
-      ctx.sched.post ("com_frame", [] ()
+      scheduler::post (com_frame_domain{}, [] ()
       {
         try
         {

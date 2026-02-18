@@ -57,8 +57,8 @@ namespace iw4x
     network::
     network ()
     {
-      ctx.sched.post ("com_frame",
-              []
+      scheduler::post (com_frame_domain {},
+                       []
       {
         try
         {
