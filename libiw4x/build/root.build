@@ -11,6 +11,10 @@ cxx{*}: extension = cxx
 #
 def{*}: extension = def
 
+# The test target for cross-testing (running tests under Wine, etc).
+#
+test.target = $cxx.target
+
 # Pre-defined semantics to distinguish between development and consumption
 # builds.
 #
