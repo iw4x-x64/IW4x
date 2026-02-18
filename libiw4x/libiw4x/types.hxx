@@ -99,4 +99,7 @@ namespace iw4x
   using std::future_status;
   using std::future;
   using std::once_flag;
+  using std::memory_order_acquire;
+  using std::memory_order_release;
+  using std::memory_order_relaxed;
 }
