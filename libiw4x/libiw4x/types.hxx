@@ -75,6 +75,7 @@ namespace iw4x
   //
   using std::function;
   using std::forward;
+  using std::move_only_function;
 
   // Containers
   //
