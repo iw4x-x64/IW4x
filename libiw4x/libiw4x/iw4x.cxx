@@ -244,6 +244,20 @@ namespace iw4x
         memset ((void*) 0x1403B30DC, 0x00, 9);                                     // ^
         memcpy ((void*) 0x1402864F0, "\xB0\x01\xC3", 3);                           // Patch Content_DoWeHaveContentPack to return true
 
+        memset ((void*) 0x1402A5F70, 0x90, 3);                                     // xboxlive_signed
+        memset ((void*) 0x1402A5F73, 0x74, 1);                                     // ^
+        memset ((void*) 0x1400F5B86, 0xEB, 1);                                     // ^
+        memset ((void*) 0x1400F5BAC, 0xEB, 1);                                     // ^
+        memset ((void*) 0x14010B332, 0xEB, 1);                                     // ^
+        memset ((void*) 0x1401BA1FE, 0xEB, 1);                                     // ^
+        memset ((void*) 0x140271ED0, 0xC3, 1);                                     // playlist
+        memset ((void*) 0x1400F6BC4, 0x90, 2);                                     // ^
+        memset ((void*) 0x1400FC833, 0xEB, 1);                                     // configstring
+        memset ((void*) 0x1400D2AFC, 0x90, 2);                                     // ^
+        memset ((void*) 0x1400E4DA0, 0x33, 1);                                     // stats
+        memset ((void*) 0x1400E4DA1, 0xC0, 1);                                     // ^
+        memset ((void*) 0x1400E4DA2, 0xC3, 1);                                     // ^
+
         // Patch s_cpuCount with hardware concurrency in Sys_InitMainThread.
         //
         // Note that this may violate implicit engine assumptions about CPU
