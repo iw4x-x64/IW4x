@@ -4,9 +4,24 @@
 //
 #include <cstdint>
 
+// Diagnostics library
+//
+#include <stdexcept>
+#include <system_error>
+
+// Memory management library
+//
+#include <memory>
+
+// General utilities library
+//
+#include <functional>
+
 // Containers library
 //
 #include <array>
+#include <unordered_map>
+#include <vector>
 
 // Strings library
 //
@@ -14,7 +29,15 @@
 
 // Input/output library
 //
+#include <cstdio>
 #include <iostream>
+#include <sstream>
+
+// Concurrency support library
+//
+#include <atomic>
+#include <future>
+#include <mutex>
 
 namespace iw4x
 {
@@ -36,9 +59,28 @@ namespace iw4x
   using std::uintmax_t;
   using std::uintptr_t;
 
+  // Diagnostics
+  //
+  using std::invalid_argument;
+  using std::logic_error;
+  using std::out_of_range;
+  using std::runtime_error;
+  using std::system_error;
+
+  // Memory management
+  //
+  using std::unique_ptr;
+
+  // General utilities
+  //
+  using std::function;
+  using std::forward;
+
   // Containers
   //
   using std::array;
+  using std::unordered_map;
+  using std::vector;
 
   // Strings
   //
@@ -47,4 +89,13 @@ namespace iw4x
   // Input/output
   //
   using std::ios;
+  using std::size_t;
+  using std::ostringstream;
+
+  // Concurrency support
+  //
+  using std::atomic;
+  using std::future_status;
+  using std::future;
+  using std::once_flag;
 }
