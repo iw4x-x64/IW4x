@@ -237,6 +237,9 @@ namespace iw4x
         memset ((void*) 0x1402A8CFE, 0x90, 5);                                  // Suppress GDK shutdown in Com_Quit_f (avoids crash)
         memset ((void*) 0x1402A92B3, 0x90, 13);                                 // Suppress Sys_CheckCrashOrRerun call in WinMain
         memset ((void*) 0x1401FAC87, 0x90, 7);                                  // Suppress com_safemode checks in Com_Init (only set by Sys_CheckCrashOrRerun).
+        memset ((void*) 0x1401FAC8E, 0xEB, 1);                                  // ^
+        memcpy ((void*) 0x1403B1E88, "iw4x.cfg", 9);                            // Rename "config_mp.cfg" to "iw4x.cfg"
+        memset ((void*) 0x1403B1E90, 0x00, 6);                                  // ^
 
         // __scrt_common_main_seh
         //
