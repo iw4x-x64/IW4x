@@ -244,6 +244,14 @@ namespace iw4x
         memset ((void*) 0x1403B30DC, 0x00, 9);                                     // ^
         memcpy ((void*) 0x1402864F0, "\xB0\x01\xC3", 3);                           // Patch Content_DoWeHaveContentPack to return true
 
+        // Patch s_cpuCount with hardware concurrency in Sys_InitMainThread.
+        //
+        // Note that this may violate implicit engine assumptions about CPU
+        // topology. Current behavior is stable, but should be monitored for
+        // regressions.
+        //
+        *(uint32_t*) 0x14020DD06 = thread::hardware_concurrency ();
+
         // __scrt_common_main_seh
         //
         return reinterpret_cast<int (*) ()> (0x140358D48) ();
