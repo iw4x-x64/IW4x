@@ -11,10 +11,10 @@ namespace iw4x
   // sequences to relieve the instruction decoder.
   //
   LIBIW4X_SYMEXPORT void*
-  memwrite (void* dest, int ch, size_t count);
+  memwrite (void* dest, int ch, size_t);
 
   LIBIW4X_SYMEXPORT void*
-  memwrite (uintptr_t dest, int ch, size_t count);
+  memwrite (uintptr_t dest, int ch, size_t);
 
   // Copy memory.
   //
@@ -23,10 +23,10 @@ namespace iw4x
   // NOPs in the destination.
   //
   LIBIW4X_SYMEXPORT void*
-  memwrite (void* dest, const void* src, size_t count);
+  memwrite (void* dest, const void* src, size_t);
 
   LIBIW4X_SYMEXPORT void*
-  memwrite (uintptr_t dest, const void* src, size_t count);
+  memwrite (uintptr_t dest, const void* src, size_t);
 
   // Convenience wrappers for static arrays.
   //
