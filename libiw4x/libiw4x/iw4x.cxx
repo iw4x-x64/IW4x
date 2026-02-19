@@ -275,7 +275,9 @@ namespace iw4x
 
         mod::scheduler ();
         mod::ui ();
-        mod::session_module ();
+
+        mod::session_module s;
+
 
         // __scrt_common_main_seh
         //

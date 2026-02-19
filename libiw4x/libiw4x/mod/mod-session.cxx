@@ -20,6 +20,7 @@ namespace iw4x
     void session_module::
     create_session (session::host_role, session::session_metadata m)
     {
+
     }
 
     void session_module::
