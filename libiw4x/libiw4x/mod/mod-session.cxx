@@ -18,12 +18,22 @@ namespace iw4x
     }
 
     void session_module::
+    create_session (session::host_role, session::session_metadata m)
+    {
+    }
+
+    void session_module::
     tick ()
     {
       // Re-post ourselves before doing any work so that the next frame call
       // is guaranteed even if an exception unwinds through the code below.
       //
       scheduler::post (com_frame_domain{}, [this] () { tick (); });
+
+      // Tick the transport first.
+      //
+      if (transport_)
+        transport_->tick ();
     }
   }
 }

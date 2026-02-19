@@ -8,6 +8,11 @@ namespace iw4x
     {
       virtual
       ~transport_capability () = default;
+
+      // Drive internal transport state for one frame.
+      //
+      virtual void
+      tick () = 0;
     };
   }
 }
