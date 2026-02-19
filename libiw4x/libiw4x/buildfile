@@ -8,11 +8,13 @@ import intf_libs += libquill%lib{quill}
 import intf_libs += libzydis%lib{zydis}
 import intf_libs += libimgui%lib{imgui}
 
+./: $nasm
+
 lib{iw4x}: {hxx ixx txx cxx}{** -version} \
            {hxx            }{    version} \
            {def            }{**         } \
            {asm            }{**         } \
-           $impl_libs $intf_libs $nasm
+           $impl_libs $intf_libs
 
 hxx{version}: in{version} $src_root/manifest
 
