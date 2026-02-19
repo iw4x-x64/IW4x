@@ -52,6 +52,7 @@ Checks: '*,
   -readability-isolate-declaration,
   -readability-magic-numbers,
   -readability-named-parameter,
+  -readability-implicit-bool-conversion,
   -readability-qualified-auto,
   -zircon-*'
 ...
