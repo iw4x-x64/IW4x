@@ -6,6 +6,7 @@ namespace iw4x
   {
     session_module::
     session_module ()
+      : transport_ (nullptr)
     {
       // Post the first tick.
       //

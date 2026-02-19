@@ -1,6 +1,7 @@
 #pragma once
 
 #include <libiw4x/session/machine.hxx>
+#include <libiw4x/transport/transport.hxx>
 
 #include <libiw4x/import.hxx>
 #include <libiw4x/export.hxx>
@@ -20,6 +21,9 @@ namespace iw4x
       //
       void
       tick ();
+
+    private:
+      unique_ptr<transport::transport_capability> transport_;
     };
   }
 }
