@@ -1,0 +1,10 @@
+Name: libbuild2-kconfig
+Version: 0.4.0-a.0.20250604061820.fcb7ec1133e1
+Description: Kconfig build system module for build2
+URL: https://github.com/build2/libbuild2-kconfig
+Cflags: -I${pcfiledir}/../../include -DLIBBUILD2_KCONFIG_SHARED
+Libs: -L${pcfiledir}/.. -lbuild2-kconfig
+
+build2.metadata = 1
+
+cc.type = cxx

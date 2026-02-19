@@ -1,0 +1,21 @@
+: 1
+name: bpkg
+version: 0.18.0-a.0.20260217120221.e6f49816c146
+project: build2
+summary: build2 package dependency manager
+license: MIT
+topics: package dependency management, build toolchain
+description-file: README
+changes-file: NEWS
+url: https://build2.org
+doc-url: https://build2.org/doc.xhtml
+src-url: https://git.build2.org/cgit/bpkg/tree/
+email: users@build2.org
+build-warning-email: builds@build2.org
+builds: all : &host
+requires: c++14
+depends: * build2 >= 0.18.0-
+depends: * bpkg >= 0.18.0-
+depends: libbutl [0.18.0-a.0.1 0.18.0-a.1)
+depends: libbpkg [0.18.0-a.0.1 0.18.0-a.1)
+depends: build2 [0.18.0-a.0.1 0.18.0-a.1)

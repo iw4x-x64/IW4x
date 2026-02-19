@@ -1,0 +1,170 @@
+.\" Process this file with
+.\" groff -man -Tascii bx.1
+.\"
+.TH bx 1 "January 2026" "build2 0.18.0-a.0.z"
+.SH NAME
+\fBbx\fR \- shell script and task runner
+.SH "SYNOPSIS"
+.PP
+\fBbx\fR [\fIoptions\fR] \fIpath\fR [\fIarg\fR\.\.\.]
+.br
+\fBbx\fR [\fIoptions\fR] \fItask\fR [\fIarg\fR\.\.\.]
+.br
+\fBbx\fR [\fIoptions\fR] [\fB--\fR \fIarg\fR\.\.\.]\fR
+.SH "DESCRIPTION"
+.PP
+The \fBbuild2\fR shell script and task runner executes a script (first form)
+or a task (second and third form) with optional arguments\.
+.PP
+The first argument after \fIoptions\fR determines whether it is a shell script
+path or a task name\. It is considered a script if it contains the directory
+separator or the \fB\.bx\fR extension\. Otherwise, it is considered a task
+name\. Absent first argument means the default task\. In this case the
+\fB--\fR separator must be used if you wish to pass arguments to the default
+task\. Note that neither the script path nor task name can start with
+\fB-\fR\.
+.PP
+Note that task running is not yet implemented\.
+.PP
+The recommended first line ("shebang") for an executable script is as follows:
+.PP
+.nf
+#! /usr/bin/env bx
+.fi
+.SH "OPTIONS"
+.IP "\fB-v\fR"
+Print actual commands being executed\. This options is equivalent to
+\fB--verbose 2\fR\.
+.IP "\fB-V\fR"
+Print all underlying commands being executed\. This options is equivalent to
+\fB--verbose 3\fR\.
+.IP "\fB--quiet\fR|\fB-q\fR"
+Run quietly, only printing error messages\. This option is equivalent to
+\fB--verbose 0\fR\.
+.IP "\fB--verbose\fR \fIlevel\fR"
+Set the diagnostics verbosity to \fIlevel\fR between 0 and 6\. Level 0
+disables any non-error messages while level 6 produces lots of information,
+with level 1 being the default\. The following additional types of diagnostics
+are produced at each level:
+.RS
+.IP 1. 4em
+High-level information messages\.
+.IP 2. 4em
+Essential underlying commands being executed\.
+.IP 3. 4em
+All underlying commands being executed\.
+.IP 4. 4em
+Information that could be helpful to the user\.
+.IP 5. 4em
+Information that could be helpful to the developer\.
+.IP 6. 4em
+Even more detailed information\.
+.RE
+.IP "\fB--diag-color\fR"
+Use color in diagnostics\. If printing to a terminal the color is used by
+default provided the terminal is not dumb\. Use \fB--no-diag-color\fR to
+suppress\.
+.IP "\fB--no-diag-color\fR"
+Don't use color in diagnostics\.
+.IP "\fB--max-stack\fR \fInum\fR"
+The maximum stack size in KBytes to allow for newly created threads\. For
+\fIpthreads\fR-based systems the driver queries the stack size of the main
+thread and uses the same size for creating additional threads\. This allows
+adjusting the stack size using familiar mechanisms, such as \fBulimit\fR\.
+Sometimes, however, the stack size of the main thread is excessively large\.
+As a result, the driver checks if it is greater than a predefined limit (64MB
+on 64-bit systems and 32MB on 32-bit ones) and caps it to a more sensible
+value (8MB) if that's the case\. This option allows you to override this check
+with the special zero value indicating that the main thread stack size should
+be used as is\.
+.IP "\fB--pager\fR \fIpath\fR"
+The pager program to be used to show long text\. Commonly used pager programs
+are \fBless\fR and \fBmore\fR\. You can also specify additional options that
+should be passed to the pager program with \fB--pager-option\fR\. If an empty
+string is specified as the pager program, then no pager will be used\. If the
+pager program is not explicitly specified, then \fBb\fR will try to use
+\fBless\fR\. If it is not available, then no pager will be used\.
+.IP "\fB--pager-option\fR \fIopt\fR"
+Additional option to be passed to the pager program\. See \fB--pager\fR for
+more information on the pager program\. Repeat this option to specify multiple
+pager options\.
+.IP "\fB--options-file\fR \fIfile\fR"
+Read additional options from \fIfile\fR\. Each option should appear on a
+separate line optionally followed by space or equal sign (\fB=\fR) and an
+option value\. Empty lines and lines starting with \fB#\fR are ignored\.
+Option values can be enclosed in double (\fB"\fR) or single (\fB'\fR) quotes
+to preserve leading and trailing whitespaces as well as to specify empty
+values\. If the value itself contains trailing or leading quotes, enclose it
+with an extra pair of quotes, for example \fB'"x"'\fR\. Non-leading and
+non-trailing quotes are interpreted as being part of the option value\.
+
+The semantics of providing options in a file is equivalent to providing the
+same set of options in the same order on the command line at the point where
+the \fB--options-file\fR option is specified except that the shell escaping
+and quoting is not required\. Repeat this option to specify more than one
+options file\.
+.IP "\fB--default-options\fR \fIdir\fR"
+The directory to load additional default options files from\.
+.IP "\fB--no-default-options\fR"
+Don't load default options files\.
+.IP "\fB--help\fR"
+Print usage information and exit\.
+.IP "\fB--version\fR"
+Print version and exit\.
+.SH "DEFAULT OPTIONS FILES"
+.PP
+Instead of having a separate config file format for tool configuration, the
+\fBbuild2\fR toolchain uses \fIdefault options files\fR which contain the same
+options as what can be specified on the command line\. The default options
+files are like options files that one can specify with \fB--options-file\fR
+except that they are loaded by default\.
+.PP
+The default options files for \fBbx\fR are called \fBbx\.options\fR,
+\fBbx-script\.options\fR (shell script only), and \fBbx-task\.options\fR (task
+only) and are searched for in the \fB\.build2/\fR subdirectory of the home
+directory and in the system directory (for example, \fB/etc/build2/\fR) if
+configured\. Note that besides options the \fBbx-task\.options\fR file can
+also contain global variable overrides (@@ only for task running?)\.
+.PP
+Once the search is complete, the files are loaded in the reverse order, that
+is, beginning from the system directory (if any), followed by the home
+directory, and finishing off with the options specified on the command line\.
+For each directory \fBbx\.options\fR, if found, is loaded first, followed by
+\fBbx-script\.options\fR for a shell script and \fBbx-task\.options\fR for a
+task\. In other words, the files are loaded from the more generic to the more
+specific with the command line options having the ability to override any
+values specified in the default options files\.
+.PP
+If a default options file contains \fB--no-default-options\fR, then the search
+is stopped at the directory containing this file and no outer files are
+loaded\. If this option is specified on the command line, then none of the
+default options files are searched for or loaded\.
+.PP
+An additional directory containing default options files can be specified with
+\fB--default-options\fR\. Its configuration files are loaded after the home
+directory\.
+.PP
+The order in which default options files are loaded is traced at the verbosity
+level 3 (\fB-V\fR option) or higher\.
+.SH "EXIT STATUS"
+.PP
+In case of a script execution, the script exit code is returned\. In case of a
+task execution, non-zero exit status is returned in case of an error\.
+.SH "ENVIRONMENT"
+.PP
+The \fBHOME\fR environment variable is used to determine the user's home
+directory\. If it is not set, then \fBgetpwuid(3)\fR is used instead\. This
+value is used to shorten paths printed in diagnostics by replacing the home
+directory with \fB~/\fR\. It is also made available to scripts as the
+\fBshell\.home\fR variable\.
+.PP
+The \fBBUILD2_DEF_OPT\fR environment variable is used to suppress loading of
+default options files in nested runner invocations\. Its values are
+\fBfalse\fR or \fB0\fR to suppress and \fBtrue\fR or \fB1\fR to load\.
+.SH BUGS
+Send bug reports to the users@build2.org mailing list.
+.SH COPYRIGHT
+Copyright (c) 2014-2026 the build2 authors.
+
+Permission is granted to copy, distribute and/or modify this document under
+the terms of the MIT License.

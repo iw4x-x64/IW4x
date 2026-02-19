@@ -1,0 +1,662 @@
+# libbuild2-autoconf
+
+GNU Autoconf emulation build system module for `build2`.
+
+Specifically, this module provides an [`in`][module-in]-based rule for
+processing `config.h.in` files. Besides the Autoconf special line flavor
+(`#undef`), it also supports the CMake (`#cmakedefine`, `#cmakedefine01`) and
+Meson (`#mesondefine`) variants. Note that the CMake `${VAR}` style
+substitutions are not supported, only the `@VAR@` style (see
+[Modifying upstream source code during build][pkg-guide-modify-upstream]
+for one way to deal with `${VAR}`).
+
+Similar to Autoconf, this module provides builtin support for a number of
+common `HAVE_*` configuration checks with projects being able to add custom
+ones. However, the values of these checks are not discovered by dynamic
+probing, such as trying to compile a test program to determine if the feature
+is present. Instead, they are set to static expected values based on the
+platform/compiler macro checks (see note at the beginning of [Project
+Configuration][proj-config] for rationale).
+
+See [`libbuild2/autoconf/checks/`][checks] for the list of available builtin
+checks. Submit requests for new checks as issues. Submit implementations of
+new checks (or any other improvements) as PRs or patches.
+
+
+## Using in your projects
+
+This module is part of the standard pre-installed `build2` modules and no
+extra integration steps are required other than the `using` directive in
+your `buildfile`. For example, for Autoconf `config.h.in`:
+
+```
+using autoconf
+
+h{config}: in{config}
+```
+
+Or for CMake `config.h.cmake`:
+
+```
+using autoconf
+
+h{config}: in{config.h.cmake}
+```
+
+The default flavor is `autoconf` but if the input file has the `.cmake` or
+`.meson` extension, then the `cmake` or `meson` flavors are selected
+automatically.  If, however, the standard `config.h.in` file is re-used for
+CMake/Meson, then the flavor must be specified explicitly with the
+`autoconf.flavor` variable, for example:
+
+```
+using autoconf
+
+h{config}: in{config}
+{
+  autoconf.flavor = meson
+}
+```
+
+Besides the configuration checks, custom substitutions can be specified as
+`buildfile` variables or key-value pairs in the same way as with the
+[`in`][module-in] module. For example, as `buildfile` variables:
+
+```
+/* config.h.in */
+
+#define PACKAGE_NAME @PACKAGE_NAME@
+#define PACKAGE_VERSION @PACKAGE_VERSION@
+
+#undef HAVE_STRLCPY
+#undef HAVE_STRLCAT
+```
+
+```
+h{config}: in{config}
+{
+  PACKAGE_NAME = $project
+  PACKAGE_VERSION = $version
+}
+```
+
+Or as key-value pairs in the `autoconf.substitutions` map (which is an alias
+for the `in.substitutions` variable; see the [`in`][module-in] module for
+details):
+
+```
+/* config.h.in */
+
+#undef _GNU_SOURCE
+#undef _POSIX_SOURCE
+```
+
+```
+gnu_source = ($c.stdlib == 'glibc')
+posix_source = ($c.target.class != 'windows' && !$gnu_source)
+
+h{config}: in{config}
+{
+  autoconf.substitutions  = _GNU_SOURCE@$gnu_source
+  autoconf.substitutions += _POSIX_SOURCE@$posix_source
+}
+```
+
+In particular, the `autoconf.substitutions` mechanism is the only way to have
+substitutions that cannot be specified as `buildfile` variables because they
+start with an underscore (and thus are reserved, as in the above example) or
+refer to one of the predefined variables.
+
+The custom substitutions can also be used to override the checks, for example:
+
+```
+h{config}: in{config}
+{
+  HAVE_STRLCPY = true
+}
+```
+
+While this module provides widely used aliases for some checks, it doesn't
+attempt to cover every project's idiosyncrasies. Instead, it provides a
+mechanism for creating project-specific aliases for builtin checks.
+Specifically, the desired aliases can be specified as key-value pairs in the
+`autoconf.aliases` map with the key being the new name and the value --
+old/existing. For example:
+
+```
+/* config.h.in */
+
+#undef HAVE_AF_UNIX_H
+#undef MY_SSIZE_T
+```
+
+```
+h{config}: in{config}
+{
+  autoconf.aliases  = HAVE_AF_UNIX_H@HAVE_AFUNIX_H
+  autoconf.aliases += MY_SSIZE_T@ssize_t
+}
+```
+
+The checks can be prefixed in order to avoid clashes with similarly named
+macros in other headers. This is an especially good idea if the resulting
+header is public. To enable this, we specify the prefix with the
+`autoconf.prefix` variable and then use the prefixed versions of the checks in
+the `config.h.in` file. For example:
+
+```
+/* config.h.in */
+
+#undef LIBFOO_HAVE_STRLCPY
+#undef LIBFOO_HAVE_STRLCAT
+```
+
+```
+h{config}: in{config}
+{
+  autoconf.prefix = LIBFOO_
+}
+```
+
+Note that `autoconf.prefix` only affects the lookup of the checks in the
+catalogs (project and builtin). Custom substitutions and overrides of checks
+must include the prefix. Similarly, both names in `autoconf.aliases` must be
+specified with the prefix (unless unprefixable; see below). For example:
+
+```
+h{config}: in{config}
+{
+  autoconf.prefix = LIBFOO_
+
+  LIBFOO_HAVE_STRLCPY = true
+
+  autoconf.aliases = LIBFOO_SSIZE_T@ssize_t
+}
+```
+
+Note also that some check names are *unprefixable*, usually because they are
+standard macro names (for example, `BYTE_ORDER`) that on some platforms come
+from system headers (for example, `<sys/endian.h>` on FreeBSD). Such checks
+have `!` after their names on the first line of their implementation files
+(for example, `// BYTE_ORDER!`).
+
+An implementation of a check may depend on another check. As a result,
+substitutions should not be conditional at the preprocessor level (unless all
+the checks are part of the same condition). Nor should the results of checks
+be adjusted until after the last check. For example:
+
+```
+#ifndef _WIN32
+#  cmakedefine HAVE_EXPLICIT_BZERO // Conditional substitution.
+#endif
+
+#cmakedefine HAVE_EXPLICIT_MEMSET  // Shares implementation with BZERO.
+
+#cmakedefine BYTE_ORDER
+
+#if BYTE_ORDER == LITTLE_ENDIAN
+#  undef BYTE_ORDER               // Adjusting the result.
+#endif
+
+#cmakedefine WORDS_BIGENDIAN      // Based on BYTE_ORDER.
+```
+
+Below is the correct way to achieve the above semantics:
+
+```
+#cmakedefine HAVE_EXPLICIT_BZERO
+#cmakedefine HAVE_EXPLICIT_MEMSET
+
+#cmakedefine BYTE_ORDER
+#cmakedefine WORDS_BIGENDIAN
+
+#ifdef _WIN32
+#  undef HAVE_EXPLICIT_BZERO
+#endif
+
+#if BYTE_ORDER == LITTLE_ENDIAN
+#  undef BYTE_ORDER
+#endif
+```
+
+
+## Communicating check results to `buildfiles`
+
+The results of the checks are represented as preprocessor macros and are
+normally used in source files. However, sometimes we may need these results to
+be available in `buildfiles`. For example, we may need them to decide whether
+to use a certain compiler option or to exclude certain source files from the
+build.
+
+The results of the checks can be communicated to `buildfiles` by combining two
+`build2` mechanisms: the [`c.predefs` rule][build2-predefs], which allows us
+to extract macro values from header files, and [the `update`
+directive][build2-udl], which allow us to update a target while loading a
+`buildfile`. Specifically, we can extract macro values from the
+`autoconf`-generated header into a `buildfile` fragment (or a JSON file) and
+then include this fragment (or load this JSON file) into our `buildfile`.
+
+As an example, let's make the value of the `BYTE_ORDER` macro available in
+our `buildfile` in order to decide which source file to include into the
+build. First we prepare `byte-order.h.in`:
+
+```
+/* byte-order.h.in */
+
+#undef BYTE_ORDER
+
+#if BYTE_ORDER == LITTLE_ENDIAN
+#  define BYTE_ORDER_LITTLE_ENDIAN true
+#elif BYTE_ORDER == BIG_ENDIAN
+#  define BYTE_ORDER_LITTLE_ENDIAN false
+#else
+#  error unexpected byte order
+#endif
+```
+
+Then we load the `c.predefs` submodule after `c` in our `root.build`:
+
+```
+# root.build
+#
+using c
+using c.predefs
+```
+
+Finally, at the beginning of our `buildfile` we add the following fragment:
+
+```
+# Detect target endianness.
+#
+using autoconf
+
+h{byte-order}: in{byte-order}
+
+[rule_hint=c.predefs] buildfile{byte-order}: h{byte-order}
+{
+  c.predefs.poptions = false
+  c.predefs.macros = BYTE_ORDER_LITTLE_ENDIAN@little_endian
+}
+
+./: buildfile{byte-order} # Make sure it gets cleaned.
+
+if ($build.meta_operation == 'perform')
+{
+  update buildfile{byte-order}
+  source $path(buildfile{byte-order})
+}
+else
+  little_endian = false
+```
+
+After this fragment we can use the `little_endian` variable to make decisions
+in our `buildfile`:
+
+```
+/: exe{hello}: cxx{hello}
+
+exe{hello}: cxx{hello-big}:    include = (!$little_endian)
+exe{hello}: cxx{hello-little}: include = $little_endian
+```
+
+
+## Adding new checks
+
+There are two check catalogs: builtin, which is part of the `autoconf` module,
+and project-specific. Ideally, common checks which can be used by multiple
+projects should be added to the builtin rather than project catalog (see
+"Which checks are considered common?" below for details). In particular, this
+makes sure that fixes and improvements only need to be applied in one place
+rather than in all the projects that use the check.
+
+Practically, however, there are several valid reasons why we may want to add a
+project-specific check:
+
+1. Test a common check on CI before proposing it for the builtin catalog.
+
+2. Release a project with a common check without waiting on the `autoconf`
+   release. Once the check is available as builtin, it can be dropped from
+   the project catalog.
+
+3. Override a broken builtin check with a fixed version. Similar to the
+   previous case, the check can be dropped once the fix is available in
+   the builtin version.
+
+4. Have a project-private check that is unlikely to be useful to any other
+   project.
+
+Before adding a new check, verify the same checks does not already exist in
+the builtin catalog, potentially with a different name. Note that adding a
+project check because the same builtin check has a different name is not a
+valid reason: this case should be handled with `autoconf.aliases` discussed
+above.
+
+Checks from the project catalog take precedence over the builtin checks.
+However, to help detect cases where a project check can be dropped (items 1-3
+in the above list), the `autoconf` module issues a warning when a check with
+the same name exists in both catalogs. It's recommended that private checks
+(item 4) use names that can never clash with builtin checks since such checks
+could be used as bases by other builtin checks (see below for details on base
+checks). This can be achieved, for example, by embedding the project name in
+the check name (use `autoconf.aliases` to retain the original name in output).
+
+To add a new configuration check `<NAME>` create the `<NAME>.h` header file
+(preserving the case) which will contain the check's implementation (use
+[existing checks][checks] for inspiration).
+
+Then, if this is a project-specific check, place it into the
+`build/autoconf/checks/` subdirectory of your project (or
+`build2/autoconf/checks/` if using the alternative naming scheme). And if this
+is a builtin check -- into [`libbuild2/autoconf/checks/`][checks] of
+`libbuild2-autoconf`. For the latter, see also "Stylistic guidelines for
+builtin checks" below.
+
+The format and semantics of this header file are exactly the same for both
+project and builtin catalogs. Its first line must be in the form:
+
+```
+// <NAME>[!] [: <BASE>...]
+```
+
+If the name is followed by the `!` modifier, then it is *unprefixable* (see
+the previous section for details). The name can also be followed by `:` and a
+space-separated list of base checks. Such checks are automatically inserted
+before the rest of the lines in the resulting substitution. One notable check
+that you may want to use as a base is
+[`BUILD2_AUTOCONF_LIBC_VERSION`][libc-version] (see comments for details).
+
+Subsequent lines should be C-style comments or preprocessor directives that
+`#define` or `#undef` `<NAME>` depending on whether the feature is available
+(though there can be idiosyncrasies; see [`const.h`][const], for example). The
+file may also contain C++-style comment lines, which (along with the first
+line) are excluded from the output. Note also that there should be no
+double-quotes or backslashes except for line continuations.
+
+For example, to add a new check `HAVE_BAR`, we could create the `HAVE_BAR.h`
+header file with the following content:
+
+```
+// HAVE_BAR
+
+// TODO: maybe add support for Cygwin?
+
+#undef HAVE_BAR
+
+/* No bar on Windows except with MinGW. */
+#if !defined(_WIN32) || \
+     defined(__MINGW32__)
+#  define HAVE_BAR 1
+#endif
+```
+
+Note also that the module implementation may need to replace `<NAME>` with its
+prefixed version (unless it is unprefixable) if the `autoconf.prefix`
+functionality is in use (see above). This is done by textually substituting
+every occurrence of `<NAME>` that is separated on both left and right hand
+sides (that is, both characters immediately before and after `<NAME>` are not
+`[A-Za-z0-9_]`).
+
+Within a file duplicate checks are automatically suppressed. And if multiple
+files are involved, then the user is expected to employ the `autoconf.prefix`
+functionality to avoid clashes across files. However, this does not help
+unprefixable names and, as a result, such checks should be implemented in
+ways that deal with duplication (for example, include guards).
+
+The duplicate suppression is incompatible with conditional (at the
+preprocessor level) checks, for example, assuming both `HAVE_EXPLICIT_*`
+checks are based on `BUILD2_AUTOCONF_LIBC_VERSION`:
+
+```
+#ifndef _WIN32
+#  undef HAVE_EXPLICIT_BZERO
+#endif
+
+#undef HAVE_EXPLICIT_MEMSET
+```
+
+In this example, the `autoconf` module will omit the second copy of the
+`BUILD2_AUTOCONF_LIBC_VERSION` check as part of the `HAVE_EXPLICIT_MEMSET`
+substitution because it was already inserted as part of the
+`HAVE_EXPLICIT_BZERO` substitution. But the first copy will not be
+preprocessed on Windows.
+
+While there is no bulletproof way to detect such situations (because the
+unconditional check could be `BUILD2_AUTOCONF_LIBC_VERSION` itself; perhaps
+we should only have private bases that are only accessed by the user via
+derived public checks), it is a good idea for checks that are based on
+other checks to verify that the base macros are in fact defined, for example:
+
+```
+// HAVE_EXPLICIT_BZERO : BUILD2_AUTOCONF_LIBC_VERSION
+
+#ifndef BUILD2_AUTOCONF_LIBC_VERSION
+#  error BUILD2_AUTOCONF_LIBC_VERSION appears to be conditionally included
+#endif
+
+...
+```
+
+## Which checks are considered common?
+
+As mentioned above, common checks should preferably be added to the builtin
+catalog rather than being part of multiple projects. But which checks are
+considered common? The key criterion is the likelihood of a check being used
+by multiple projects. However, when adding a check in a specific single
+project, it may not always be obvious whether it is likely to be useful to
+someone else. In fact, since you found it useful, chances are someone else
+will as well, in some potentially distant future. But we feel the bar for
+inclusion into the builtin catalog should be higher than that.
+
+If both of the following points hold then it's a strong indication the check
+in question is too obscure and should be rather kept in the project:
+
+1. No other project is using the same check (search the Internet for the
+   check name and its plausible alternative spellings).
+
+2. The feature a check tries to detect is only available on one platform
+   and is not likely to ever become available anywhere else. For example, a
+   check detects presence of an idiosyncratic, OS-specific API (quite
+   common on Mac OS) that has no counterparts on other platforms.
+
+
+## Stylistic guidelines for builtin checks
+
+When writing checks for the builtin catalog we require that you follow a
+number of stylistic guidelines described below in addition to the correctness
+rules described in the "Adding new checks" section above. This helps with
+keeping the checks maintainable. The following example of a check illustrate
+many of the points discussed next:
+
+```
+// HAVE_STRLCPY
+
+#undef HAVE_STRLCPY
+
+// TODO: available in glibc since 2.38.
+
+// NOTE: keep consistent with HAVE_STRLCAT.
+
+/* Check for the strlcpy() function.
+ *
+ * Available in BSDs and Mac OS since the beginning. Not available
+ * on Windows including MinGW or Linux/glibc. */
+ */
+#if defined(__FreeBSD__) || \
+    defined(__OpenBSD__) || \
+    defined(__NetBSD__)  || \
+    defined(__APPLE__)
+#  define HAVE_STRLCPY 1
+#endif
+```
+
+1. Make sure the same check is not already present in the builtin catalog,
+   potentially with a different name. To accomplish this, search for a
+   component of a check name that is unlikely to vary (for example `strlcpy`)
+   in the contents of the existing checks.
+
+2. Use C-style comments except for information that should not be copied to
+  `config.h` (for example, TODO notes).
+
+3. Use proper sentences in comments. That is, start each sentence with a
+   capital letter and end with a period.
+
+4. Use canonical check name even if your project doesn't (see
+   `autoconf.aliases` above).
+
+   For headers, the canonical name is the header name with `/` replaced with
+   `_` and ending with `_H`. For example, for `<sys/stat.h>` the canonical
+   check name is `HAVE_SYS_STAT_H`.
+
+   For functions and macros, the canonical name is just the function/macro
+   name. For example, for `strlcpy()` the canonical check name is
+   `HAVE_STRLCPY`.
+
+   For structs, the canonical name is the `STRUCT_` prefix followed by the
+   struct name. For example, for struct `stat` the canonical check name is
+   `HAVE_STRUCT_STAT`.
+
+   For struct data members, the canonical name is the `STRUCT_` prefix followed
+   by the struct name followed by the data member name. For example, for struct
+   `stat`'s `st_mtim.tv_nsec` data member the canonical check name is
+   `HAVE_STRUCT_STAT_ST_MTIM_TV_NSEC`.
+
+   For other entities (builtin types, instruction sets, etc) the canonical name
+   is typically just the entity name. For example, `HAVE_SSE4_2`.
+
+   Note that if the entity includes leading underscore(s), include it (them)
+   in the name (since there could also be a version without). For example:
+   `__bswap_32()` becomes `HAVE___BSWAP_32`.
+
+5. Describe what the check is checking for. Examples:
+
+   ```
+   /* Check for the <sys/stat.h> header.
+    *
+    * ...
+    */
+   ```
+
+   ```
+   /* Check for the strlcpy() function.
+    *
+    * ...
+    */
+   ```
+
+   ```
+   /* Check for the stat struct.
+    *
+    * ...
+    */
+   ```
+
+   ```
+   /* Check for the st_mtim.tv_nsec data member in the stat struct.
+    *
+    *  ...
+    */
+   ```
+
+   For more obscure entities you may want to expand of what it is about. For
+   example:
+
+   ```
+   /* Check for the availability of the kCMVideoCodecType_VP9 constant.
+    * VP9 is an open-source video codec developed by Google.
+    *
+    *  ...
+    */
+   ```
+
+6. Describe in a comment on which platforms/versions the checked functionality
+   is present. Also list explicitly if it's not present on one of the main
+   platforms: Linux with glibc, Windows (including MinGW), and Mac OS. For
+   example:
+
+   ```
+   /* Check for the addrinfo struct.
+    *
+    * Available since Linux/glibc 2.4, OpenBSD 2.9, FreeBSD 3.5, NetBSD 1.5,
+    * and Mac OS (exact version is unclear but for a while now). Not available
+    * on Windows including MinGW.
+    */
+   ```
+
+   The reason for essentially describing what the check below does is
+   two-fold: Firstly, some check implementations might be hard to
+   decipher. For example, the OpenBSD version in the check is specified as a
+   date, not a version. More importantly, if there is a bug in the check, the
+   description allows one to distinguish between an incorrect implementation
+   of a correct assumption and an incorrect assumption.
+
+   On Windows, it is fairly common for the functionality to be not available
+   in MSVC with vanilla PlatformSDK but available in MinGW. This should be
+   noted.  The standard Windows description lines are:
+
+   ```
+   Not available on Windows including MinGW.
+   Not available on Windows except MinGW.
+   Available on Windows including MinGW.
+   Available on Windows except MinGW.
+   ```
+
+7. Avoid redundant macro checks.
+
+   The most common offender is checking for `_WIN32` or `__MINGW32__`:
+
+   ```
+   /* Available on Windows including MinGW. */
+   #if defined(_WIN32) || defined(__MINGW32__)
+   ```
+
+   This is redundant since if `__MINGW32__` is defined, `_WIN32` is always
+   defined as well. The correct version would be:
+
+   ```
+   /* Available on Windows including MinGW. */
+   #if defined(_WIN32)
+   ```
+
+8. Do not use one check to implement another (except for specific "base"
+   checks, like `BUILD2_AUTOCONF_LIBC_VERSION`, that are meant to be
+   used as bases). For example, this is incorrect:
+
+   ```
+   // HAVE_STRLCAT: HAVE_STRLCPY
+
+   #undef HAVE_STRLCAT
+
+   /* The same as strlcat() so just define it in its terms. */
+   #ifdef HAVE_STRLCPY
+   #  define HAVE_STRLCAT 1
+   #endif
+   ```
+
+   Instead, duplicate the same (for now) check in all places, potentially
+   adding a note to keep them consistent.
+
+9. If you are relying on another macro in your check, you should either
+   include the header that defines it (potentially different for different
+   platforms) or you should explicitly document in which situations (for
+   example, compiler options) it is predefined by the compiler.
+
+10. When submitting a pull request with a number of checks, squash them into
+    a single commit with the subject reading "Add number of common checks"
+    and the body listing all the added checks one per line. For example:
+
+    ```
+    Add number of common checks
+
+    HAVE_ACCESS
+    HAVE_FILENO
+    ...
+    ```
+
+[module-in]: https://build2.org/build2/doc/build2-build-system-manual.xhtml#module-in
+[proj-config]: https://build2.org/build2/doc/build2-build-system-manual.xhtml#proj-config
+[checks]: https://github.com/build2/libbuild2-autoconf/tree/master/libbuild2-autoconf/libbuild2/autoconf/checks/
+[libc-version]: https://github.com/build2/libbuild2-autoconf/tree/master/libbuild2-autoconf/libbuild2/autoconf/checks/BUILD2_AUTOCONF_LIBC_VERSION.h
+[const]: https://github.com/build2/libbuild2-autoconf/tree/master/libbuild2-autoconf/libbuild2/autoconf/checks/const.h
+[pkg-guide-modify-upstream]: https://build2.org/build2-toolchain/doc/build2-toolchain-packaging.xhtml#howto-patch-upstream-source-build
+[build2-predefs]:https://build2.org/stage/build2/doc/build2-build-system-manual.xhtml#c-predefs
+[build2-udl]:https://build2.org/stage/build2/doc/build2-build-system-manual.xhtml#directives-update

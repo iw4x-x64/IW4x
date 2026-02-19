@@ -1,0 +1,10 @@
+Name: build2
+Version: 0.18.0-a.0.20260217121713.c80534ed43dc
+Description: build2 build system
+URL: https://build2.org
+Cflags: -I${pcfiledir}/../../include -DLIBBUILD2_IN_SHARED
+Libs: -L${pcfiledir}/.. -lbuild2-in
+
+build2.metadata = 1
+
+cc.type = cxx
