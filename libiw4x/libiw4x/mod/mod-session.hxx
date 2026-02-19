@@ -2,6 +2,7 @@
 
 #include <libiw4x/session/machine.hxx>
 
+#include <libiw4x/import.hxx>
 #include <libiw4x/export.hxx>
 
 namespace iw4x
@@ -14,6 +15,11 @@ namespace iw4x
     public:
       explicit
       session_module ();
+
+      // Drive all pending session events and transport I/O for one frame.
+      //
+      void
+      tick ();
     };
   }
 }

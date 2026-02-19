@@ -2,6 +2,7 @@
 
 #include <libiw4x/mod/mod-scheduler.hxx>
 #include <libiw4x/mod/mod-ui.hxx>
+#include <libiw4x/mod/mod-session.hxx>
 
 namespace iw4x
 {
@@ -274,6 +275,7 @@ namespace iw4x
 
         mod::scheduler ();
         mod::ui ();
+        mod::session_module ();
 
         // __scrt_common_main_seh
         //
