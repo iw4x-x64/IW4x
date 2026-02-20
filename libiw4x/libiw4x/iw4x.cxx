@@ -1,5 +1,6 @@
 #include <libiw4x/iw4x.hxx>
 
+#include <libiw4x/logger.hxx>
 #include <libiw4x/memory.hxx>
 #include <libiw4x/scheduler.hxx>
 
@@ -279,8 +280,9 @@ namespace iw4x
         mod::render ();
         mod::scheduler ();
         mod::ui ();
-
         windows::init ();
+
+        active_logger = new logger;
 
         // __scrt_common_main_seh
         //
