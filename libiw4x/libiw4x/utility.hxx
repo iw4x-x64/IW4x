@@ -7,6 +7,10 @@ extern "C"
   #include <io.h>
 }
 
+// Concepts library
+//
+#include <concepts>
+
 // Diagnostics library
 //
 #include <cassert>
@@ -24,6 +28,7 @@ extern "C"
 // Strings library
 //
 #include <cstring>
+#include <string_view>
 
 // Time library
 //
@@ -40,6 +45,10 @@ extern "C"
 
 namespace iw4x
 {
+  // Concepts
+  //
+  using std::convertible_to;
+
   // Diagnostics
   //
   using std::system_category;
@@ -57,6 +66,10 @@ namespace iw4x
   //
   using namespace std::chrono_literals;
   using std::chrono::seconds;
+
+  // String library
+  //
+  using std::string_view;
 
   // Input/output
   //
