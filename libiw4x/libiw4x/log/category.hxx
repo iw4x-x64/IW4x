@@ -15,6 +15,7 @@ namespace iw4x
   namespace categories
   {
     struct iw4x {};
+    struct steam {};
   }
 
   namespace log
@@ -33,6 +34,13 @@ namespace iw4x
     struct category_policy<categories::iw4x>
     {
       static constexpr string_view     name      = "iw4x";
+      static constexpr quill::LogLevel threshold = quill::LogLevel::Info;
+    };
+
+    template <>
+    struct category_policy<categories::steam>
+    {
+      static constexpr string_view     name      = "steam";
       static constexpr quill::LogLevel threshold = quill::LogLevel::Info;
     };
 

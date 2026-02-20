@@ -89,6 +89,12 @@ namespace iw4x
         {cs, fs}, fmt,
         log::category_policy<iw4x>::threshold);
 
+    log::detail::category_logger_ref<steam> () =
+      make_category_logger (
+        string (log::category_policy<steam>::name),
+        {cs, fs}, fmt,
+        log::category_policy<steam>::threshold);
+
     // Development builds open the full trace range on every category so that
     // internals are visible without adjusting per-category thresholds manually.
     // Note that the compile-time compiled_minimum_level already admits trace
@@ -97,6 +103,7 @@ namespace iw4x
     //
 #if LIBIW4X_DEVELOP
     log::detail::category_logger_ref<iw4x> ()->set_log_level (LogLevel::TraceL3);
+    log::detail::category_logger_ref<steam> ()->set_log_level (LogLevel::TraceL3);
 #endif
   }
 
@@ -113,6 +120,7 @@ namespace iw4x
     using namespace categories;
 
     log::detail::category_logger_ref<iw4x> () = nullptr;
+    log::detail::category_logger_ref<steam> () = nullptr;
 
     Backend::stop ();
   }

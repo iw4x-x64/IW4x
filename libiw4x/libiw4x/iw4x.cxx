@@ -8,6 +8,7 @@
 #include <libiw4x/mod/mod-oob.hxx>
 #include <libiw4x/mod/mod-render.hxx>
 #include <libiw4x/mod/mod-scheduler.hxx>
+#include <libiw4x/mod/mod-steam.hxx>
 #include <libiw4x/mod/mod-ui.hxx>
 
 #include <libiw4x/windows/init.hxx>
@@ -236,6 +237,9 @@ namespace iw4x
           exit (1);
         }
 
+        attach_console ();
+        active_logger = new logger;
+
         memwrite (0x1402A91E5, "\xB0\x01");                                       // Suppress XGameRuntimeInitialize call in WinMain
         memwrite (0x1402A91E7, 0x90, 3);                                          // ^
         memwrite (0x1402A6A4B, 0x90, 5);                                          // Suppress XCurl call in Live_Init
@@ -280,9 +284,9 @@ namespace iw4x
         mod::render ();
         mod::scheduler ();
         mod::ui ();
-        windows::init ();
+        mod::steam_module ();
 
-        active_logger = new logger;
+        windows::init ();
 
         // __scrt_common_main_seh
         //
