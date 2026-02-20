@@ -8,30 +8,25 @@ import intf_libs += libquill%lib{quill}
 import intf_libs += libzydis%lib{zydis}
 import intf_libs += libimgui%lib{imgui}
 
-./: $nasm
-
 lib{iw4x}: {hxx ixx txx cxx}{** -version} \
            {hxx            }{    version} \
            {def            }{**         } \
            {asm            }{**         } \
-           $impl_libs $intf_libs
+           $impl_libs $intf_libs $nasm
 
 hxx{version}: in{version} $src_root/manifest
 
 # Shared headers.
 #
 if ($cxx.class == 'msvc')
-{
   cxx.poptions =+ "/FI" "libiw4x/types.hxx"              \
                   "/FI" "libiw4x/utility.hxx"            \
                   "/FI" "libiw4x/utility-win32.hxx"
-}
-else
-{
+
+if ($cxx.class == 'gcc')
   cxx.poptions =+ "-include" "libiw4x/types.hxx"         \
                   "-include" "libiw4x/utility.hxx"       \
                   "-include" "libiw4x/utility-win32.hxx"
-}
 
 # Build options.
 #
@@ -45,11 +40,24 @@ objs{*}: cxx.poptions += -DLIBIW4X_SHARED_BUILD
 
 # Export options.
 #
+lib{iw4x}: bin.lib.prefix = "lib"
 lib{iw4x}:
 {
   cxx.export.poptions = "-I$out_root" "-I$src_root"
   cxx.export.libs = $intf_libs
 }
+
+# Export shared headers.
+#
+if ($cxx.class == 'msvc')
+  lib{iw4x}: cxx.export.poptions =+ "/FI" "libiw4x/types.hxx"         \
+                                    "/FI" "libiw4x/utility.hxx"       \
+                                    "/FI" "libiw4x/utility-win32.hxx"
+
+if ($cxx.class == 'gcc')
+  lib{iw4x}: cxx.export.poptions =+ "-include" "libiw4x/types.hxx"         \
+                                    "-include" "libiw4x/utility.hxx"       \
+                                    "-include" "libiw4x/utility-win32.hxx"
 
 liba{iw4x}: cxx.export.poptions += -DLIBIW4X_STATIC
 libs{iw4x}: cxx.export.poptions += -DLIBIW4X_SHARED
