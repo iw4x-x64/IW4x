@@ -33,6 +33,11 @@ namespace iw4x
   //
   struct asynchronous {};
 
+  // Execute on every tick indefinitely. The task is re-enqueued after each
+  // execution and will persist until the scheduler is destroyed.
+  //
+  struct repeat_every_tick {};
+
   // Scheduled entry.
   //
   // Internal representation of a unit of work. We unify all scheduling modes
@@ -45,6 +50,13 @@ namespace iw4x
   struct scheduled_entry
   {
     task work;
+
+    // Retention policy.
+    //
+    // Called after execution to determine whether this entry should
+    // survive to the next tick.
+    //
+    bool (*retain) (scheduled_entry&) = nullptr;
 
     scheduled_entry () = default;
     scheduled_entry (scheduled_entry&&) = default;
@@ -98,6 +110,11 @@ namespace iw4x
     //
     void
     post (task work, asynchronous mode);
+
+    // Schedule work to be executed on every tick.
+    //
+    void
+    post (task work, repeat_every_tick mode);
 
     // Execution.
     //
@@ -200,6 +217,13 @@ namespace iw4x
     template <typename Domain>
     void
     post (Domain, task work, asynchronous mode)
+    {
+      get<Domain> ().post (static_cast<task&&> (work), mode);
+    }
+
+    template <typename Domain>
+    void
+    post (Domain, task work, repeat_every_tick mode)
     {
       get<Domain> ().post (static_cast<task&&> (work), mode);
     }

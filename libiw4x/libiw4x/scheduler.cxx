@@ -2,6 +2,23 @@
 
 namespace iw4x
 {
+  namespace
+  {
+    // Task retention policies.
+    //
+    // The idea here is that each function encodes the re-enqueue decision for a
+    // particular scheduling mode. We store them as simple function pointers in
+    // the scheduled_entry and call them after the task executes.
+
+    // Unconditional retention for the repeat_every_tick mode.
+    //
+    bool
+    retain_always (scheduled_entry&)
+    {
+      return true;
+    }
+  }
+
   // logical_scheduler
   //
 
@@ -52,6 +69,24 @@ namespace iw4x
     e.work = std::move (work);
 
     pending_.push_back (std::move (e));
+  }
+
+  void logical_scheduler::
+  post (task work, repeat_every_tick)
+  {
+    assert (work);
+
+    // Same-thread post for a repeating task.
+    //
+    // This is essentially the same as the regular same-thread post, but
+    // here we attach the unconditional retention policy so that the task
+    // persists across ticks.
+    //
+    scheduled_entry e;
+    e.work = static_cast<task&&> (work);
+    e.retain = &retain_always;
+
+    pending_.push_back (static_cast<scheduled_entry&&> (e));
   }
 
   void logical_scheduler::
@@ -172,8 +207,17 @@ namespace iw4x
     //
     for (auto& e : active_)
     {
-      if (e.work)
-        e.work ();
+      e.work ();
+
+      // Retention check.
+      //
+      // If the entry should persist (e.g., repeating modes), we move it back
+      // into the pending queue for the next tick. One-shot entries (where
+      // retain is null) simply fall through and are discarded when the
+      // active queue is cleared.
+      //
+      if (e.retain != nullptr && e.retain (e))
+        pending_.push_back (static_cast<scheduled_entry&&> (e));
     }
 
     // Clear the executed tasks. Note that while it destroys the function
