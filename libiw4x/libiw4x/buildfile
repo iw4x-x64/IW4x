@@ -1,12 +1,12 @@
+import nasm%buildfile{rules}
+
 intf_libs = # Interface dependencies.
 impl_libs = # Implementation dependencies.
 
-import nasm%buildfile{rules}
-
 import intf_libs += libboost-asio%lib{boost_asio}
+import intf_libs += libimgui%lib{imgui}
 import intf_libs += libquill%lib{quill}
 import intf_libs += libzydis%lib{zydis}
-import intf_libs += libimgui%lib{imgui}
 
 lib{iw4x}: {hxx ixx txx cxx}{** -version} \
            {hxx            }{    version} \
@@ -15,6 +15,17 @@ lib{iw4x}: {hxx ixx txx cxx}{** -version} \
            $impl_libs $intf_libs $nasm
 
 hxx{version}: in{version} $src_root/manifest
+
+# Steam SDK unpackaged dependency
+#
+steam_sdk_root = $src_root/../upstream/steamworks/sdk
+
+# Build options.
+#
+cxx.poptions =+ "-I$out_root" "-I$src_root" "-I$steam_sdk_root/include"
+
+if ($config.libiw4x.develop)
+  cxx.poptions += "-DLIBIW4X_DEVELOP"
 
 # Shared headers.
 #
@@ -26,12 +37,14 @@ if ($cxx.class == 'gcc')
   cxx.poptions =+ "-include" "libiw4x/utility.hxx"       \
                   "-include" "libiw4x/utility-win32.hxx"
 
-# Build options.
-#
-cxx.poptions =+ "-I$out_root" "-I$src_root"
+if ($cxx.id == 'msvc')
+  cxx.loptions += "/LIBPATH:$steam_sdk_root/lib"
 
-if ($config.libiw4x.develop)
-  cxx.poptions += "-DLIBIW4X_DEVELOP"
+if ($cxx.class == 'gcc')
+  cxx.loptions += "-L$steam_sdk_root/lib"
+
+lib{iw4x}: cxx.libs += $steam_sdk_root/lib/sdkencryptedappticket64.lib
+lib{iw4x}: cxx.libs += $steam_sdk_root/lib/steam_api64.lib
 
 obja{*}: cxx.poptions += -DLIBIW4X_STATIC_BUILD
 objs{*}: cxx.poptions += -DLIBIW4X_SHARED_BUILD
@@ -41,7 +54,7 @@ objs{*}: cxx.poptions += -DLIBIW4X_SHARED_BUILD
 lib{iw4x}: bin.lib.prefix = "lib"
 lib{iw4x}:
 {
-  cxx.export.poptions = "-I$out_root" "-I$src_root"
+  cxx.export.poptions = "-I$out_root" "-I$src_root" "-I$steam_sdk_root/include"
   cxx.export.libs = $intf_libs
 }
 
@@ -53,7 +66,16 @@ if ($cxx.class == 'msvc')
 
 if ($cxx.class == 'gcc')
   lib{iw4x}: cxx.export.poptions =+ "-include" "libiw4x/utility.hxx"       \
-                                    "-include" "libiw4x/utility-win32.hxx"
+                                    "-include" "libiw4x/utility-win32.hxx" \
+
+if ($cxx.id == 'msvc')
+  lib{iw4x}: cxx.export.loptions += "/LIBPATH:$steam_sdk_root/lib"
+
+if ($cxx.class == 'gcc')
+  lib{iw4x}: cxx.export.loptions += "-L$steam_sdk_root/lib"
+
+lib{iw4x}: cxx.export.libs += $steam_sdk_root/lib/sdkencryptedappticket64.lib
+lib{iw4x}: cxx.export.libs += $steam_sdk_root/lib/steam_api64.lib
 
 liba{iw4x}: cxx.export.poptions += -DLIBIW4X_STATIC
 libs{iw4x}: cxx.export.poptions += -DLIBIW4X_SHARED
