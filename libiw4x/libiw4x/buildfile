@@ -19,13 +19,11 @@ hxx{version}: in{version} $src_root/manifest
 # Shared headers.
 #
 if ($cxx.class == 'msvc')
-  cxx.poptions =+ "/FI" "libiw4x/types.hxx"              \
-                  "/FI" "libiw4x/utility.hxx"            \
+  cxx.poptions =+ "/FI" "libiw4x/utility.hxx"            \
                   "/FI" "libiw4x/utility-win32.hxx"
 
 if ($cxx.class == 'gcc')
-  cxx.poptions =+ "-include" "libiw4x/types.hxx"         \
-                  "-include" "libiw4x/utility.hxx"       \
+  cxx.poptions =+ "-include" "libiw4x/utility.hxx"       \
                   "-include" "libiw4x/utility-win32.hxx"
 
 # Build options.
@@ -50,13 +48,11 @@ lib{iw4x}:
 # Export shared headers.
 #
 if ($cxx.class == 'msvc')
-  lib{iw4x}: cxx.export.poptions =+ "/FI" "libiw4x/types.hxx"         \
-                                    "/FI" "libiw4x/utility.hxx"       \
+  lib{iw4x}: cxx.export.poptions =+ "/FI" "libiw4x/utility.hxx"       \
                                     "/FI" "libiw4x/utility-win32.hxx"
 
 if ($cxx.class == 'gcc')
-  lib{iw4x}: cxx.export.poptions =+ "-include" "libiw4x/types.hxx"         \
-                                    "-include" "libiw4x/utility.hxx"       \
+  lib{iw4x}: cxx.export.poptions =+ "-include" "libiw4x/utility.hxx"       \
                                     "-include" "libiw4x/utility-win32.hxx"
 
 liba{iw4x}: cxx.export.poptions += -DLIBIW4X_STATIC
