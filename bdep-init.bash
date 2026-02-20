@@ -172,4 +172,19 @@ if test -n "$release"; then
     --wipe
 fi
 
+# HACK:
+#
+# Work around a bootstrap phase ordering issue during nasm target evaluation.
+#
+# The problem is an implicit dependency cycle: the build system attempts to
+# resolve rules requiring nasm before nasm executable is built and registered.
+# This causes the initial execution phase to fail.
+#
+# To mitigate this, force a secondary build invocation. On the second pass, the
+# nasm is correctly identified, allowing downstream targets to build.
+#
+# Note that on CI we cannot have a secondary invocation. We can, however, pass
+# the -s flag to build synchronously which bypasses the underlying problem.
+#
+b || true
 b
