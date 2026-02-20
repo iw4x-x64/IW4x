@@ -7,6 +7,10 @@ extern "C"
   #include <io.h>
 }
 
+// Language support library
+//
+#include <initializer_list>
+
 // Concepts library
 //
 #include <concepts>
@@ -45,6 +49,10 @@ extern "C"
 
 namespace iw4x
 {
+  // Language support library
+  //
+  using std::initializer_list;
+
   // Concepts
   //
   using std::convertible_to;

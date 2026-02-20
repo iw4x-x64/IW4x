@@ -70,6 +70,7 @@ namespace iw4x
   // Memory management
   //
   using std::unique_ptr;
+  using std::shared_ptr;
 
   // General utilities
   //
