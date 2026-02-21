@@ -8,8 +8,9 @@
 #include <libiw4x/mod/mod-oob.hxx>
 #include <libiw4x/mod/mod-render.hxx>
 #include <libiw4x/mod/mod-scheduler.hxx>
-#include <libiw4x/mod/mod-steam.hxx>
 #include <libiw4x/mod/mod-ui.hxx>
+
+#include <libiw4x/steam/steam.hxx>
 
 #include <libiw4x/windows/init.hxx>
 
@@ -284,7 +285,8 @@ namespace iw4x
         mod::render ();
         mod::scheduler ();
         mod::ui ();
-        mod::steam_module ();
+
+        steam::steam ();
 
         windows::init ();
 

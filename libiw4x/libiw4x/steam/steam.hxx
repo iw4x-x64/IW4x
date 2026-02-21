@@ -4,12 +4,12 @@
 
 namespace iw4x
 {
-  namespace mod
+  namespace steam
   {
-    class LIBIW4X_SYMEXPORT steam_module
+    class LIBIW4X_SYMEXPORT steam
     {
     public:
-      steam_module ();
+      steam ();
     };
   }
 }

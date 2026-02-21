@@ -8,5 +8,11 @@ namespace iw4x
     steam_transport ()
     {
     }
+
+    void steam_transport::
+    tick ()
+    {
+
+    }
   }
 }

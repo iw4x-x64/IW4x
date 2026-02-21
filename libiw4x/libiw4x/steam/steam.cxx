@@ -1,4 +1,4 @@
-#include <libiw4x/mod/mod-steam.hxx>
+#include <libiw4x/steam/steam.hxx>
 
 #include <libiw4x/logger.hxx>
 
@@ -7,10 +7,10 @@
 
 namespace iw4x
 {
-  namespace mod
+  namespace steam
   {
-    steam_module::
-    steam_module ()
+    steam::
+    steam ()
     {
       SteamErrMsg e {};
       ESteamAPIInitResult r (SteamAPI_InitFlat (&e));

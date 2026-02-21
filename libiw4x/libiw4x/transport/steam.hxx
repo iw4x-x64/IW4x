@@ -10,6 +10,9 @@ namespace iw4x
     {
     public:
       steam_transport ();
+
+      void
+      tick () override;
     };
   }
 }

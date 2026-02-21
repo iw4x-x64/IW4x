@@ -1,5 +1,7 @@
 #include <libiw4x/mod/mod-session.hxx>
 
+#include <libiw4x/transport/steam.hxx>
+
 namespace iw4x
 {
   namespace mod
@@ -8,29 +10,22 @@ namespace iw4x
     session_module ()
       : transport_ (nullptr)
     {
-      // Post the first tick.
-      //
-      // Note that tick() re-posts itself at the start of each invocation,
-      // forming a recurring per-frame callback for the lifetime of this
-      // object.
-      //
-      scheduler::post (com_frame_domain{}, [this] () { tick (); });
+      scheduler::post (com_frame_domain {},
+                       [this] ()
+      {
+        tick ();
+      }, repeat_every_tick {});
     }
 
     void session_module::
     create_session (session::host_role, session::session_metadata m)
     {
-
+       transport_ = make_unique<steam_transport> ();
     }
 
     void session_module::
     tick ()
     {
-      // Re-post ourselves before doing any work so that the next frame call
-      // is guaranteed even if an exception unwinds through the code below.
-      //
-      scheduler::post (com_frame_domain{}, [this] () { tick (); });
-
       // Tick the transport first.
       //
       if (transport_)
