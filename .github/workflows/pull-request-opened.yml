@@ -6,7 +6,7 @@ on:
 
 env:
   OPENED: |
-    Thank you for opening this pull request, @${{ github.actor }}. It has been registered and will be reviewed in sequence.
+    Thank you for opening this pull request, @${{ github.actor }}. It has been registered and is now awaiting review.
 
 permissions:
   contents: read
