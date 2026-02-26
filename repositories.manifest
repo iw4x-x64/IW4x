@@ -5,8 +5,7 @@ summary: iw4x project repository
 # functions as the de facto source of up-to-date packages while maintaining a
 # reasonable level of stability.
 #
-# For background, see:
-# build2-toolchain-packaging.xhtml#review
+# For background, see: build2-toolchain-packaging.xhtml#review
 #
 :
 role: prerequisite

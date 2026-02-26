@@ -232,10 +232,7 @@ namespace iw4x
           int64_t target_abs (ra + ri->length + dv);
           int64_t dr (target_abs - (fa + rd + ri->length));
 
-          if (in_range<int32_t> (dr))
-            r.operands [n].mem.displacement = dr;
-          else
-            throw out_of_range ("RIP-relative displacement out of range");
+          r.operands [n].mem.displacement = dr;
         }
       }
 

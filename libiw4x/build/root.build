@@ -1,8 +1,13 @@
-cxx.internal.scope = current
-
 cxx.std = latest
 
 using cxx
+
+# In MinGW case we need to explicitly load the bin.def module.
+#
+# https://build2.org/build2/doc/build2-build-system-manual.xhtml#cc-auto-symexport
+#
+if ($cxx.target.class == 'windows')
+  using bin.def
 
 hxx{*}: extension = hxx
 ixx{*}: extension = ixx
@@ -12,30 +17,6 @@ cxx{*}: extension = cxx
 # Provide the linker with information about exports.
 #
 def{*}: extension = def
-
-# Disable a small set of MSVC warnings that are either noise in this codebase
-# or actively unhelpful for our usage patterns.
-#
-if ($cxx.class == 'msvc')
-  cxx.coptions += /wd4251 /wd4275 /wd4800
-
-# Silent obsolete CRT security warnings.
-#
-cxx.poptions += -D_CRT_SECURE_NO_WARNINGS -D_SCL_SECURE_NO_WARNINGS
-
-# Prevent windows.h from defining min/max macros that clash with c++
-# standard library functions (e.g. std::numeric_limits::max)
-#
-cxx.poptions += -DNOMINMAX
-
-# ASIO conditionally enables parts of its Windows backend based on
-# _WIN32_WINNT. Leaving this macros to compiler defaults can result in
-# different translation units selecting different execution paths, which in
-# turn leads to inconsistent behavior and, in some cases, ABI mismatches.
-#
-# Background discussion: https://stackoverflow.com/a/41068811
-#
-cxx.poptions += -DWINVER=0x0A00 -D_WIN32_WINNT=0x0A00
 
 # The test target for cross-testing (running tests under Wine, etc).
 #

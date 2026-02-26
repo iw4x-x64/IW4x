@@ -22,6 +22,6 @@ namespace iw4x
     // at runtime.
     //
     LIBIW4X_SYMEXPORT BOOL WINAPI
-    DllMain (HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved);
+    DllMain (HINSTANCE, DWORD reason, LPVOID);
   }
 }

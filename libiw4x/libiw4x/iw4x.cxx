@@ -1,28 +1,35 @@
 #include <libiw4x/iw4x.hxx>
 
 #include <libiw4x/context.hxx>
+#include <libiw4x/logger.hxx>
 #include <libiw4x/memory.hxx>
-#include <libiw4x/scheduler.hxx>
 
-#include <libiw4x/client/init.hxx>
-#include <libiw4x/ui/init.hxx>
-#include <libiw4x/win32/init.hxx>
-#include <libiw4x/windows/init.hxx>
+#include <libiw4x/mod/mod-scheduler.hxx>
+#include <libiw4x/mod/mod-ui.hxx>
 
 namespace iw4x
 {
-  // We avoid a pointer-based singleton here to prevent the compiler from
-  // generating dependent loads. That is, even if the pointer is TU-local, the
-  // compiler assumes it might change, preventing it from folding the access
-  // into a single address computation.
+  // What we need here is not to "implement a singleton", but to control the
+  // exact shape of the generated code at every access site. A pointer-based
+  // singleton forces the compiler to emit a load of the pointer value,
+  // followed by a dependent load of the requested member. Even when the
+  // pointer is TU-local or constant after initialization, the compiler must
+  // assume that it can be modified across translation units and therefore
+  // cannot fold the access into a single address computation.
   //
-  // Instead, we reserve storage with static duration and use placement-new.
-  // This gives us a reference with a fixed base address, which is critical
-  // for performance in our per-frame detours (avoids the pointer-chasing
-  // dependency chan).
+  // By contrast, a reference bound to an object with static storage duration
+  // gives the compiler a fixed base address. Member accesses become simple
+  // base+offset operations with no intermediate load. For IW4x, this property
+  // is relied upon in detours that execute per-frame or per-instruction, where
+  // the extra dependency chain introduced by pointer chasing is *very*
+  // observable.
   //
-  // Note that we must manually sequence construction since the linker only
-  // sees the storage, not the object lifetime.
+  // We therefore reserve raw storage with static duration and known alignment
+  // and later materialize the object into that storage with placement-new. The
+  // exported symbol is a reference whose address is resolved by the linker to
+  // the storage itself, not to an indirection cell. From the code generator's
+  // point of view, `ctx` is indistinguishable from a TU-level static object,
+  // except that its construction is manually sequenced.
   //
   alignas (context) std::byte ctx_storage [sizeof (context)];
   context& ctx (reinterpret_cast<context&> (ctx_storage));
@@ -55,10 +62,10 @@ namespace iw4x
         // underlying OS handle is valid. Only if both streams are invalid do
         // we attempt to attach a console.
         //
-        intptr_t stdout_handle (_get_osfhandle (_fileno (stdout)));
-        intptr_t stderr_handle (_get_osfhandle (_fileno (stderr)));
+        intptr_t o (_get_osfhandle (_fileno (stdout)));
+        intptr_t e (_get_osfhandle (_fileno (stderr)));
 
-        if (stdout_handle >= 0 || stderr_handle >= 0)
+        if (o >= 0 || e >= 0)
           return;
       }
 
@@ -79,21 +86,16 @@ namespace iw4x
         // diagnostic-only and has no bearing on core functionality. We
         // therefore avoid exceptions and suppress all errors unconditionally.
         //
-        bool stdout_rebound (false);
-        bool stderr_rebound (false);
+        bool o (freopen ("CONOUT$", "w", stdout) != nullptr &&
+          _dup2 (_fileno (stdout), 1) != -1);
 
-        if (freopen ("CONOUT$", "w", stdout) != nullptr &&
-            _dup2 (_fileno (stdout), 1) != -1)
-          stdout_rebound = true;
-
-        if (freopen ("CONOUT$", "w", stderr) != nullptr &&
-            _dup2 (_fileno (stderr), 2) != -1)
-          stderr_rebound = true;
+        bool e (freopen ("CONOUT$", "w", stderr) != nullptr &&
+          _dup2 (_fileno (stderr), 2) != -1);
 
         // If stream were rebound, realign iostream objects (`cout`, `cerr`,
         // etc.) with C FILE streams.
         //
-        if (stdout_rebound && stderr_rebound)
+        if (o && e)
           ios::sync_with_stdio ();
       }
     }
@@ -121,8 +123,6 @@ namespace iw4x
         // __security_init_cookie
         //
         reinterpret_cast<void (*) ()> (0x1403598CC) ();
-
-        attach_console ();
 
         // Under normal circumstances, a DLL is unloaded via FreeLibrary once
         // its reference count reaches zero. This is acceptable for auxiliary
@@ -190,8 +190,11 @@ namespace iw4x
           exit (1);
         }
 
-        // Relax module's memory protection to permit writes to segments that
-        // are otherwise read-only.
+        // Make process writable and executable.
+        //
+        // Note that we unprotect the whole image (SizeOfImage) rather than
+        // parsing headers to locate its code sections. That is, we want to
+        // avoid dealing with PE section alignment nuances.
         //
         MODULEINFO mi;
         if (GetModuleInformation (GetCurrentProcess (),
@@ -221,54 +224,14 @@ namespace iw4x
           exit (1);
         }
 
-        // Start Quill backend thread.
-        //
-        // Note that Quill backend is kept responsive (no sleep) and is allowed
-        // to exit without draining queues to avoid MinGW-specific shutdown
-        // hangs.
-        //
-        quill::Backend::start ({
-          .enable_yield_when_idle               = true,
-          .sleep_duration                       = 0ns,
-          .wait_for_queues_to_empty_before_exit = false,
-          .check_printable_char                 = {},
-          .log_level_short_codes                =
-          {
-            "3", "2", "1", "D", "I", "N", "W", "E", "C", "B", "_"
-          }
-        });
+        attach_console ();
 
-        // Configure Quill log layout.
-        //
-        // @@: It may be tempting to include the name of the calling function
-        // in log output, but this is not reliable in practice. In particular,
-        // calls made from lambdas (and other compiler-generated contexts)
-        // often yield generic names.
-        //
-        quill::PatternFormatterOptions format_options {
-          "%(time) [%(log_level_short_code)] %(message)",
-          "%H:%M:%S.%Qms",
-          quill::Timezone::LocalTime,
-        };
+        active_logger = new logger;
 
-        // Create the main logger instance.
-        //
-        // Note that its lifetime is managed by Quill.
-        //
-        quill::Logger* l (
-          quill::Frontend::create_or_get_logger (
-            "iw4x",
-            quill::Frontend::create_or_get_sink<quill::ConsoleSink> ("cs"),
-            format_options));
+        new (&ctx_storage) context ();
 
-        // In development builds, enable the most verbose tracing level.
-        //
-#if LIBIW4X_DEVELOP
-        l->set_log_level (quill::LogLevel::TraceL3);
-#endif
-
-        scheduler s;
-        new (&ctx_storage) context (s, l);
+        mod::scheduler_module ();
+        mod::ui_module ();
 
         memwrite (0x1402A91E5, "\xB0\x01");                                     // Suppress XGameRuntimeInitialize call in WinMain
         memwrite (0x1402A91E7, 0x90, 3);                                        // ^
@@ -293,26 +256,21 @@ namespace iw4x
         //
         *(uint32_t*) 0x14020DD06 = thread::hardware_concurrency ();
 
-        // Experimental offline mode.
+        // Offline mode.
         //
-        // memwrite (0x1402A5F70, 0x90, 3);                                        // xboxlive_signed
-        // memwrite (0x1402A5F73, 0x74, 1);                                        // ^
-        // memwrite (0x1400F5B86, 0xEB, 1);                                        // ^
-        // memwrite (0x1400F5BAC, 0xEB, 1);                                        // ^
-        // memwrite (0x14010B332, 0xEB, 1);                                        // ^
-        // memwrite (0x1401BA1FE, 0xEB, 1);                                        // ^
-        // memwrite (0x140271ED0, 0xC3, 1);                                        // playlist
-        // memwrite (0x1400F6BC4, 0x90, 2);                                        // ^
-        // memwrite (0x1400FC833, 0xEB, 1);                                        // configstring
-        // memwrite (0x1400D2AFC, 0x90, 2);                                        // ^
-        // memwrite (0x1400E4DA0, 0x33, 1);                                        // stats
-        // memwrite (0x1400E4DA1, 0xC0, 1);                                        // ^
-        // memwrite (0x1400E4DA2, 0xC3, 1);                                        // ^
-
-        client::init ();
-        ui::init ();
-        win32::init ();
-        windows::init ();
+        // memwrite (0x1402A5F70, 0x90, 3);                                     // xboxlive_signed
+        // memwrite (0x1402A5F73, 0x74, 1);                                     // ^
+        // memwrite (0x1400F5B86, 0xEB, 1);                                     // ^
+        // memwrite (0x1400F5BAC, 0xEB, 1);                                     // ^
+        // memwrite (0x14010B332, 0xEB, 1);                                     // ^
+        // memwrite (0x1401BA1FE, 0xEB, 1);                                     // ^
+        // memwrite (0x140271ED0, 0xC3, 1);                                     // playlist
+        // memwrite (0x1400F6BC4, 0x90, 2);                                     // ^
+        // memwrite (0x1400FC833, 0xEB, 1);                                     // configstring
+        // memwrite (0x1400D2AFC, 0x90, 2);                                     // ^
+        // memwrite (0x1400E4DA0, 0x33, 1);                                     // stats
+        // memwrite (0x1400E4DA1, 0xC0, 1);                                     // ^
+        // memwrite (0x1400E4DA2, 0xC3, 1);                                     // ^
 
         // __scrt_common_main_seh
         //
@@ -340,12 +298,6 @@ namespace iw4x
         static_cast<unsigned char> (s >> 56 & 0xFF)
       });
 
-      // A failure here would indicate that ASLR is still enabled for this
-      // region. In practice this is not expected: the distributed binary is
-      // already pre-patched with ASLR disabled, so VirtualProtect should
-      // always succeed. If it does fail, we bail out rather than attempting
-      // to write to a potentially protected page.
-      //
       DWORD o (0);
       if (VirtualProtect (reinterpret_cast<void*> (t),
                           seq.size (),
@@ -361,26 +313,5 @@ namespace iw4x
       //
       return TRUE;
     }
-
-    // Force 'High Performance Graphics'.
-    //
-    // Official documentation states that this mechanism is not supported when
-    // invoked from a DLL. Turn out that in practice, user reports and field
-    // testing indicate that it does actually take effect and is in fact
-    // required for hybrid (Optimus) system. We therefore enable it here despite
-    // the documented limitation.
-    //
-    // https://docs.nvidia.com/gameworks/content/technologies/desktop/optimus
-    // https://gpuopen.com/learn/amdpowerxpressrequesthighperformance/
-    //
-    // @@: AmdPowerXpressRequestHighPerformance has a history of causing
-    // instability in some games. While we currently enable it,
-    // this should be treated as a potential fault surface. If IW4x
-    // exhibits similar crash patterns, the correct response is likely
-    // to introduce a conditional or opt-out rather than remove it
-    // outright.
-    //
-    LIBIW4X_SYMEXPORT DWORD NvOptimusEnablement = 0x00000001;
-    LIBIW4X_SYMEXPORT DWORD AmdPowerXpressRequestHighPerformance = 0x00000001;
   }
 }

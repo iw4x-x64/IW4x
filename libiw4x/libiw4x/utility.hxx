@@ -7,11 +7,19 @@ extern "C"
   #include <io.h>
 }
 
+// Language support library
+//
+#include <initializer_list>
+
+// Concepts library
+//
+#include <concepts>
+
 // Diagnostics library
 //
 #include <cassert>
+#include <exception>
 #include <stdexcept>
-#include <system_error>
 
 // Memory management library
 //
@@ -19,11 +27,19 @@ extern "C"
 
 // General utilities library
 //
-#include <utility>
+#include <functional>
+#include <variant>
+
+// Containers library
+//
+#include <array>
+#include <vector>
+#include <queue>
 
 // Strings library
 //
-#include <cstring>
+#include <string>
+#include <string_view>
 
 // Time library
 //
@@ -35,23 +51,63 @@ extern "C"
 
 // Concurrency support library
 //
+#include <atomic>
+#include <future>
 #include <mutex>
 #include <thread>
 
 namespace iw4x
 {
+  // Language support
+  //
+  using std::initializer_list;
+
+  using std::int8_t;
+  using std::int16_t;
+  using std::int32_t;
+  using std::int64_t;
+
+  using std::intmax_t;
+  using std::intptr_t;
+
+  using std::uint8_t;
+  using std::uint16_t;
+  using std::uint32_t;
+  using std::uint64_t;
+
+  using std::uintmax_t;
+  using std::uintptr_t;
+
+  // Concepts
+  //
+  using std::convertible_to;
+
   // Diagnostics
   //
-  using std::system_category;
+  using std::runtime_error;
+  using std::terminate;
 
   // Memory management
   //
+  using std::unique_ptr;
+  using std::shared_ptr;
   using std::make_unique;
 
   // General utilities
   //
-  using std::forward;
-  using std::in_range;
+  using std::move_only_function;
+  using std::variant;
+
+  // Containers
+  //
+  using std::array;
+  using std::vector;
+  using std::queue;
+
+  // Strings
+  //
+  using std::string;
+  using std::string_view;
 
   // Time
   //
@@ -65,10 +121,22 @@ namespace iw4x
   using std::dec;
   using std::endl;
   using std::hex;
+  using std::ios;
+  using std::ostringstream;
+  using std::size_t;
 
   // Concurrency support
   //
-  using std::call_once;
-  using std::thread;
+  using std::atomic;
+  using std::future;
+  using std::future_status;
+  using std::jthread;
   using std::launch;
+  using std::lock_guard;
+  using std::memory_order_acquire;
+  using std::memory_order_relaxed;
+  using std::memory_order_release;
+  using std::mutex;
+  using std::thread;
+  using std::scoped_lock;
 }

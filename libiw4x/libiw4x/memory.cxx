@@ -1,5 +1,4 @@
 #include <libiw4x/memory.hxx>
-#include <cstring>
 
 namespace iw4x
 {

@@ -1,8 +1,51 @@
-#include <libiw4x/types.hxx>
 #include <libiw4x/scheduler.hxx>
 
 #undef NDEBUG
 #include <cassert>
+
+struct token
+{
+  int v;
+
+  token (int v) : v (v) {}
+  token (token&&) = default;
+  token& operator= (token&&) = default;
+
+  token (const token&) = delete;
+  token& operator= (const token&) = delete;
+};
+
+struct tracker
+{
+  std::atomic<int>* c;
+
+  tracker (std::atomic<int>& c) : c (&c) {}
+
+  tracker (tracker&& o) noexcept
+      : c (o.c)
+  {
+    o.c = nullptr;
+  }
+
+  tracker& operator= (tracker&& o) noexcept
+  {
+    if (this != &o)
+    {
+      if (c) (*c)++;
+      c = o.c;
+      o.c = nullptr;
+    }
+    return *this;
+  }
+
+  ~tracker ()
+  {
+    if (c) (*c)++;
+  }
+
+  tracker (const tracker&) = delete;
+  tracker& operator= (const tracker&) = delete;
+};
 
 int
 main ()
@@ -10,100 +53,181 @@ main ()
   using namespace std;
   using namespace iw4x;
 
-  scheduler s;
+  active_logger = new logger;
 
-  // Test strand creation.
-  //
-  assert (s.create ("strand1"));
-  assert (s.exists ("strand1"));
-  assert (!s.create ("strand1")); // Already exists.
-  assert (s.create ("strand2"));
-  assert (s.exists ("strand2"));
-
-  // Test posting work to strands.
+  // Test high contention.
   //
   {
-    bool executed (false);
+    logical_scheduler s;
+    atomic<int> n (0);
+    const int nt (8);
+    const int np (10000);
 
-    assert (s.post ("strand1", [&executed] () { executed = true; }));
-    assert (!executed); // Not yet polled.
+    vector<thread> ts;
+    ts.reserve(nt);
 
-    s.poll ("strand1");
+    for (int i (0); i < nt; ++i)
+    {
+      ts.emplace_back ([&s, &n, np] ()
+      {
+        for (int j (0); j < np; ++j)
+        {
+          s.post ([&n] () { n++; }, asynchronous {});
+        }
+      });
+    }
 
-    assert (executed);
+    for (auto& t : ts)
+      t.join ();
+
+    s.tick ();
+    assert (n == nt * np);
   }
 
-  // Test multiple work items on same strand.
+  // Test execution snapshotting.
   //
   {
-    int counter (0);
+    logical_scheduler s;
+    bool l (false); // local.
+    bool a (false); // async.
 
-    assert (s.post ("strand2", [&counter] () { counter++; }));
-    assert (s.post ("strand2", [&counter] () { counter++; }));
-    assert (s.post ("strand2", [&counter] () { counter++; }));
+    s.post ([&] ()
+    {
+      s.post ([&l] () { l = true; });
+      s.post ([&a] () { a = true; }, asynchronous {});
+    });
 
-    assert (counter == 0);
+    s.tick ();
 
-    s.poll ("strand2");
+    // Children should be pending.
+    //
+    assert (!l);
+    assert (!a);
 
-    assert (counter == 3);
+    s.tick ();
+
+    assert (l);
+    assert (a);
   }
 
-  // Test posting to non-existent strand.
+  // Test move-only closures.
   //
   {
-    bool executed (false);
+    logical_scheduler s;
+    auto p (make_unique<token> (42));
+    bool r (false);
 
-    assert (!s.post ("nonexistent", [&executed] () { executed = true; }));
-    assert (!executed);
+    s.post ([p = move (p), &r] ()
+    {
+      assert (p->v == 42);
+      r = true;
+    });
+
+    s.tick ();
+    assert (r);
   }
 
-  // Test strand destruction.
-  //
-  assert (s.destroy ("strand1"));
-  assert (!s.exists ("strand1"));
-  assert (!s.destroy ("strand1")); // Already destroyed.
-
-  // Test posting to destroyed strand.
+  // Test destruction cleanup.
   //
   {
-    bool executed (false);
+    atomic<int> n (0);
+    {
+      logical_scheduler s;
+      s.post ([t = tracker (n)] () {});
+      s.post ([t = tracker (n)] () {}, asynchronous {});
+    }
 
-    assert (!s.post ("strand1", [&executed] () { executed = true; }));
-    assert (!executed);
+    assert (n == 2);
   }
 
-  // Test recreation after destruction.
+  // Test vector resizing.
   //
-  assert (s.create ("strand1"));
-  assert (s.exists ("strand1"));
-
   {
-    bool executed (false);
+    logical_scheduler s;
+    int n (0);
+    const int max (100000);
 
-    assert (s.post ("strand1", [&executed] () { executed = true; }));
+    for (int i (0); i < max; ++i)
+    {
+      s.post ([&n] () { n++; });
+    }
 
-    s.poll ("strand1");
-
-    assert (executed);
+    s.tick ();
+    assert (n == max);
   }
 
-  // Test work ordering on same strand.
+  // Test exception propagation.
   //
   {
-    string result;
+    logical_scheduler s;
+    bool c (false);
 
-    assert (s.post ("strand1", [&result] () { result += "a"; }));
-    assert (s.post ("strand1", [&result] () { result += "b"; }));
-    assert (s.post ("strand1", [&result] () { result += "c"; }));
+    s.post ([] () { throw runtime_error ("boom"); });
 
-    s.poll ("strand1");
+    // This one shouldn't run this tick, but shouldn't leak either.
+    //
+    bool r (false);
+    s.post ([&r] () { r = true; });
 
-    assert (result == "abc");
-    assert (s.post ("strand1", [&result] () { result += "d"; }));
+    try
+    {
+      s.tick ();
+    }
+    catch (const runtime_error&)
+    {
+      c = true;
+    }
 
-    s.poll ("strand1");
+    assert (c);
+  }
 
-    assert (result == "abcd");
+  // Test async FIFO ordering.
+  //
+  {
+    logical_scheduler s;
+    vector<int> v;
+
+    s.post ([&] () { v.push_back (1); }, asynchronous {});
+    s.post ([&] () { v.push_back (2); }, asynchronous {});
+    s.post ([&] () { v.push_back (3); }, asynchronous {});
+
+    s.tick ();
+
+    assert (v.size () == 3);
+    assert (v[0] == 1);
+    assert (v[1] == 2);
+    assert (v[2] == 3);
+  }
+
+    // Test repeating tasks.
+  //
+  {
+    logical_scheduler s;
+    int r (0);
+    int o (0);
+
+    s.post ([&r] () { r++; }, repeat_every_tick {});
+    s.post ([&o] () { o++; });
+
+    // First tick executes both the repeating and the one-shot task.
+    //
+    s.tick ();
+
+    assert (r == 1);
+    assert (o == 1);
+
+    // Second tick executes only the repeating task.
+    //
+    s.tick ();
+
+    assert (r == 2);
+    assert (o == 1);
+
+    // Third tick executes the repeating task again.
+    //
+    s.tick ();
+
+    assert (r == 3);
+    assert (o == 1);
   }
 }
