@@ -139,7 +139,8 @@ bdep init -C @mingw32-debug                                          \
                       -mtune=generic                                 \
                       -fasynchronous-unwind-tables                   \
                       -fno-omit-frame-pointer                        \
-                      -mno-omit-leaf-frame-pointer"                  \
+                      -mno-omit-leaf-frame-pointer                   \
+                      -Wa,-mbig-obj"                                 \
   config.cc.loptions="-static-libgcc -static-libstdc++"              \
   config.cc.compiledb=./                                             \
   cc                                                                 \
@@ -162,7 +163,8 @@ if test -n "$release"; then
                         -mtune=generic                                 \
                         -fasynchronous-unwind-tables                   \
                         -fno-omit-frame-pointer                        \
-                        -mno-omit-leaf-frame-pointer"                  \
+                        -mno-omit-leaf-frame-pointer                   \
+                        -Wa,-mbig-obj"                                 \
     config.cc.loptions="-static-libgcc -static-libstdc++"              \
     config.cc.compiledb=./                                             \
     cc                                                                 \

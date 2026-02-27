@@ -12,6 +12,7 @@ switch $cxx.target.class, $cxx.target.system
 intf_libs = # Interface dependencies.
 impl_libs = # Implementation dependencies.
 
+import intf_libs += libnp%lib{np}
 import intf_libs += libquill%lib{quill}
 import intf_libs += libzydis%lib{zydis}
 
