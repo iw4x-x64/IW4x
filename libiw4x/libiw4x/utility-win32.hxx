@@ -1,45 +1,44 @@
 #pragma once
 
-// On MinGW, <winsock2.h> must be included before <windows.h> to avoid
-// conflicts.
-//
-#include <winsock2.h>
-
-// Include Windows.h in a way that avoids the usual namespace pollution.
+// Include Windows headers in a way that avoids the usual namespace pollution.
 //
 // In particular, we temporarily define WIN32_LEAN_AND_MEAN to exclude rarely
 // used headers, and NOMINMAX to suppress the intrusive min() and max() macros.
-// These macros are problematic because they interfere with standard library
-// functions and templates. Note that we restore the macro state afterward to
-// avoid affecting other translation units.
+//
+// Note also that on MinGW, <winsock2.h> must be included before <windows.h>
+// to prevent redefinition conflicts.
 //
 #ifndef WIN32_LEAN_AND_MEAN
 #  define WIN32_LEAN_AND_MEAN
 #  ifndef NOMINMAX
 #    define NOMINMAX
+#    include <winsock2.h>
 #    include <windows.h>
+#    include <psapi.h>
+#    include <d3d9.h>
 #    undef NOMINMAX
 #  else
+#    include <winsock2.h>
 #    include <windows.h>
+#    include <psapi.h>
+#    include <d3d9.h>
 #  endif
 #  undef WIN32_LEAN_AND_MEAN
 #else
 #  ifndef NOMINMAX
 #    define NOMINMAX
+#    include <winsock2.h>
 #    include <windows.h>
+#    include <psapi.h>
+#    include <d3d9.h>
 #    undef NOMINMAX
 #  else
+#    include <winsock2.h>
 #    include <windows.h>
+#    include <psapi.h>
+#    include <d3d9.h>
 #  endif
 #endif
-
-// Process Status API.
-//
-#include <psapi.h>
-
-// Direct3D 9 Graphics.
-//
-#include <d3d9.h>
 
 // Linker pseudo-variable.
 //
