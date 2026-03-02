@@ -26,9 +26,6 @@ namespace iw4x
   logical_scheduler ()
     : async_head_ (nullptr)
   {
-    log::debug {categories::scheduler {},
-                "initializing logical scheduler"};
-
     // Pre-allocate queue capacity to avoid heap allocations during the steady
     // state (tick).
     //
@@ -43,9 +40,6 @@ namespace iw4x
   logical_scheduler::
   ~logical_scheduler ()
   {
-    log::debug {categories::scheduler {},
-                "destroying logical scheduler"};
-
     // Drain and discard any remaining async nodes.
     //
     // Note that these may exist if the scheduler is destroyed before a final
@@ -67,9 +61,6 @@ namespace iw4x
   {
     assert (work);
 
-    log::trace_l3 {categories::scheduler {},
-                   "posting same-thread one-shot task"};
-
     // Fast path: same-thread post.
     //
     // Push the task directly onto the pending queue.
@@ -84,9 +75,6 @@ namespace iw4x
   post (task work, repeat_every_tick)
   {
     assert (work);
-
-    log::trace_l2 {categories::scheduler {},
-                   "posting same-thread repeating task"};
 
     // Same-thread post for a repeating task.
     //
@@ -105,9 +93,6 @@ namespace iw4x
   post (task work, asynchronous)
   {
     assert (work);
-
-    log::trace_l3 {categories::scheduler {},
-                   "posting cross-thread task"};
 
     // Prepare the entry.
     //
@@ -154,9 +139,6 @@ namespace iw4x
     if (n == nullptr)
       return;
 
-    log::trace_l2 {categories::scheduler {},
-                   "draining cross-thread tasks"};
-
     // The stack yields nodes in LIFO order. This is generally not what we want
     // for task execution (we prefer FIFO), so we reverse the list.
     //
@@ -200,12 +182,7 @@ namespace iw4x
       jthread::id tid (this_thread::get_id ());
 
       if (owner_ == jthread::id {})
-      {
-        log::debug {categories::scheduler {},
-                    "claimed scheduler ownership for thread"};
-
         owner_ = tid;
-      }
       else
         assert (owner_ == tid);
     }

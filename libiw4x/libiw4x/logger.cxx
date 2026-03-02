@@ -1,10 +1,18 @@
 #include <libiw4x/logger.hxx>
 
+#include <string>
+#include <initializer_list>
+
+#include <quill/Frontend.h>
+#include <quill/sinks/ConsoleSink.h>
+#include <quill/sinks/RotatingFileSink.h>
+
+using namespace std;
 using namespace quill;
 
 namespace iw4x
 {
-  logger* active_logger (nullptr);
+  class logger* logger (nullptr);
 
   namespace
   {
@@ -53,31 +61,13 @@ namespace iw4x
       "%H:%M:%S.%Qms",
       Timezone::LocalTime);
 
-    using namespace categories;
+    using namespace log::categories;
 
     log::detail::logger<iw4x> () =
       register_category (string (log::policy<iw4x>::name),
                          {cs, fs},
                          pf,
                          log::policy<iw4x>::threshold);
-
-    log::detail::logger<scheduler> () =
-      register_category (string (log::policy<scheduler>::name),
-                         {cs, fs},
-                         pf,
-                         log::policy<scheduler>::threshold);
-
-    log::detail::logger<detour> () =
-      register_category (string (log::policy<detour>::name),
-                         {cs, fs},
-                         pf,
-                         log::policy<detour>::threshold);
-
-    log::detail::logger<ui> () =
-      register_category (string (log::policy<ui>::name),
-                         {cs, fs},
-                         pf,
-                         log::policy<ui>::threshold);
 
     // In development builds, we blow the doors wide open and allow all trace
     // statements through so internals are visible. The compile-time minimum
@@ -86,22 +76,15 @@ namespace iw4x
     //
 #if LIBIW4X_DEVELOP
     log::detail::logger<iw4x> ()->set_log_level (LogLevel::TraceL3);
-    log::detail::logger<scheduler> ()->set_log_level (LogLevel::TraceL3);
-    log::detail::logger<detour>    ()->set_log_level (LogLevel::TraceL3);
-    log::detail::logger<ui>        ()->set_log_level (LogLevel::TraceL3);
-
 #endif
   }
 
   logger::
   ~logger ()
   {
-    using namespace categories;
+    using namespace log::categories;
 
     log::detail::logger<iw4x> () = nullptr;
-    log::detail::logger<scheduler> () = nullptr;
-    log::detail::logger<detour>    () = nullptr;
-    log::detail::logger<ui>        () = nullptr;
 
     Backend::stop ();
   }

@@ -53,7 +53,7 @@ main ()
   using namespace std;
   using namespace iw4x;
 
-  active_logger = new logger;
+  logger = new class logger;
 
   // Test high contention.
   //

@@ -5,7 +5,6 @@
 #include <libiw4x/memory.hxx>
 
 #include <libiw4x/mod/mod-scheduler.hxx>
-#include <libiw4x/mod/mod-ui.hxx>
 
 namespace iw4x
 {
@@ -226,12 +225,11 @@ namespace iw4x
 
         attach_console ();
 
-        active_logger = new logger;
+        logger = new class logger;
 
         new (&ctx_storage) context ();
 
         mod::scheduler_module ();
-        mod::ui_module ();
 
         memwrite (0x1402A91E5, "\xB0\x01");                                     // Suppress XGameRuntimeInitialize call in WinMain
         memwrite (0x1402A91E7, 0x90, 3);                                        // ^

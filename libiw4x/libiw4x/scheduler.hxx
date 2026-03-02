@@ -219,9 +219,6 @@ namespace iw4x
     void
     post (Domain, task work)
     {
-      log::trace_l3 {categories::scheduler {},
-                     "dispatching standard task to domain scheduler"};
-
       get<Domain> ().post (static_cast<task&&> (work));
     }
 
@@ -231,9 +228,6 @@ namespace iw4x
     void
     post (Domain, task work, asynchronous mode)
     {
-      log::trace_l3 {categories::scheduler {},
-                     "dispatching async task to domain scheduler"};
-
       get<Domain> ().post (static_cast<task&&> (work), mode);
     }
 
@@ -243,9 +237,6 @@ namespace iw4x
     void
     post (Domain, task work, repeat_every_tick mode)
     {
-      log::trace_l2 {categories::scheduler {},
-                     "dispatching repeating task to domain scheduler"};
-
       get<Domain> ().post (static_cast<task&&> (work), mode);
     }
   }
