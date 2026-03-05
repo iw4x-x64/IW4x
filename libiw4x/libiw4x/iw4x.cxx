@@ -97,6 +97,40 @@ namespace iw4x
           exit (1);
         }
 
+        // Make process writable and executable.
+        //
+        // Note that we unprotect the whole image (SizeOfImage) rather than
+        // parsing headers to locate its code sections. That is, we want to
+        // avoid dealing with PE section alignment nuances.
+        //
+        MODULEINFO mi;
+        if (GetModuleInformation (GetCurrentProcess (),
+                                  GetModuleHandle (nullptr),
+                                  &mi,
+                                  sizeof (mi)))
+        {
+          DWORD o (0);
+          if (!VirtualProtect (mi.lpBaseOfDll,
+                               mi.SizeOfImage,
+                               PAGE_EXECUTE_READWRITE,
+                               &o))
+          {
+            MessageBox (nullptr,
+                        "unable to change module protection",
+                        "error",
+                        MB_ICONERROR);
+            exit (1);
+          }
+        }
+        else
+        {
+          MessageBox (nullptr,
+                      "unable to retrieve module information",
+                      "error",
+                      MB_ICONERROR);
+          exit (1);
+        }
+
         // __scrt_common_main_seh
         //
         return reinterpret_cast<int (*) ()> (0x140358D48) ();
