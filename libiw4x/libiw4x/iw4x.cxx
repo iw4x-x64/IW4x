@@ -4,6 +4,8 @@
 #include <cstdint>
 #include <string>
 
+#include <libiw4x/memory.hxx>
+
 using namespace std;
 
 namespace iw4x
@@ -130,6 +132,14 @@ namespace iw4x
                       MB_ICONERROR);
           exit (1);
         }
+
+        // Built-in patches.
+        //
+        memwrite (0x1402A91E5, "\xB0\x01");                                     // Suppress XGameRuntimeInitialize call in WinMain
+        memwrite (0x1402A91E7, 0x90, 3);                                        // ^
+        memwrite (0x1402A6A4B, 0x90, 5);                                        // Suppress XCurl call in Live_Init
+        memwrite (0x1402A6368, 0x90, 5);                                        // Suppress XCurl call in Live_Frame
+        memwrite (0x1402A8CFE, 0x90, 5);                                        // Suppress GDK shutdown in Com_Quit_f (avoids crash)
 
         // __scrt_common_main_seh
         //
