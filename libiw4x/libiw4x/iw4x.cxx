@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <string>
 
+#include <libiw4x/context.hxx>
 #include <libiw4x/memory.hxx>
 #include <libiw4x/logger.hxx>
 
@@ -11,6 +12,29 @@ using namespace std;
 
 namespace iw4x
 {
+  // A pointer-based singleton forces the compiler to emit a load of the pointer
+  // value, followed by a dependent load of the requested member. Even when the
+  // pointer is TU-local or constant after initialization, the compiler must
+  // assume that it can be modified across translation units and therefore
+  // cannot fold the access into a single address computation.
+  //
+  // By contrast, a reference bound to an object with static storage duration
+  // gives the compiler a fixed base address. Member accesses become simple
+  // base+offset operations with no intermediate load. For IW4x, this property
+  // is relied upon in detours that execute per-frame or per-instruction, where
+  // the extra dependency chain introduced by pointer chasing is *very*
+  // observable.
+  //
+  // We therefore reserve raw storage with static duration and known alignment
+  // and later materialize the object into that storage with placement-new. The
+  // exported symbol is a reference whose address is resolved by the linker to
+  // the storage itself, not to an indirection cell. From the code generator's
+  // point of view, `ctx` is indistinguishable from a TU-level static object,
+  // except that its construction is manually sequenced.
+  //
+  alignas (context) std::byte ctx_storage [sizeof (context)];
+  context& ctx (reinterpret_cast<context&> (ctx_storage));
+
   namespace
   {
     void
@@ -204,6 +228,11 @@ namespace iw4x
         // Initialize log.
         //
         attach_console (), logger = new class logger;
+
+        // Initialize context using placement new (see ctx_storage documentation
+        // for details).
+        //
+        new (&ctx_storage) context ();
 
         // Built-in patches.
         //
