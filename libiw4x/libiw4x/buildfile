@@ -1,6 +1,8 @@
 intf_libs = # Interface dependencies.
 impl_libs = # Implementation dependencies.
 
+import intf_libs += libquill%lib{quill}
+
 lib{iw4x}: {hxx ixx txx cxx}{** -version} \
            {hxx            }{    version} \
            {def            }{**         } \
@@ -11,6 +13,9 @@ hxx{version}: in{version} $src_root/manifest
 # Build options.
 #
 cxx.poptions =+ "-I$out_root" "-I$src_root"
+
+if ($config.libiw4x.develop)
+  cxx.poptions += "-DLIBIW4X_DEVELOP"
 
 obja{*}: cxx.poptions += -DLIBIW4X_STATIC_BUILD
 objs{*}: cxx.poptions += -DLIBIW4X_SHARED_BUILD

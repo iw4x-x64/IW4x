@@ -32,3 +32,8 @@ if ($cxx.target.system == 'win32-msvc')
 
 if ($cxx.target.system == 'win32-msvc')
   cxx.coptions += /wd4251 /wd4275 /wd4800
+
+# Pre-defined semantics to distinguish between development and consumption
+# builds.
+#
+config [bool] config.libiw4x.develop ?= false
