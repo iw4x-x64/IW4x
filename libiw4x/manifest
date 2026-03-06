@@ -6,6 +6,7 @@ summary: iw4x C++ library
 license: GPL-3.0-or-later ; GNU General Public License v3.0 or later.
 depends: * build2 >= 0.17.0
 depends: * bpkg >= 0.17.0
+depends: libzydis
 depends: libquill
 
 # CI configuration.
