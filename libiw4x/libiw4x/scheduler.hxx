@@ -4,6 +4,8 @@
 #include <functional>
 #include <thread>
 
+#include <boost/asio/io_context.hpp>
+
 #include <libiw4x/export.hxx>
 
 namespace iw4x
@@ -245,5 +247,88 @@ namespace iw4x
     {
       get<Domain> ().post (static_cast<task&&> (work), mode);
     }
+
+    // Boost.Asio executor adapter.
+    //
+    // Bridge logical_scheduler to an execution context for Boost.Asio
+    // operations. Coroutines spawned via co_spawn () with this executor will
+    // automatically resume on the scheduler's tick (main thread) after a
+    // background async operation completes.
+    //
+    template <typename Domain>
+    class asio_executor
+    {
+    public:
+      boost::asio::io_context* ioc;
+
+      explicit
+      asio_executor (boost::asio::io_context& i) noexcept
+        : ioc (&i) {}
+
+      asio_executor (const asio_executor&) noexcept = default;
+      asio_executor& operator= (const asio_executor&) noexcept = default;
+
+      bool
+      operator == (const asio_executor& o) const noexcept
+      {
+        return ioc == o.ioc;
+      }
+
+      bool
+      operator != (const asio_executor& o) const noexcept
+      {
+        return ioc != o.ioc;
+      }
+
+      boost::asio::io_context&
+      context () const noexcept { return *ioc; }
+
+      void on_work_started () const noexcept {}
+      void on_work_finished () const noexcept {}
+
+      template <typename F, typename A>
+      void
+      dispatch (F f, const A&) const
+      {
+        post (Domain {},
+              [func = std::move (f)] () mutable
+        {
+          func ();
+        }, asynchronous {});
+      }
+
+      template <typename F, typename A>
+      void
+      post (F f, const A&) const
+      {
+        post (Domain {},
+              [func = std::move (f)] () mutable
+        {
+          func ();
+        }, asynchronous {});
+      }
+
+      template <typename F, typename A>
+      void
+      defer (F f, const A&) const
+      {
+        post (Domain {},
+              [func = std::move (f)] () mutable
+        {
+          func ();
+        }, asynchronous {});
+      }
+
+      template <typename F>
+      void
+      execute (F f) const
+      {
+        post (Domain {},
+              [func = std::move (f)] () mutable
+        {
+          func ();
+        }, asynchronous {});
+      }
+    };
   }
 }
