@@ -4,6 +4,7 @@
 #include <functional>
 #include <memory>
 #include <thread>
+#include <type_traits>
 
 #include <boost/asio/awaitable.hpp>
 #include <boost/asio/bind_cancellation_slot.hpp>
@@ -339,6 +340,43 @@ namespace iw4x
       get<Domain> ().post (static_cast<task&&> (work), mode);
     }
 
+    template <typename F>
+    struct shared_task_wrapper
+    {
+      std::shared_ptr<F> f;
+
+      void
+      operator () ()
+      {
+        (*f) ();
+      }
+    };
+
+    template <typename F>
+    auto
+    wrap_task (F&& f)
+    {
+#if __cpp_lib_move_only_function
+      return [func = std::forward<F> (f)] () mutable
+      {
+        func ();
+      };
+#else
+      if constexpr (std::is_copy_constructible_v<std::decay_t<F>>)
+      {
+        return [func = std::forward<F> (f)] () mutable
+        {
+          func ();
+        };
+      }
+      else
+      {
+        return shared_task_wrapper<std::decay_t<F>> {
+          std::make_shared<std::decay_t<F>> (std::forward<F> (f))};
+      }
+#endif
+    }
+
     // Boost.Asio executor adapter.
     //
     // Bridge logical_scheduler to an execution context for Boost.Asio
@@ -382,10 +420,8 @@ namespace iw4x
       dispatch (F f, const A&) const
       {
         iw4x::scheduler::post (Domain {},
-                               [func = std::move (f)] () mutable
-        {
-          func ();
-        }, asynchronous {});
+                               wrap_task (std::move (f)),
+                               asynchronous {});
       }
 
       template <typename F, typename A>
@@ -393,10 +429,8 @@ namespace iw4x
       post (F f, const A&) const
       {
         iw4x::scheduler::post (Domain {},
-                               [func = std::move (f)] () mutable
-        {
-          func ();
-        }, asynchronous {});
+                               wrap_task (std::move (f)),
+                               asynchronous {});
       }
 
       template <typename F, typename A>
@@ -404,10 +438,8 @@ namespace iw4x
       defer (F f, const A&) const
       {
         iw4x::scheduler::post (Domain {},
-                               [func = std::move (f)] () mutable
-        {
-          func ();
-        }, asynchronous {});
+                               wrap_task (std::move (f)),
+                               asynchronous {});
       }
 
       template <typename F>
@@ -415,10 +447,8 @@ namespace iw4x
       execute (F f) const
       {
         iw4x::scheduler::post (Domain {},
-                               [func = std::move (f)] () mutable
-        {
-          func ();
-        }, asynchronous {});
+                               wrap_task (std::move (f)),
+                               asynchronous {});
       }
 
       boost::asio::io_context&
