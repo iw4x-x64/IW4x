@@ -5,9 +5,10 @@
 #include <string>
 
 #include <libiw4x/context.hxx>
-#include <libiw4x/memory.hxx>
 #include <libiw4x/logger.hxx>
+#include <libiw4x/memory.hxx>
 
+#include <libiw4x/mod/mod-live.hxx>
 #include <libiw4x/mod/mod-scheduler.hxx>
 #include <libiw4x/mod/mod-ui.hxx>
 
@@ -258,6 +259,7 @@ namespace iw4x
         //
         mod::scheduler_module ();
         mod::ui_module ();
+        mod::live_module ();
 
         // __scrt_common_main_seh
         //

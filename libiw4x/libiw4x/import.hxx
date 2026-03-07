@@ -4645,4 +4645,19 @@ namespace iw4x
 
   using  DB_FindXAssetHeader_t = xasset_header (*) (xasset_type, const char* name);
   inline DB_FindXAssetHeader_t DB_FindXAssetHeader = reinterpret_cast<DB_FindXAssetHeader_t> (0x140129220);
+
+  using  LiveStorage_IsWaitingOnPlaylists_t = bool (*) ();
+  inline LiveStorage_IsWaitingOnPlaylists_t LiveStorage_IsWaitingOnPlaylists = reinterpret_cast<LiveStorage_IsWaitingOnPlaylists_t> (0x1402AA9B0);
+
+  using  LiveStorage_FetchPlaylists_t = void (*) (int controller_index);
+  inline LiveStorage_FetchPlaylists_t LiveStorage_FetchPlaylists = reinterpret_cast<LiveStorage_FetchPlaylists_t> (0x1402AA840);
+
+  using  Playlist_ParsePlaylists_t = int64_t (*) (uint8_t*);
+  inline Playlist_ParsePlaylists_t Playlist_ParsePlaylists = reinterpret_cast<Playlist_ParsePlaylists_t> (0x14025D460);
+
+  using  Playlist_ValidatePlaylistNum_t = void (*) (void);
+  inline Playlist_ValidatePlaylistNum_t Playlist_ValidatePlaylistNum = reinterpret_cast<Playlist_ValidatePlaylistNum_t> (0x14025E250);
+
+  using Live_SetPlaylistVersion_t = int64_t (*) (void);
+  inline Live_SetPlaylistVersion_t Live_SetPlaylistVersion = reinterpret_cast<Live_SetPlaylistVersion_t> (0x1402A7300);
 }
