@@ -254,6 +254,7 @@ namespace iw4x
         memwrite (0x1403B30DC, 0x00, 9);                                        // ^
         memwrite (0x1402864F0, "\xB0\x01\xC3");                                 // Suppress Content_DoWeHaveContentPack
         memwrite (0x1400F85F8, 0x90, 26);                                       // Suppress CL_Live_BaseGameLicenseCheck
+        memwrite (0x14012F720, "\xB8\x02\x00\x00\x00\xC3", 6);                  // Suppress GDK connection state
 
         // Built-in modules.
         //

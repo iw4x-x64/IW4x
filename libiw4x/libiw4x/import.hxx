@@ -4643,6 +4643,9 @@ namespace iw4x
   using  Com_Frame_Try_Block_Function_t = int64_t (*) ();
   inline Com_Frame_Try_Block_Function_t Com_Frame_Try_Block_Function = reinterpret_cast<Com_Frame_Try_Block_Function_t> (0x1401F9930);
 
+  using  CL_LocalClientNumFromControllerIndex_t = __int64 (*) (void);
+  inline CL_LocalClientNumFromControllerIndex_t CL_LocalClientNumFromControllerIndex = reinterpret_cast<CL_LocalClientNumFromControllerIndex_t> (0x1400EF8F0);
+
   using  DB_FindXAssetHeader_t = xasset_header (*) (xasset_type, const char* name);
   inline DB_FindXAssetHeader_t DB_FindXAssetHeader = reinterpret_cast<DB_FindXAssetHeader_t> (0x140129220);
 
@@ -4658,6 +4661,21 @@ namespace iw4x
   using  Playlist_ValidatePlaylistNum_t = void (*) (void);
   inline Playlist_ValidatePlaylistNum_t Playlist_ValidatePlaylistNum = reinterpret_cast<Playlist_ValidatePlaylistNum_t> (0x14025E250);
 
-  using Live_SetPlaylistVersion_t = int64_t (*) (void);
+  using  Live_SetPlaylistVersion_t = int64_t (*) (void);
   inline Live_SetPlaylistVersion_t Live_SetPlaylistVersion = reinterpret_cast<Live_SetPlaylistVersion_t> (0x1402A7300);
+
+  using  LiveStorage_IsWaitingOnStats_t = char (*) (__int64);
+  inline LiveStorage_IsWaitingOnStats_t LiveStorage_IsWaitingOnStats = reinterpret_cast<LiveStorage_IsWaitingOnStats_t> (0x1401FE130);
+
+  using  Cbuf_ExecuteBuffer_t = void (*) (unsigned int, unsigned int, uint8_t *);
+  inline Cbuf_ExecuteBuffer_t Cbuf_ExecuteBuffer = reinterpret_cast<Cbuf_ExecuteBuffer_t> (0x1401EC780);
+
+  using  Com_Error_t = void (*) (int, const char *, ...);
+  inline Com_Error_t Com_Error = reinterpret_cast<Com_Error_t> (0x1401F8FD0);
+
+  using  Com_ErrorEntered_t = bool (*) (void);
+  inline Com_ErrorEntered_t Com_ErrorEntered = reinterpret_cast<Com_ErrorEntered_t> (0x1401F9620);
+
+  using  Live_ThrowError_t = void (*) (int, const char *);
+  inline Live_ThrowError_t Live_ThrowError = reinterpret_cast<Live_ThrowError_t> (0x1402A7600);
 }

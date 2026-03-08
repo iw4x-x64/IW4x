@@ -1,15 +1,17 @@
 #include <libiw4x/mod/mod-live.hxx>
 
+#include <string_view>
+
 #include <boost/asio/awaitable.hpp>
 #include <boost/asio/co_spawn.hpp>
 #include <boost/asio/detached.hpp>
 
-#include <libiw4x/detour.hxx>
-#include <libiw4x/scheduler.hxx>
-#include <libiw4x/context.hxx>
-#include <libiw4x/logger.hxx>
-
 #include <libnp/np.hxx>
+
+#include <libiw4x/context.hxx>
+#include <libiw4x/detour.hxx>
+#include <libiw4x/logger.hxx>
+#include <libiw4x/scheduler.hxx>
 
 using namespace iw4x::log;
 using C = categories::iw4x;
@@ -89,6 +91,39 @@ namespace iw4x
         //
         return !have_valid_playlists || playlist_out_of_date;
       }
+
+      bool
+      live_storage_is_waiting_on_stats (int c)
+      {
+        int n (CL_LocalClientNumFromControllerIndex ());
+
+        // Map the static base address of the game's stats pool, and create a
+        // dummy stats source (level 1). The per-client stats block size appears
+        // to be 0x4018 bytes.
+        //
+        uint8_t* stats_source (reinterpret_cast<uint8_t*> (0x141C37F20));
+        uint8_t& b (stats_source[n * 0x4018]);
+
+        if (b == 0)
+          b = 1;
+
+        // We are never waiting on the network as we just provided the dummy
+        // data ourselves. Tell the caller to proceed.
+        //
+        return false;
+      }
+
+      void
+      live_throw_error (int code, const char* error_key)
+      {
+        std::string_view const e (error_key);
+
+        if (e != "MP_BUILDEXPIRED" && e != "XBOXLIVE_SIGNEDOUT")
+          return;
+
+        if (!Com_ErrorEntered ())
+          Com_Error (code, error_key);
+      }
     }
 
     live_module::
@@ -96,6 +131,8 @@ namespace iw4x
     {
       detour (LiveStorage_IsWaitingOnPlaylists, &live_storage_is_waiting_on_playlists);
       detour (LiveStorage_FetchPlaylists, &live_storage_fetch_playlists);
+      detour (LiveStorage_IsWaitingOnStats, &live_storage_is_waiting_on_stats);
+      detour (Live_ThrowError, &live_throw_error);
     }
   }
 }
