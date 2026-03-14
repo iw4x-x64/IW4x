@@ -76,7 +76,7 @@ namespace iw4x
   }
 
   void logical_scheduler::
-  post (task work, repeat_every_tick)
+  post (task work, repeat_every_tick_t)
   {
     assert (work);
 
@@ -94,7 +94,7 @@ namespace iw4x
   }
 
   void logical_scheduler::
-  post (task work, asynchronous)
+  post (task work, asynchronous_t)
   {
     assert (work);
 

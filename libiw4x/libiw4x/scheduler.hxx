@@ -41,7 +41,8 @@ namespace iw4x
   //
   // This is the default behavior when no specific mode argument is provided.
   //
-  struct immediate {};
+  struct immediate_t {};
+  inline constexpr immediate_t immediate;
 
   // Execute on the next tick, but force the task through the atomic
   // cross-thread ingress queue.
@@ -50,14 +51,16 @@ namespace iw4x
   // target scheduler (foreign thread). It is also safe, though less efficient,
   // to use from the owning thread.
   //
-  struct asynchronous {};
+  struct asynchronous_t {};
+  inline constexpr asynchronous_t asynchronous;
 
   // Execute on every tick indefinitely.
   //
   // The task is re-enqueued after each execution and persists until the
   // scheduler is destroyed.
   //
-  struct repeat_every_tick {};
+  struct repeat_every_tick_t {};
+  inline constexpr repeat_every_tick_t repeat_every_tick;
 
   // Scheduled entry.
   //
@@ -215,12 +218,12 @@ namespace iw4x
     // start of the next tick.
     //
     void
-    post (task work, asynchronous mode);
+    post (task work, asynchronous_t mode);
 
     // Schedule work to be executed on every tick.
     //
     void
-    post (task work, repeat_every_tick mode);
+    post (task work, repeat_every_tick_t mode);
 
     // Execution.
     //
@@ -326,7 +329,7 @@ namespace iw4x
     //
     template <typename Domain>
     void
-    post (Domain, task work, asynchronous mode)
+    post (Domain, task work, asynchronous_t mode)
     {
       get<Domain> ().post (static_cast<task&&> (work), mode);
     }
@@ -335,7 +338,7 @@ namespace iw4x
     //
     template <typename Domain>
     void
-    post (Domain, task work, repeat_every_tick mode)
+    post (Domain, task work, repeat_every_tick_t mode)
     {
       get<Domain> ().post (static_cast<task&&> (work), mode);
     }
@@ -471,7 +474,7 @@ namespace iw4x
       {
         iw4x::scheduler::post (Domain {},
                                wrap_task (std::move (f)),
-                               asynchronous {});
+                               asynchronous);
       }
 
       template <typename F, typename A>
@@ -480,7 +483,7 @@ namespace iw4x
       {
         iw4x::scheduler::post (Domain {},
                                wrap_task (std::move (f)),
-                               asynchronous {});
+                               asynchronous);
       }
 
       template <typename F, typename A>
@@ -489,7 +492,7 @@ namespace iw4x
       {
         iw4x::scheduler::post (Domain {},
                                wrap_task (std::move (f)),
-                               asynchronous {});
+                               asynchronous);
       }
 
       template <typename F>
@@ -498,7 +501,7 @@ namespace iw4x
       {
         iw4x::scheduler::post (Domain {},
                                wrap_task (std::move (f)),
-                               asynchronous {});
+                               asynchronous);
       }
 
       boost::asio::io_context&
