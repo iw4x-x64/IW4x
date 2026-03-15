@@ -1,10 +1,13 @@
 #pragma once
 
-#include <concepts>
-#include <string_view>
+#include <chrono>
+#include <sstream>
+#include <type_traits>
+#include <utility>
 
 #include <quill/Backend.h>
 #include <quill/LogFunctions.h>
+#include <quill/Logger.h>
 
 #include <libiw4x/export.hxx>
 
@@ -23,36 +26,13 @@ namespace iw4x
     logger& operator = (logger&&) = delete;
   };
 
-  LIBIW4X_SYMEXPORT extern logger* logger;
+  extern class logger* logger;
 
   namespace log
   {
-    namespace categories
-    {
-      struct iw4x {};
-    }
-
-    template <typename C>
-    struct policy;
-
-    template <>
-    struct policy<categories::iw4x>
-    {
-      static constexpr std::string_view name      = "iw4x";
-      static constexpr quill::LogLevel  threshold = quill::LogLevel::Info;
-    };
-
-    template <typename C>
-    concept Category = requires
-    {
-      { policy<C>::name      } -> std::convertible_to<std::string_view>;
-      { policy<C>::threshold } -> std::convertible_to<quill::LogLevel>;
-    };
-
     namespace detail
     {
-      template <typename C>
-      quill::Logger*&
+      inline quill::Logger*&
       logger () noexcept
       {
         static quill::Logger* p (nullptr);
@@ -60,11 +40,10 @@ namespace iw4x
       }
     }
 
-    template <typename C>
-    quill::Logger*
+    inline quill::Logger*
     logger () noexcept
     {
-      return detail::logger<C> ();
+      return detail::logger ();
     }
 
     // Minimum severity level.
@@ -78,95 +57,173 @@ namespace iw4x
     //
   #if LIBIW4X_DEVELOP
     inline constexpr quill::LogLevel
-      compiled_minimum_level (quill::LogLevel::TraceL3);
+      min_level (quill::LogLevel::TraceL3);
 #else
     inline constexpr quill::LogLevel
-      compiled_minimum_level (quill::LogLevel::Info);
+      min_level (quill::LogLevel::Info);
 #endif
 
-    #define IW4X_LOG_SEVERITY(N, L)                                            \
-    template <Category C, typename... A>                                       \
-    struct N                                                                   \
-    {                                                                          \
-      N (C,                                                                    \
-         char const* f,                                                        \
-         A&&... a,                                                             \
-         quill::SourceLocation l = quill::SourceLocation::current ())          \
-      {                                                                        \
-        if constexpr (L >= compiled_minimum_level)                             \
-        {                                                                      \
-          quill::Logger* q (logger<C> ());                                     \
-                                                                               \
-          if (q && q->should_log_statement (L))                                \
-          {                                                                    \
-            quill::log (q, "", L, f, l, static_cast<A&&> (a)...);              \
-          }                                                                    \
-        }                                                                      \
-      }                                                                        \
-    };                                                                         \
-                                                                               \
-    template <Category C, typename... A>                                       \
-    N (C, char const*, A&&...) -> N<C, A...>
+    template <quill::LogLevel L>
+    struct stream_accumulator;
 
-    IW4X_LOG_SEVERITY (trace_l3, quill::LogLevel::TraceL3);
-    IW4X_LOG_SEVERITY (trace_l2, quill::LogLevel::TraceL2);
-    IW4X_LOG_SEVERITY (trace_l1, quill::LogLevel::TraceL1);
-    IW4X_LOG_SEVERITY (debug,    quill::LogLevel::Debug);
-    IW4X_LOG_SEVERITY (info,     quill::LogLevel::Info);
-    IW4X_LOG_SEVERITY (notice,   quill::LogLevel::Notice);
-    IW4X_LOG_SEVERITY (warning,  quill::LogLevel::Warning);
-    IW4X_LOG_SEVERITY (error,    quill::LogLevel::Error);
-    IW4X_LOG_SEVERITY (critical, quill::LogLevel::Critical);
-    #undef IW4X_LOG_SEVERITY
+    namespace detail
+    {
+      // Capture the source location for the first operand of operator<<.
+      //
+      // Because C++ prohibits default arguments on overloaded operators, we
+      // cannot inject std::source_location directly into the operator<<
+      // signature. Instead, we capture the call site location during the
+      // implicit conversion of the right-hand operand.
+      //
+      // That is, when evaluating 'error << "foo"', overload resolution selects
+      // an operator<< that accepts this wrapper type. The compiler performs an
+      // implicit conversion of the operand, invoking the wrapper's templated
+      // constructor which specifies std::source_location::current() as a
+      // default argument.
+      //
+      // Note also that the payload is then type-erased via a function pointer
+      // and forwarded to the stream accumulator.
+      //
+      template <quill::LogLevel L>
+      struct first_arg
+      {
+        void const* p_;
+        void (*f_) (stream_accumulator<L>&, void const*);
+        quill::SourceLocation l_;
 
-    // Rate-limiting gate for a log call site.
+        template <typename T>
+        first_arg (
+          T&& t,
+          quill::SourceLocation l = quill::SourceLocation::current ()) noexcept
+            : p_ (std::addressof (t)),
+              f_ ([] (stream_accumulator<L>& a, void const* p)
+          {
+            a << *static_cast<std::remove_reference_t<T> const*> (p);
+          }), l_ (l) {}
+      };
+    }
+
+    // Accumulate stream output and flush to the logging backend upon
+    // destruction.
     //
-    // Returns true at most once per interval. All intermediate checks return
-    // false.
+    // A fundamental limitation of C++ streams is that an expression evaluates
+    // as a sequence of operator<< calls. The stream itself has no knowledge of
+    // the full expression's boundary. In other words, it cannot reliably
+    // determine when to flush the assembled message.
     //
+    // To bridge this gap, we employ the proxy object workaround. Accessing the
+    // logger returns a temporary instance of this accumulator, and subsequent
+    // operator<< invocations buffer the output into it.
+    //
+    // The key here is that when execution reaches the end of the full
+    // expression, C++ language rules naturally mandate the destruction of this
+    // temporary. We rely on its destructor to submit the completely buffered
+    // string back to Quill.
+    //
+    template <quill::LogLevel L>
+    struct stream_accumulator
+    {
+      quill::SourceLocation l_;
+      std::ostringstream    s_;
+      bool                  a_ {true};
+
+      stream_accumulator (quill::SourceLocation l)
+        : l_ (l) {}
+
+      // Notice the move constructor and the 'a_' (active) flag.
+      //
+      // As the compiler passes this temporary object down the operator chain,
+      // it might move it, so we must clear the active flag on the moved-from
+      // object, otherwise both the old and new objects will attempt to flush
+      // the same log message when they are respectively destroyed.
+      //
+      stream_accumulator (stream_accumulator&& o) noexcept
+        : l_ (o.l_), s_ (std::move (o.s_)), a_ (o.a_)
+      {
+        o.a_ = false;
+      }
+
+      ~stream_accumulator ()
+      {
+        if constexpr (L >= min_level)
+        {
+          if (a_)
+          {
+            quill::Logger* q (logger ());
+
+            if (q != nullptr && q->should_log_statement (L))
+            {
+              std::string s (s_.str ());
+              if (!s.empty ())
+                quill::log (q, "", L, "{}", l_, s);
+            }
+          }
+        }
+      }
+
+      template <typename T>
+      stream_accumulator&
+      operator<< (T&& t)
+      {
+        if constexpr (L >= min_level)
+          s_ << std::forward<T> (t);
+        return *this;
+      }
+
+      stream_accumulator&
+      operator<< (std::ostream& (*f)(std::ostream&))
+      {
+        if constexpr (L >= min_level)
+          f (s_);
+        return *this;
+      }
+    };
+
+    template <quill::LogLevel L>
+    struct severity
+    {
+      stream_accumulator<L>
+      operator<< (detail::first_arg<L> a) const
+      {
+        stream_accumulator<L> r (a.l_);
+        a.f_ (r, a.p_);
+        return r;
+      }
+    };
+
+    inline constexpr severity<quill::LogLevel::TraceL3>  trace_l3 {};
+    inline constexpr severity<quill::LogLevel::TraceL2>  trace_l2 {};
+    inline constexpr severity<quill::LogLevel::TraceL1>  trace_l1 {};
+    inline constexpr severity<quill::LogLevel::Debug>    debug {};
+    inline constexpr severity<quill::LogLevel::Info>     info {};
+    inline constexpr severity<quill::LogLevel::Notice>   notice {};
+    inline constexpr severity<quill::LogLevel::Warning>  warning {};
+    inline constexpr severity<quill::LogLevel::Error>    error {};
+    inline constexpr severity<quill::LogLevel::Critical> critical {};
+
     struct rate_limiter
     {
-      using clock = std::chrono::steady_clock;
+      using clock      = std::chrono::steady_clock;
       using time_point = clock::time_point;
-      using duration = clock::duration;
+      using duration   = clock::duration;
+
+      duration   i_; // interval
+      time_point l_; // last
 
       explicit
       rate_limiter (duration d) noexcept
-        : interval_ (d), last_ (time_point::min ()) {}
+        : i_ (d), l_ (time_point::min ()) {}
 
       bool
-      operator () () noexcept
+      operator() () noexcept
       {
-        time_point now (clock::now ());
+        time_point n (clock::now ());
 
-        if (last_ == time_point::min () || now - last_ >= interval_)
-          return last_ = now, true;
+        if (l_ == time_point::min () || n - l_ >= i_)
+          return l_ = n, true;
 
         return false;
       }
-
-      duration interval_;
-      time_point last_;
-    };
-
-    // Repeated-message suppressor.
-    //
-    // Returns true only when the format string pointer changes from the
-    // previous call.
-    //
-    struct deduplicate
-    {
-      bool
-      operator () (char const* fmt) noexcept
-      {
-        if (fmt == last_fmt)
-          return false;
-
-        last_fmt = fmt;
-        return true;
-      }
-
-      char const* last_fmt = nullptr;
     };
   }
 }

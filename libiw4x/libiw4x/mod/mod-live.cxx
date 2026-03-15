@@ -13,9 +13,6 @@
 #include <libiw4x/logger.hxx>
 #include <libiw4x/scheduler.hxx>
 
-using namespace iw4x::log;
-using C = categories::iw4x;
-
 namespace iw4x
 {
   namespace mod
@@ -68,7 +65,7 @@ namespace iw4x
           }
           catch (const std::exception& e)
           {
-            error {C {}, "unable to fetch playlists: {}", e.what ()};
+            log::error << "unable to fetch playlists: " << e.what ();
           }
 
           co_return;
