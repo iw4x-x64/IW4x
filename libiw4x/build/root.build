@@ -2,10 +2,6 @@ cxx.std = latest
 
 using cxx
 
-# In MinGW case we need to explicitly load the bin.def module.
-#
-# https://build2.org/build2/doc/build2-build-system-manual.xhtml#cc-auto-symexport
-#
 if ($cxx.target.system == 'mingw32')
   using bin.def
 
@@ -13,22 +9,19 @@ hxx{*}: extension = hxx
 ixx{*}: extension = ixx
 txx{*}: extension = txx
 cxx{*}: extension = cxx
+def{*}: extension = def
 
-# Notice that when we bypass the monolithic windows.h and include specific
-# headers (like sysinfoapi.h or memoryapi.h) directly, we miss out on the
-# target architecture macros that windows.h normally sets up for us. That
-# is, winnt.h expects _AMD64_ to be defined and will fail with a "No Target
-# Architecture" error if it isn't.
-#
-# To avoid pulling in the entirety of windows.h just for this macro, and
-# since we only target x64 here anyway, we simply define _AMD64_ ourselves
-# to keep winnt.h happy.
-#
 if ($cxx.target.system == 'win32-msvc')
-  cxx.poptions += "-D_AMD64_"
+  cxx.poptions += -D_AMD64_
+
+if ($cxx.target.system == 'win32-msvc')
+  cxx.poptions += -DNOMINMAX
 
 if ($cxx.target.system == 'win32-msvc')
   cxx.poptions += -D_CRT_SECURE_NO_WARNINGS -D_SCL_SECURE_NO_WARNINGS
+
+if ($cxx.target.system == 'win32-msvc')
+  cxx.poptions += -DWINVER=0x0A00 -D_WIN32_WINNT=0x0A00
 
 if ($cxx.target.system == 'win32-msvc')
   cxx.coptions += /wd4251 /wd4275 /wd4800
@@ -37,3 +30,4 @@ if ($cxx.target.system == 'win32-msvc')
 # builds.
 #
 config [bool] config.libiw4x.develop ?= false
+develop = $config.libiw4x.develop # shorthand
