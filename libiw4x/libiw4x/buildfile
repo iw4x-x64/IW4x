@@ -1,16 +1,506 @@
 intf_libs = # Interface dependencies.
 impl_libs = # Implementation dependencies.
 
-import intf_libs += libzydis%lib{zydis}
-import intf_libs += libquill%lib{quill}
 import intf_libs += libboost-asio%lib{boost_asio}
 
-lib{iw4x}: {hxx ixx txx cxx}{** -version} \
-           {hxx            }{    version} \
-           {def            }{**         } \
+import intf_libs += libquill%lib{quill}
+import intf_libs += libzydis%lib{zydis}
+
+lib{iw4x}: {hxx ixx txx cxx}{** -{version utility-*installed}} \
+           {hxx            }{     version                    } \
+           {def            }{**                              } \
            $impl_libs $intf_libs
 
+# Link the appropriate utility object file depending on the build operation.
+#
+# If we are building for installation, we link the installed object file which
+# contains the resolved absolute or relative installation paths. Otherwise, we
+# link the uninstalled object file which maps data paths directly to the local
+# source tree.
+#
+lib{iw4x}: cxx{utility-installed}:   for_install = true
+lib{iw4x}: cxx{utility-uninstalled}: for_install = false
+
+# Note that while the -installed object file should only be linked when we are
+# installing, it will be compiled even in the uninstalled case.
+#
+
+{obja objs}{utility-uninstalled}: \
+  cxx.poptions += \
+    -DLIBIW4X_INSTALL_ROOT=\"$regex.replace( \
+      $src_root, '\\', '\\\\')\"
+
+{obja objs}{utility-uninstalled}: \
+  cxx.poptions += \
+    -DLIBIW4X_INSTALL_DATA_ROOT=\"$regex.replace( \
+      $src_root, '\\', '\\\\')\"
+
+{obja objs}{utility-uninstalled}: \
+  cxx.poptions += \
+    -DLIBIW4X_INSTALL_EXEC_ROOT=\"$regex.replace( \
+      $out_root, '\\', '\\\\')\"
+
+{obja objs}{utility-uninstalled}: \
+  cxx.poptions += \
+    -DLIBIW4X_INSTALL_BIN=\"$regex.replace( \
+      $out_root/bin, '\\', '\\\\')\"
+
+{obja objs}{utility-uninstalled}: \
+  cxx.poptions += \
+    -DLIBIW4X_INSTALL_SBIN=\"$regex.replace( \
+      $out_root/sbin, '\\', '\\\\')\"
+
+{obja objs}{utility-uninstalled}: \
+  cxx.poptions += \
+    -DLIBIW4X_INSTALL_LIB=\"$regex.replace( \
+      $out_root/lib, '\\', '\\\\')\"
+
+{obja objs}{utility-uninstalled}: \
+  cxx.poptions += \
+    -DLIBIW4X_INSTALL_LIBEXEC=\"$regex.replace( \
+      $out_root/libexec, '\\', '\\\\')\"
+
+{obja objs}{utility-uninstalled}: \
+  cxx.poptions += \
+    -DLIBIW4X_INSTALL_PKGCONFIG=\"$regex.replace( \
+      $out_root/pkgconfig, '\\', '\\\\')\"
+
+{obja objs}{utility-uninstalled}: \
+  cxx.poptions += \
+    -DLIBIW4X_INSTALL_ETC=\"$regex.replace( \
+      $src_root/etc, '\\', '\\\\')\"
+
+{obja objs}{utility-uninstalled}: \
+  cxx.poptions += \
+    -DLIBIW4X_INSTALL_INCLUDE=\"$regex.replace( \
+      $src_root/include, '\\', '\\\\')\"
+
+{obja objs}{utility-uninstalled}: \
+  cxx.poptions += \
+    -DLIBIW4X_INSTALL_INCLUDE_ARCH=\"$regex.replace( \
+      $out_root/include, '\\', '\\\\')\"
+
+{obja objs}{utility-uninstalled}: \
+  cxx.poptions += \
+    -DLIBIW4X_INSTALL_SHARE=\"$regex.replace( \
+      $src_root/share, '\\', '\\\\')\"
+
+{obja objs}{utility-uninstalled}: \
+  cxx.poptions += \
+    -DLIBIW4X_INSTALL_DATA=\"$regex.replace( \
+      $src_root/data, '\\', '\\\\')\"
+
+{obja objs}{utility-uninstalled}: \
+  cxx.poptions += \
+    -DLIBIW4X_INSTALL_BUILDFILE=\"$regex.replace( \
+      $src_root/buildfile, '\\', '\\\\')\"
+
+{obja objs}{utility-uninstalled}: \
+  cxx.poptions += \
+    -DLIBIW4X_INSTALL_DOC=\"$regex.replace( \
+      $src_root/doc, '\\', '\\\\')\"
+
+{obja objs}{utility-uninstalled}: \
+  cxx.poptions += \
+    -DLIBIW4X_INSTALL_LEGAL=\"$regex.replace( \
+      $src_root/legal, '\\', '\\\\')\"
+
+{obja objs}{utility-uninstalled}: \
+  cxx.poptions += \
+    -DLIBIW4X_INSTALL_MAN=\"$regex.replace( \
+      $src_root/man, '\\', '\\\\')\"
+
+ifn! $install.root
+{
+  {obja objs}{utility-installed}: \
+    cxx.poptions += \
+      -DLIBIW4X_INSTALL_ROOT=\"$regex.replace( \
+        $install.resolve( \
+          $install.root, \
+          $install.relocatable ? $install.bin : [dir_path]), \
+        '\\', '\\\\')\"
+
+  {obja objs}{utility-installed}: \
+    cxx.poptions += \
+      -DLIBIW4X_INSTALL_DATA_ROOT=\"$regex.replace( \
+        $install.resolve( \
+          $install.data_root, \
+          $install.relocatable ? $install.bin : [dir_path]), \
+        '\\', '\\\\')\"
+
+  {obja objs}{utility-installed}: \
+    cxx.poptions += \
+      -DLIBIW4X_INSTALL_EXEC_ROOT=\"$regex.replace( \
+        $install.resolve( \
+          $install.exec_root, \
+          $install.relocatable ? $install.bin : [dir_path]), \
+        '\\', '\\\\')\"
+
+  {obja objs}{utility-installed}: \
+    cxx.poptions += \
+      -DLIBIW4X_INSTALL_BIN=\"$regex.replace( \
+        $install.resolve( \
+          $install.bin, \
+          $install.relocatable ? $install.bin : [dir_path]), \
+        '\\', '\\\\')\"
+
+  {obja objs}{utility-installed}: \
+    cxx.poptions += \
+      -DLIBIW4X_INSTALL_SBIN=\"$regex.replace( \
+        $install.resolve( \
+          $install.sbin, \
+          $install.relocatable ? $install.bin : [dir_path]), \
+        '\\', '\\\\')\"
+
+  {obja objs}{utility-installed}: \
+    cxx.poptions += \
+      -DLIBIW4X_INSTALL_LIB=\"$regex.replace( \
+        $install.resolve( \
+          $install.lib, \
+          $install.relocatable ? $install.bin : [dir_path]), \
+        '\\', '\\\\')\"
+
+  {obja objs}{utility-installed}: \
+    cxx.poptions += \
+      -DLIBIW4X_INSTALL_LIBEXEC=\"$regex.replace( \
+        $install.resolve( \
+          $install.libexec, \
+          $install.relocatable ? $install.bin : [dir_path]), \
+        '\\', '\\\\')\"
+
+  {obja objs}{utility-installed}: \
+    cxx.poptions += \
+      -DLIBIW4X_INSTALL_PKGCONFIG=\"$regex.replace( \
+        $install.resolve( \
+          $install.pkgconfig, \
+          $install.relocatable ? $install.bin : [dir_path]), \
+        '\\', '\\\\')\"
+
+  {obja objs}{utility-installed}: \
+    cxx.poptions += \
+      -DLIBIW4X_INSTALL_ETC=\"$regex.replace( \
+        $install.resolve( \
+          $install.etc, \
+          $install.relocatable ? $install.bin : [dir_path]), \
+        '\\', '\\\\')\"
+
+  {obja objs}{utility-installed}: \
+    cxx.poptions += \
+      -DLIBIW4X_INSTALL_INCLUDE=\"$regex.replace( \
+        $install.resolve( \
+          $install.include, \
+          $install.relocatable ? $install.bin : [dir_path]), \
+        '\\', '\\\\')\"
+
+  {obja objs}{utility-installed}: \
+    cxx.poptions += \
+      -DLIBIW4X_INSTALL_INCLUDE_ARCH=\"$regex.replace( \
+        $install.resolve( \
+          $install.include_arch, \
+          $install.relocatable ? $install.bin : [dir_path]), \
+        '\\', '\\\\')\"
+
+  {obja objs}{utility-installed}: \
+    cxx.poptions += \
+      -DLIBIW4X_INSTALL_SHARE=\"$regex.replace( \
+        $install.resolve( \
+          $install.share, \
+          $install.relocatable ? $install.bin : [dir_path]), \
+        '\\', '\\\\')\"
+
+  {obja objs}{utility-installed}: \
+    cxx.poptions += \
+      -DLIBIW4X_INSTALL_DATA=\"$regex.replace( \
+        $install.resolve( \
+          $install.data, \
+          $install.relocatable ? $install.bin : [dir_path]), \
+        '\\', '\\\\')\"
+
+  {obja objs}{utility-installed}: \
+    cxx.poptions += \
+      -DLIBIW4X_INSTALL_BUILDFILE=\"$regex.replace( \
+        $install.resolve( \
+          $install.buildfile, \
+          $install.relocatable ? $install.bin : [dir_path]), \
+        '\\', '\\\\')\"
+
+  {obja objs}{utility-installed}: \
+    cxx.poptions += \
+      -DLIBIW4X_INSTALL_DOC=\"$regex.replace( \
+        $install.resolve( \
+          $install.doc, \
+          $install.relocatable ? $install.bin : [dir_path]), \
+        '\\', '\\\\')\"
+
+  {obja objs}{utility-installed}: \
+    cxx.poptions += \
+      -DLIBIW4X_INSTALL_LEGAL=\"$regex.replace( \
+        $install.resolve( \
+          $install.legal, \
+          $install.relocatable ? $install.bin : [dir_path]), \
+        '\\', '\\\\')\"
+
+  {obja objs}{utility-installed}: \
+    cxx.poptions += \
+      -DLIBIW4X_INSTALL_MAN=\"$regex.replace( \
+        $install.resolve( \
+          $install.man, \
+          $install.relocatable ? $install.bin : [dir_path]), \
+        '\\', '\\\\')\"
+
+  # Handle relocatable installations.
+  #
+  # If relocatable, the library might be moved post-installation. We provide
+  # the base install directories and the relative paths from the library back
+  # to each directory.
+  #
+  if $install.relocatable
+  {
+    {obja objs}{utility-installed}: \
+      cxx.poptions += \
+        -DLIBIW4X_INSTALL_ROOT=\"$regex.replace( \
+          $install.root, '\\', '\\\\')\"
+
+    {obja objs}{utility-installed}: \
+      cxx.poptions += \
+        -DLIBIW4X_INSTALL_ROOT_RELATIVE=\"$regex.replace( \
+          $path.relative( \
+            $install.root, \
+            $install.resolve($install.bin, [dir_path])), \
+          '\\', '\\\\')\"
+
+    {obja objs}{utility-installed}: \
+      cxx.poptions += \
+        -DLIBIW4X_INSTALL_DATA_ROOT=\"$regex.replace( \
+          $install.data_root, '\\', '\\\\')\"
+
+    {obja objs}{utility-installed}: \
+      cxx.poptions += \
+        -DLIBIW4X_INSTALL_DATA_ROOT_RELATIVE=\"$regex.replace( \
+          $path.relative( \
+            $install.data_root, \
+            $install.resolve($install.bin, [dir_path])), \
+          '\\', '\\\\')\"
+
+    {obja objs}{utility-installed}: \
+      cxx.poptions += \
+        -DLIBIW4X_INSTALL_EXEC_ROOT=\"$regex.replace( \
+          $install.exec_root, '\\', '\\\\')\"
+
+    {obja objs}{utility-installed}: \
+      cxx.poptions += \
+        -DLIBIW4X_INSTALL_EXEC_ROOT_RELATIVE=\"$regex.replace( \
+          $path.relative( \
+            $install.exec_root, \
+            $install.resolve($install.bin, [dir_path])), \
+          '\\', '\\\\')\"
+
+    {obja objs}{utility-installed}: \
+      cxx.poptions += \
+        -DLIBIW4X_INSTALL_BIN=\"$regex.replace( \
+          $install.bin, '\\', '\\\\')\"
+
+    {obja objs}{utility-installed}: \
+      cxx.poptions += \
+        -DLIBIW4X_INSTALL_BIN_RELATIVE=\"$regex.replace( \
+          $path.relative( \
+            $install.bin, \
+            $install.resolve($install.bin, [dir_path])), \
+          '\\', '\\\\')\"
+
+    {obja objs}{utility-installed}: \
+      cxx.poptions += \
+        -DLIBIW4X_INSTALL_SBIN=\"$regex.replace( \
+          $install.sbin, '\\', '\\\\')\"
+
+    {obja objs}{utility-installed}: \
+      cxx.poptions += \
+        -DLIBIW4X_INSTALL_SBIN_RELATIVE=\"$regex.replace( \
+          $path.relative( \
+            $install.sbin, \
+            $install.resolve($install.bin, [dir_path])), \
+          '\\', '\\\\')\"
+
+    {obja objs}{utility-installed}: \
+      cxx.poptions += \
+        -DLIBIW4X_INSTALL_LIB=\"$regex.replace( \
+          $install.lib, '\\', '\\\\')\"
+
+    {obja objs}{utility-installed}: \
+      cxx.poptions += \
+        -DLIBIW4X_INSTALL_LIB_RELATIVE=\"$regex.replace( \
+          $path.relative( \
+            $install.lib, \
+            $install.resolve($install.bin, [dir_path])), \
+          '\\', '\\\\')\"
+
+    {obja objs}{utility-installed}: \
+      cxx.poptions += \
+        -DLIBIW4X_INSTALL_LIBEXEC=\"$regex.replace( \
+          $install.libexec, '\\', '\\\\')\"
+
+    {obja objs}{utility-installed}: \
+      cxx.poptions += \
+        -DLIBIW4X_INSTALL_LIBEXEC_RELATIVE=\"$regex.replace( \
+          $path.relative( \
+            $install.libexec, \
+            $install.resolve($install.bin, [dir_path])), \
+          '\\', '\\\\')\"
+
+    {obja objs}{utility-installed}: \
+      cxx.poptions += \
+        -DLIBIW4X_INSTALL_PKGCONFIG=\"$regex.replace( \
+          $install.pkgconfig, '\\', '\\\\')\"
+
+    {obja objs}{utility-installed}: \
+      cxx.poptions += \
+        -DLIBIW4X_INSTALL_PKGCONFIG_RELATIVE=\"$regex.replace( \
+          $path.relative( \
+            $install.pkgconfig, \
+            $install.resolve($install.bin, [dir_path])), \
+          '\\', '\\\\')\"
+
+    {obja objs}{utility-installed}: \
+      cxx.poptions += \
+        -DLIBIW4X_INSTALL_ETC=\"$regex.replace( \
+          $install.etc, '\\', '\\\\')\"
+
+    {obja objs}{utility-installed}: \
+      cxx.poptions += \
+        -DLIBIW4X_INSTALL_ETC_RELATIVE=\"$regex.replace( \
+          $path.relative( \
+            $install.etc, \
+            $install.resolve($install.bin, [dir_path])), \
+          '\\', '\\\\')\"
+
+    {obja objs}{utility-installed}: \
+      cxx.poptions += \
+        -DLIBIW4X_INSTALL_INCLUDE=\"$regex.replace( \
+          $install.include, '\\', '\\\\')\"
+
+    {obja objs}{utility-installed}: \
+      cxx.poptions += \
+        -DLIBIW4X_INSTALL_INCLUDE_RELATIVE=\"$regex.replace( \
+          $path.relative( \
+            $install.include, \
+            $install.resolve($install.bin, [dir_path])), \
+          '\\', '\\\\')\"
+
+    {obja objs}{utility-installed}: \
+      cxx.poptions += \
+        -DLIBIW4X_INSTALL_INCLUDE_ARCH=\"$regex.replace( \
+          $install.include_arch, '\\', '\\\\')\"
+
+    {obja objs}{utility-installed}: \
+      cxx.poptions += \
+        -DLIBIW4X_INSTALL_INCLUDE_ARCH_RELATIVE=\"$regex.replace( \
+          $path.relative( \
+            $install.include_arch, \
+            $install.resolve($install.bin, [dir_path])), \
+          '\\', '\\\\')\"
+
+    {obja objs}{utility-installed}: \
+      cxx.poptions += \
+        -DLIBIW4X_INSTALL_SHARE=\"$regex.replace( \
+          $install.share, '\\', '\\\\')\"
+
+    {obja objs}{utility-installed}: \
+      cxx.poptions += \
+        -DLIBIW4X_INSTALL_SHARE_RELATIVE=\"$regex.replace( \
+          $path.relative( \
+            $install.share, \
+            $install.resolve($install.bin, [dir_path])), \
+          '\\', '\\\\')\"
+
+    {obja objs}{utility-installed}: \
+      cxx.poptions += \
+        -DLIBIW4X_INSTALL_DATA=\"$regex.replace( \
+          $install.data, '\\', '\\\\')\"
+
+    {obja objs}{utility-installed}: \
+      cxx.poptions += \
+        -DLIBIW4X_INSTALL_DATA_RELATIVE=\"$regex.replace( \
+          $path.relative( \
+            $install.data, \
+            $install.resolve($install.bin, [dir_path])), \
+          '\\', '\\\\')\"
+
+    {obja objs}{utility-installed}: \
+      cxx.poptions += \
+        -DLIBIW4X_INSTALL_BUILDFILE=\"$regex.replace( \
+          $install.buildfile, '\\', '\\\\')\"
+
+    {obja objs}{utility-installed}: \
+      cxx.poptions += \
+        -DLIBIW4X_INSTALL_BUILDFILE_RELATIVE=\"$regex.replace( \
+          $path.relative( \
+            $install.buildfile, \
+            $install.resolve($install.bin, [dir_path])), \
+          '\\', '\\\\')\"
+
+    {obja objs}{utility-installed}: \
+      cxx.poptions += \
+        -DLIBIW4X_INSTALL_DOC=\"$regex.replace( \
+          $install.doc, '\\', '\\\\')\"
+
+    {obja objs}{utility-installed}: \
+      cxx.poptions += \
+        -DLIBIW4X_INSTALL_DOC_RELATIVE=\"$regex.replace( \
+          $path.relative( \
+            $install.doc, \
+            $install.resolve($install.bin, [dir_path])), \
+          '\\', '\\\\')\"
+
+    {obja objs}{utility-installed}: \
+      cxx.poptions += \
+        -DLIBIW4X_INSTALL_LEGAL=\"$regex.replace( \
+          $install.legal, '\\', '\\\\')\"
+
+    {obja objs}{utility-installed}: \
+      cxx.poptions += \
+        -DLIBIW4X_INSTALL_LEGAL_RELATIVE=\"$regex.replace( \
+          $path.relative( \
+            $install.legal, \
+            $install.resolve($install.bin, [dir_path])), \
+          '\\', '\\\\')\"
+
+    {obja objs}{utility-installed}: \
+      cxx.poptions += \
+        -DLIBIW4X_INSTALL_MAN=\"$regex.replace( \
+          $install.man, '\\', '\\\\')\"
+
+    {obja objs}{utility-installed}: \
+      cxx.poptions += \
+        -DLIBIW4X_INSTALL_MAN_RELATIVE=\"$regex.replace( \
+          $path.relative( \
+            $install.man, \
+            $install.resolve($install.bin, [dir_path])), \
+          '\\', '\\\\')\"
+  }
+}
+
+# Version header generation.
+#
 hxx{version}: in{version} $src_root/manifest
+hxx{version}:
+{
+  # Distribute the generated header. We want the distribution archive to
+  # be self-sufficient and not require the user to regenerate it.
+  #
+  dist = true
+
+  # Only clean the generated header if we are building out-of-source. For
+  # an in-source build, this file is tracked by version control and must
+  # be left untouched.
+  #
+  clean = ($src_root != $out_root)
+
+  # Since we keep the generated code in the repository, automatically copy
+  # it back to the source directory in case we are building in a forwarded
+  # configuration.
+  #
+  backlink = overwrite
+}
 
 # Build options.
 #
