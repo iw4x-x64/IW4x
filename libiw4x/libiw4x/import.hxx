@@ -4678,4 +4678,7 @@ namespace iw4x
 
   using  Live_ThrowError_t = void (*) (int, const char *);
   inline Live_ThrowError_t Live_ThrowError = reinterpret_cast<Live_ThrowError_t> (0x1402A7600);
+
+  using  bdLogMessage_t = void (*) (int, const char*, const char*, const char*, const char*, int, const char*, ...);
+  inline bdLogMessage_t bdLogMessage = reinterpret_cast<bdLogMessage_t> (0x140331F60);
 }
