@@ -147,39 +147,39 @@ namespace iw4x
         }
 
         // By default, the process inherits its working directory from whatever
-        // environment or launcher invoked it, which may vary across setups and
-        // lead to unpredictable relative path resolution.
+        // environment invoked it, which may vary across setups and lead to
+        // unpredictable relative path resolution.
         //
-        // The strategy here is to explicitly realign the working directory to
-        // the executable's own location. That is, we effectively makes all
-        // relative file operations resolve against the executable's directory
-        // when the process is hosted or started indirectly.
+        // The strategy here is to explicitly realign the process's working
+        // directory to this DLL's location. Because the current working
+        // directory is a process-wide state, this effectively makes all
+        // relative file operations resolve against the DLL's directory even
+        // when the DLL is hosted or started indirectly by a separate launcher.
         //
-        // Note that we don't pass NULL to GetModuleFileName() as it incorrectly
-        // returns the path of the process executable. That is, if we are
-        // running under a generic launcher or wrapper, that would be the
-        // launcher's path, not ours, and any relative path resolution based on
-        // it would be incorrect (i.e., we would look for configuration files
-        // next to the launcher).
+        // Note that we don't pass NULL to GetModuleFileNameW() as it
+        // returns the path of the host process executable. If we are running
+        // under a generic launcher, that would be the launcher's path, not
+        // ours, and any relative path resolution based on it would be incorrect
+        // (i.e., we would look for configuration files next to the launcher).
         //
         // Instead, we use the __ImageBase MSVC linker pseudo-variable. Its
-        // address coincides with the module's base address (HMODULE) which in
-        // turns can be used to query IW4x path regardless of who the hosting
-        // process is.
+        // address coincides with this specific module's base address (HMODULE),
+        // which in turn can be used to query the DLL's path regardless of who
+        // the hosting process is.
         //
-        char p [MAX_PATH];
-        if (GetModuleFileName (reinterpret_cast<HMODULE> (&__ImageBase),
-                               p,
-                               MAX_PATH))
+        wchar_t p [MAX_PATH];
+        if (GetModuleFileNameW (reinterpret_cast<HMODULE> (&__ImageBase),
+                                p,
+                                MAX_PATH))
         {
-          string s (p);
+          wstring s (p);
           size_t i (s.rfind ('\\'));
 
-          if (i == string::npos ||
-              !SetCurrentDirectory (s.substr (0, i).c_str ()))
+          if (i == wstring::npos ||
+              !SetCurrentDirectoryW (s.substr (0, i).c_str ()))
           {
             MessageBox (nullptr,
-                        "unable to set module current directory",
+                        "unable to set process current directory",
                         "error",
                         MB_ICONERROR);
             exit (1);
