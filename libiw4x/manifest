@@ -9,7 +9,6 @@ depends: * bpkg >= 0.17.0
 depends: libzydis
 depends: libquill
 depends: libboost-asio
-depends: libnp
 
 # CI configuration.
 #
