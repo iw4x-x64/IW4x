@@ -4679,6 +4679,9 @@ namespace iw4x
   using  Live_ThrowError_t = void (*) (int, const char *);
   inline Live_ThrowError_t Live_ThrowError = reinterpret_cast<Live_ThrowError_t> (0x1402A7600);
 
+  using Live_Frame_t = void (*) (unsigned int);
+  inline Live_Frame_t Live_Frame = reinterpret_cast<Live_Frame_t> (0x1402A6040);
+
   using  bdLogMessage_t = void (*) (int, const char*, const char*, const char*, const char*, int, const char*, ...);
   inline bdLogMessage_t bdLogMessage = reinterpret_cast<bdLogMessage_t> (0x140331F60);
 
@@ -4690,4 +4693,10 @@ namespace iw4x
 
   using  DW_SendPush_t = void (*) ();
   inline DW_SendPush_t DW_SendPush = reinterpret_cast<DW_SendPush_t> (0x14012ED70);
+
+  using  LiveStorage_DownloadStatsFromDir_t = void (*) (int);
+  inline LiveStorage_DownloadStatsFromDir_t LiveStorage_DownloadStatsFromDir = reinterpret_cast<LiveStorage_DownloadStatsFromDir_t> (0x140133F00);
+
+  using ClientConnect_t = void * (*) (int, __int16);
+  inline ClientConnect_t ClientConnect = reinterpret_cast<ClientConnect_t> (0x14019A470);
 }
