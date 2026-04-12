@@ -38,12 +38,12 @@ namespace iw4x
       startTask_t startTask (reinterpret_cast<startTask_t> (0x140322CC0));
 
       [[gnu::ms_abi]] int32_t
-      start_task (void*   connection,
-                  void**  task_out,
-                  uint8_t service_id,
-                  uint8_t sub_func_id,
-                  void*   payload,
-                  float   timeout)
+      lobby_connection_start_task (void*   connection,
+                                   void**  task_out,
+                                   uint8_t service_id,
+                                   uint8_t sub_func_id,
+                                   void*   payload,
+                                   float   timeout)
       {
         auto task (
           remote_task_manager::start_task (service_id, sub_func_id, payload));
@@ -62,7 +62,7 @@ namespace iw4x
     {
       // Detour the original function.
       //
-      detour (startTask, &start_task);
+      detour (startTask, &lobby_connection_start_task);
     }
 
     void remote_task_manager::
