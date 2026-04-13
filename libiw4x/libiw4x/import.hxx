@@ -4679,7 +4679,7 @@ namespace iw4x
   using  Live_ThrowError_t = void (*) (int, const char *);
   inline Live_ThrowError_t Live_ThrowError = reinterpret_cast<Live_ThrowError_t> (0x1402A7600);
 
-  using Live_Frame_t = void (*) (unsigned int);
+  using  Live_Frame_t = void (*) (unsigned int);
   inline Live_Frame_t Live_Frame = reinterpret_cast<Live_Frame_t> (0x1402A6040);
 
   using  bdLogMessage_t = void (*) (int, const char*, const char*, const char*, const char*, int, const char*, ...);
@@ -4697,6 +4697,30 @@ namespace iw4x
   using  LiveStorage_DownloadStatsFromDir_t = void (*) (int);
   inline LiveStorage_DownloadStatsFromDir_t LiveStorage_DownloadStatsFromDir = reinterpret_cast<LiveStorage_DownloadStatsFromDir_t> (0x140133F00);
 
-  using ClientConnect_t = void * (*) (int, __int16);
+  using  ClientConnect_t = void * (*) (int, __int16);
   inline ClientConnect_t ClientConnect = reinterpret_cast<ClientConnect_t> (0x14019A470);
+
+  using  CL_ConnectFromParty_t = void (*) (int controller_index, xsession_information* session, network_address address, int, int, const char* mapname, const char* gametype);
+  inline CL_ConnectFromParty_t CL_ConnectFromParty = reinterpret_cast<CL_ConnectFromParty_t> (0x1400F5220);
+
+  using  CL_DispatchConnectionlessPacket_t = void (*) (int local_client_num, network_address* from, message* msg);
+  inline CL_DispatchConnectionlessPacket_t CL_DispatchConnectionlessPacket = reinterpret_cast<CL_DispatchConnectionlessPacket_t> (0x1400F5FE0);
+
+  using  NET_OutOfBandPrint_t = void (*) (int sock, network_address* address, const char* format, ...);
+  inline NET_OutOfBandPrint_t NET_OutOfBandPrint = reinterpret_cast<NET_OutOfBandPrint_t> (0x140209FC0);
+
+  using  Dvar_FindVar_t = dvar* (*) (const char* name);
+  inline Dvar_FindVar_t Dvar_FindVar = reinterpret_cast<Dvar_FindVar_t> (0x140287170);
+
+  using  Dvar_SetFromStringByName_t = dvar* (*) (const char* name, const char* value);
+  inline Dvar_SetFromStringByName_t Dvar_SetFromStringByName = reinterpret_cast<Dvar_SetFromStringByName_t> (0x140289570);
+
+  using  Live_StartPrivateParty_t = void (*) (int controller_index);
+  inline Live_StartPrivateParty_t Live_StartPrivateParty = reinterpret_cast<Live_StartPrivateParty_t> (0x1400FABC0);
+
+  using  Party_SetState_t = void (*) (void* party, int state);
+  inline Party_SetState_t Party_SetState = reinterpret_cast<Party_SetState_t> (0x140105570);
+
+  using  NET_SendPacket_t = bool (*) (int sock, int length, const char* data, network_address address);
+  inline NET_SendPacket_t NET_SendPacket = reinterpret_cast<NET_SendPacket_t> (0x14020A040);
 }

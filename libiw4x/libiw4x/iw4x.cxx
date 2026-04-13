@@ -11,6 +11,7 @@
 #include <libiw4x/mod/mod-scheduler.hxx>
 #include <libiw4x/mod/mod-ui.hxx>
 #include <libiw4x/mod/mod-demonware.hxx>
+#include <libiw4x/mod/mod-party.hxx>
 
 using namespace std;
 
@@ -260,6 +261,7 @@ namespace iw4x
         mod::scheduler_module ();
         mod::ui_module ();
         mod::demonware_module ();
+        mod::party_module ();
 
         // __scrt_common_main_seh
         //
