@@ -8,10 +8,15 @@ import intf_libs += libzydis%lib{zydis}
 
 # Steamworks SDK
 #
-steam_dir = $src_root/upstream/steamworks_sdk
+steam_dir = $src_root/upstream/steam
+
+# Discord Social SDK
+#
+discord_dir = $src_root/upstream/discord
 
 if ($cxx.target.system == 'mingw32')
-  cxx.libs += $steam_dir/redistributable_bin/win64/steam_api64.lib
+  cxx.libs += $steam_dir/redistributable_bin/win64/steam_api64.lib           \
+              $discord_dir/redistributable_bin/win64/discord_partner_sdk.lib
 
 lib{iw4x}: {hxx ixx txx cxx}{** -{version utility-*installed}} \
            {hxx            }{     version                    } \
@@ -511,7 +516,8 @@ hxx{version}:
 
 # Build options.
 #
-cxx.poptions =+ "-I$out_root" "-I$src_root" "-I$steam_dir/public"
+cxx.poptions =+ "-I$out_root" "-I$src_root" "-I$steam_dir/public"   \
+                                            "-I$discord_dir/public"
 
 if ($config.libiw4x.develop)
   cxx.poptions += "-DLIBIW4X_DEVELOP"
