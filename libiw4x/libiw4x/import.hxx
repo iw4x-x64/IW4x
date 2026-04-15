@@ -4722,4 +4722,25 @@ namespace iw4x
 
   using  NET_SendPacket_t = bool (*) (int sock, int length, const char* data, network_address address);
   inline NET_SendPacket_t NET_SendPacket = reinterpret_cast<NET_SendPacket_t> (0x14020A040);
+
+  using  SV_ConnectionlessPacket_t = void (*) (network_address* from, message* msg);
+  inline SV_ConnectionlessPacket_t SV_ConnectionlessPacket = reinterpret_cast<SV_ConnectionlessPacket_t> (0x140240090);
+
+  using  Dvar_RegisterBool_t = dvar* (*) (const char* name, bool value, unsigned int flags, const char* description);
+  inline Dvar_RegisterBool_t Dvar_RegisterBool = reinterpret_cast<Dvar_RegisterBool_t> (0x140287CE0);
+
+  using  Dvar_RegisterString_t = dvar* (*) (const char* name, const char* value, unsigned int flags, const char* description);
+  inline Dvar_RegisterString_t Dvar_RegisterString = reinterpret_cast<Dvar_RegisterString_t> (0x140288590);
+
+  using  SV_GameSendServerCommand_t = void (*) (int client_num, int cmd_type, const char* text);
+  inline SV_GameSendServerCommand_t SV_GameSendServerCommand = reinterpret_cast<SV_GameSendServerCommand_t> (0x1402369B0);
+
+  using  Sys_SendPacket_t = bool (*) (size_t len, const char *buf, const network_address *a3);
+  inline Sys_SendPacket_t Sys_SendPacket = reinterpret_cast<Sys_SendPacket_t> (0x1402AA1B0);
+
+  // Internal globals
+  //
+  inline void* g_lobby   = reinterpret_cast<void*> (0x140D513A0);
+  inline void* g_party   = reinterpret_cast<void*> (0x140D53740);
+  inline auto* ip_socket = reinterpret_cast<uint64_t*> (0x1467E8490);
 }

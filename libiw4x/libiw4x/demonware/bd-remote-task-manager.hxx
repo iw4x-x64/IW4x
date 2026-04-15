@@ -13,10 +13,11 @@ namespace iw4x
 {
   namespace demonware
   {
-    using service_handler_t = std::function<bool (uint8_t service_id,
-                                                  uint8_t sub_function_id,
-                                                  bit_buffer_reader& request,
-                                                  bit_buffer_writer& reply)>;
+    using service_handler_t =
+      std::move_only_function<bool (uint8_t service_id,
+                                    uint8_t sub_function_id,
+                                    bit_buffer_reader& request,
+                                    bit_buffer_writer& reply)>;
 
     class LIBIW4X_SYMEXPORT remote_task_manager
     {

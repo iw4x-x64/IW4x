@@ -173,6 +173,86 @@ namespace iw4x
         router.vtable = router_vtable;
       }
 
+      using bdSocketRouterConnect_t =
+        bool (__thiscall*) (void* self, void* addr_handle_ref);
+
+      bdSocketRouterConnect_t bdSocketRouterConnect =
+        reinterpret_cast<bdSocketRouterConnect_t> (0x140335340);
+
+      // After a friend connects, DW_SendPush (called every frame) ends up
+      // invoking bdSocketRouter::connect on the real bdSocketRouter embedded
+      // inside bdNetImpl (+0x308).  That triggers NAT trav with an invalid
+      // socket and bogus addresses (2.0.0.0:0), which loops "Failed to send.
+      // Invalid socket?"
+      //
+      bool __thiscall
+      socket_router_connect (void*, void*)
+      {
+        return false;
+      }
+
+      // eek at the first byte of every pending datagram before deciding
+      //   whether to consume it.  STUN packets top two bits
+      //   of the first byte are always 00) belong to bdNet and are passed
+      //   through to the original receiveFrom so NAT traversal continues
+      //   to work.  All other packets (OOB 0xFF… and Netchan game traffic)
+      //   are left in the kernel socket buffer by returning -2 (bd_wouldblock)
+      //   without consuming them.  NET_GetPacket then reads them directly
+      //   via recvfrom(), processes them in the same frame, and feeds them
+      //   to SV_PacketEvent / CL_PacketEvent with correct sequencing.
+      //
+      //
+      using bdSocketReceiveFrom_t =
+        int (__thiscall*) (void* self, void* out_addr,
+                           void* out_buf, int buf_size);
+
+      bdSocketReceiveFrom_t bdSocketReceiveFrom =
+        reinterpret_cast<bdSocketReceiveFrom_t> (0x140371fc0);
+
+      int __thiscall
+      socket_receive_from (void* self, void* out_addr,
+                                 void* out_buf, int buf_size)
+      {
+        // Socket fd is stored at bdSocket + 0x08.
+        //
+        auto fd (*reinterpret_cast<int32_t*> (
+          static_cast<char*> (self) + 0x08));
+
+        if (fd == -1)
+          return -2;
+
+        // Peek at the first byte without consuming the datagram.
+        //
+        unsigned char first_byte = 0;
+        int peeked (recv (static_cast<SOCKET> (static_cast<uint32_t> (fd)),
+                          reinterpret_cast<char*> (&first_byte),
+                          1,
+                          MSG_PEEK));
+
+        if (peeked <= 0)
+        {
+          if (peeked == -1 && WSAGetLastError() == WSAEMSGSIZE)
+            ;
+          else
+            return -2;
+        }
+
+        // STUN packets have their top two bits == 00 (RFC 5389). Pass
+        // them to bdNet so the NAT traversal / IP discovery subsystem
+        // keeps working.
+        //
+        if ((first_byte & 0xC0) == 0x00)
+          return bdSocketReceiveFrom (self, out_addr,
+                                                out_buf, buf_size);
+
+        // Game packet (OOB 0xFF… or Netchan): leave it in the socket
+        // buffer. NET_GetPacket will consume it via recvfrom() in the
+        // same frame and feed it to the engine with correct sequencing.
+        //
+        return -2;
+      }
+
+
       // Stub session object to satisfy the engine's pointer checks.
       //
       // The gate at 0x1401B5A50 absolutely insists that the session pointer is
@@ -312,14 +392,14 @@ namespace iw4x
       session_ptr = session_stub;
       session_context = auth_service::ticket ().user_id;
 
-      // Register the primary logic detours.
-      //
       detour (bdLogMessage, &bd_log_message);
       detour (IWNet_Frame,  &iwnet_frame);
       detour (LiveStorage_FetchPlaylists, &live_storage_fetch_playlists);
       detour (LiveStorage_DownloadStatsFromDir, &live_storage_download_stats_from_dir);
       detour (ClientConnect, &client_connect);
       detour (Live_Frame, live_frame);
+      detour (bdSocketRouterConnect, socket_router_connect);
+      detour (bdSocketReceiveFrom, socket_receive_from);
     }
   }
 }
