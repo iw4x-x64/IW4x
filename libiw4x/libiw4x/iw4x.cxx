@@ -12,6 +12,7 @@
 #include <libiw4x/mod/mod-party.hxx>
 #include <libiw4x/mod/mod-scheduler.hxx>
 #include <libiw4x/mod/mod-ui.hxx>
+#include <libiw4x/mod/mod-oob.hxx>
 
 using namespace std;
 
@@ -266,6 +267,7 @@ namespace iw4x
         mod::ui_module ();
         mod::demonware_module ();
         mod::party_module ();
+        mod::oob_module ();
 
         // __scrt_common_main_seh
         //

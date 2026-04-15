@@ -1,3 +1,5 @@
+import nasm%buildfile{rules}
+
 intf_libs = # Interface dependencies.
 impl_libs = # Implementation dependencies.
 
@@ -21,7 +23,8 @@ if ($cxx.target.system == 'mingw32')
 lib{iw4x}: {hxx ixx txx cxx}{** -{version utility-*installed}} \
            {hxx            }{     version                    } \
            {def            }{**                              } \
-           $impl_libs $intf_libs
+           {asm            }{**                              } \
+           $impl_libs $intf_libs $nasm
 
 # Link the appropriate utility object file depending on the build operation.
 #
