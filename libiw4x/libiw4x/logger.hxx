@@ -1,6 +1,10 @@
 #pragma once
 
+#include <atomic>
 #include <chrono>
+#include <concepts>
+#include <cstddef>
+#include <memory>
 #include <sstream>
 #include <type_traits>
 #include <utility>
@@ -20,10 +24,10 @@ namespace iw4x
     ~logger ();
 
     logger (const logger&) = delete;
-    logger& operator = (const logger&) = delete;
+    logger& operator= (const logger&) = delete;
 
     logger (logger&&) = delete;
-    logger& operator = (logger&&) = delete;
+    logger& operator= (logger&&) = delete;
   };
 
   extern class logger* logger;
@@ -32,10 +36,10 @@ namespace iw4x
   {
     namespace detail
     {
-      inline quill::Logger*&
+      inline std::atomic<quill::Logger*>&
       logger () noexcept
       {
-        static quill::Logger* p (nullptr);
+        static std::atomic<quill::Logger*> p (nullptr);
         return p;
       }
     }
@@ -43,7 +47,7 @@ namespace iw4x
     inline quill::Logger*
     logger () noexcept
     {
-      return detail::logger ();
+      return detail::logger ().load (std::memory_order_acquire);
     }
 
     // Minimum severity level.
@@ -55,7 +59,7 @@ namespace iw4x
     //
     // Note that development builds open the full trace range.
     //
-  #if LIBIW4X_DEVELOP
+#if LIBIW4X_DEVELOP
     inline constexpr quill::LogLevel
       min_level (quill::LogLevel::TraceL3);
 #else
@@ -63,61 +67,10 @@ namespace iw4x
       min_level (quill::LogLevel::Info);
 #endif
 
-    template <quill::LogLevel L>
-    struct stream_accumulator;
-
-    namespace detail
+    template <typename T, typename S>
+    concept Streamable = requires (S& s, T&& v)
     {
-      template <typename T, quill::LogLevel L>
-      concept StreamableToAccumulator =
-        requires (stream_accumulator<L>& a,
-                  std::remove_reference_t<T> const& t)
-      {
-        {
-          a << t
-        };
-      };
-
-      // Capture the source location for the first operand of operator<<.
-      //
-      // Because C++ prohibits default arguments on overloaded operators, we
-      // cannot inject std::source_location directly into the operator<<
-      // signature. Instead, we capture the call site location during the
-      // implicit conversion of the right-hand operand.
-      //
-      // That is, when evaluating 'error << "foo"', overload resolution selects
-      // an operator<< that accepts this wrapper type. The compiler performs an
-      // implicit conversion of the operand, invoking the wrapper's templated
-      // constructor which specifies std::source_location::current() as a
-      // default argument.
-      //
-      // Note also that the payload is then type-erased via a function pointer
-      // and forwarded to the stream accumulator.
-      //
-      template <quill::LogLevel L>
-      struct first_arg
-      {
-        void const* p_;
-        void (*f_) (stream_accumulator<L>&, void const*);
-        quill::SourceLocation l_;
-
-        first_arg (
-          StreamableToAccumulator<L> auto&& t,
-          quill::SourceLocation l = quill::SourceLocation::current ()) noexcept
-            : p_ (std::addressof (t)),
-              f_ ([] (stream_accumulator<L>& a, void const* p)
-          {
-            a << *static_cast<std::remove_reference_t<decltype(t)> const*> (p);
-          }), l_ (l) {}
-      };
-    }
-
-    template <typename T, typename Stream>
-    concept Streamable = requires (Stream& stream, T&& value)
-    {
-      {
-        stream << std::forward<T> (value)
-      };
+      { s << std::forward<T> (v) } -> std::convertible_to<std::ostream&>;
     };
 
     // Accumulate stream output and flush to the logging backend upon
@@ -142,23 +95,28 @@ namespace iw4x
     {
       quill::SourceLocation l_;
       std::ostringstream    s_;
-      bool                  a_ {true};
+      bool                  a_;
 
       stream_accumulator (quill::SourceLocation l)
-        : l_ (l) {}
+        : l_ (l),
+          a_ (true) {}
 
       // Notice the move constructor and the 'a_' (active) flag.
       //
       // As the compiler passes this temporary object down the operator chain,
-      // it might move it, so we must clear the active flag on the moved-from
+      // it might move it. So we must clear the active flag on the moved-from
       // object, otherwise both the old and new objects will attempt to flush
       // the same log message when they are respectively destroyed.
       //
       stream_accumulator (stream_accumulator&& o) noexcept
-        : l_ (o.l_), s_ (std::move (o.s_)), a_ (o.a_)
+        : l_ (o.l_),
+          s_ (std::move (o.s_)),
+          a_ (o.a_)
       {
         o.a_ = false;
       }
+
+      stream_accumulator& operator= (stream_accumulator&&) = delete;
 
       ~stream_accumulator ()
       {
@@ -171,6 +129,7 @@ namespace iw4x
             if (q != nullptr && q->should_log_statement (L))
             {
               std::string s (s_.str ());
+
               if (!s.empty ())
                 quill::log (q, "", L, "{}", l_, s);
             }
@@ -178,22 +137,123 @@ namespace iw4x
         }
       }
 
+      template <typename T>
+      requires Streamable<T, decltype(s_)>
       stream_accumulator&
-      operator << (auto&& t) requires Streamable<decltype(t), decltype(s_)>
+      operator<< (T&& v)
       {
         if constexpr (L >= min_level)
-          s_ << std::forward<decltype(t)> (t);
+          s_ << std::forward<T> (v);
+
         return *this;
       }
 
       stream_accumulator&
-      operator << (std::ostream& (*f)(std::ostream&))
+      operator<< (std::ostream& (*f) (std::ostream&))
       {
         if constexpr (L >= min_level)
           f (s_);
+
+        return *this;
+      }
+
+      template <typename F>
+      requires std::invocable<F, std::ostream&>
+      stream_accumulator&
+      operator<< (F&& f)
+      {
+        if constexpr (L >= min_level)
+          std::forward<F> (f) (s_);
+
         return *this;
       }
     };
+
+    namespace detail
+    {
+      template <typename T, quill::LogLevel L>
+      concept StreamableToAccumulator =
+        requires (stream_accumulator<L>& a,
+                  std::remove_cvref_t<T> const& v)
+      {
+        { a << v } -> std::same_as<stream_accumulator<L>&>;
+      };
+
+      // Capture the source location for the first operand of operator<<.
+      //
+      // Because C++ prohibits default arguments on overloaded operators, we
+      // cannot inject std::source_location directly into the operator<<
+      // signature. Instead, we capture the call site location during the
+      // implicit conversion of the right-hand operand.
+      //
+      // That is, when evaluating 'error << "foo"', overload resolution selects
+      // an operator<< that accepts this wrapper type. The compiler performs an
+      // implicit conversion of the operand, invoking the wrapper's templated
+      // constructor which specifies std::source_location::current () as a
+      // default argument.
+      //
+      // Note also that the payload is then type-erased via a function pointer
+      // and forwarded to the stream accumulator.
+      //
+      template <quill::LogLevel L>
+      struct first_arg
+      {
+        void const* p_;
+        void (*f_) (stream_accumulator<L>&, void const*);
+        void (*d_) (void*);
+        alignas(std::max_align_t) std::byte s_[128];
+        quill::SourceLocation l_;
+
+        template <typename T>
+        requires StreamableToAccumulator<T, L>
+        first_arg (
+          T&& v,
+          quill::SourceLocation l = quill::SourceLocation::current ()) noexcept
+            : d_ (nullptr),
+              l_ (l)
+        {
+          using t = std::remove_cvref_t<T>;
+
+          if constexpr (std::is_lvalue_reference_v<T>)
+          {
+            p_ = std::addressof (v);
+            f_ = [] (stream_accumulator<L>& a, void const* p)
+            {
+              a << *static_cast<t const*> (p);
+            };
+          }
+          else
+          {
+            static_assert (sizeof (t) <= sizeof (s_),
+                           "Type is too large for inline storage in first_arg");
+
+            new (&s_) t (std::forward<T> (v));
+
+            p_ = &s_;
+            f_ = [] (stream_accumulator<L>& a, void const* p)
+            {
+              a << *static_cast<t const*> (p);
+            };
+            d_ = [] (void* p)
+            {
+              std::destroy_at (static_cast<t*> (p));
+            };
+          }
+        }
+
+        ~first_arg ()
+        {
+          if (d_ != nullptr)
+            d_ (&s_);
+        }
+
+        first_arg (const first_arg&) = delete;
+        first_arg& operator= (const first_arg&) = delete;
+
+        first_arg (first_arg&&) = delete;
+        first_arg& operator= (first_arg&&) = delete;
+      };
+    }
 
     template <quill::LogLevel L>
     struct severity
@@ -223,20 +283,28 @@ namespace iw4x
       using time_point = clock::time_point;
       using duration   = clock::duration;
 
-      duration   i_; // interval
-      time_point l_; // last
+      duration                i_;
+      std::atomic<time_point> l_;
 
       explicit
       rate_limiter (duration d) noexcept
-        : i_ (d), l_ (time_point::min ()) {}
+        : i_ (d),
+          l_ (time_point::min ()) {}
 
       bool
       operator() () noexcept
       {
         time_point n (clock::now ());
+        time_point l (l_.load (std::memory_order_acquire));
 
-        if (l_ == time_point::min () || n - l_ >= i_)
-          return l_ = n, true;
+        if (l == time_point::min () || n - l >= i_)
+        {
+          if (l_.compare_exchange_strong (l,
+                                          n,
+                                          std::memory_order_release,
+                                          std::memory_order_relaxed))
+            return true;
+        }
 
         return false;
       }
