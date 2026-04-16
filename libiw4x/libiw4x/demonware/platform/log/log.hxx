@@ -4,7 +4,7 @@ namespace iw4x
 {
   namespace demonware
   {
-    [[gnu::ms_abi]] void
+    void
     bd_log_message (int type,
                     const char* base_channel,
                     const char* channel,

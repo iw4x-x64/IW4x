@@ -11,7 +11,7 @@ namespace iw4x
 {
   namespace demonware
   {
-    // Layout-compatible bdBitBuffer for game interop.
+    // bdBitBuffer compatible object layout.
     //
     // 0x00  vtable*              vtable (0x1403DA2D0)
     // 0x08  refcount             reference count (int32)
@@ -67,7 +67,7 @@ namespace iw4x
     // Writes individual bits or groups of bits into a growable byte buffer.
     // Bits are packed LSB-first within each byte.
     //
-    class LIBIW4X_SYMEXPORT bit_writer
+    class bit_writer
     {
     public:
       bit_writer ();
@@ -116,7 +116,7 @@ namespace iw4x
     // Reads individual bits or groups of bits from a byte buffer. Note that the
     // reader does not own the data.
     //
-    class LIBIW4X_SYMEXPORT bit_reader
+    class bit_reader
     {
     public:
       bit_reader (const std::uint8_t* data, std::size_t size_bytes)
@@ -161,7 +161,7 @@ namespace iw4x
     // is prefixed with a 5-bit tag written via the underlying bit_writer,
     // followed by the value bits.
     //
-    class LIBIW4X_SYMEXPORT bit_buffer_writer
+    class bit_buffer_writer
     {
     public:
       bit_buffer_writer () = default;
@@ -233,7 +233,7 @@ namespace iw4x
     // protocol. Returns false from each read method if the data is truncated
     // or the type tag does not match the expected value.
     //
-    class LIBIW4X_SYMEXPORT bit_buffer_reader
+    class bit_buffer_reader
     {
     public:
       bit_buffer_reader (const std::uint8_t* data, std::size_t size_bytes)
@@ -290,5 +290,8 @@ namespace iw4x
     private:
       bit_reader reader_;
     };
+
+    bd_bit_buffer*
+    make_bit_buffer (const bit_buffer_writer&);
   }
 }

@@ -1,19 +1,16 @@
 #include <libiw4x/mod/mod-demonware.hxx>
-#include "libiw4x/logger.hxx"
 
-#include <algorithm>
-#include <cassert>
-#include <cstdint>
-
+#include <libiw4x/logger.hxx>
 #include <libiw4x/detour.hxx>
+#include <libiw4x/import.hxx>
 
-#include <libiw4x/demonware/bd-auth-service.hxx>
-#include <libiw4x/demonware/bd-bandwidth-test-client.hxx>
-#include <libiw4x/demonware/bd-lobby-service.hxx>
-#include <libiw4x/demonware/bd-remote-task.hxx>
-#include <libiw4x/demonware/bd-remote-task-manager.hxx>
-#include <libiw4x/demonware/bd-storage.hxx>
-#include <libiw4x/demonware/bd-platform-log.hxx>
+#include <libiw4x/demonware/lobby/auth-service.hxx>
+#include <libiw4x/demonware/lobby/lobby-service.hxx>
+#include <libiw4x/demonware/lobby/remote-task-manager/remote-task-manager.hxx>
+#include <libiw4x/demonware/lobby/storage/storage.hxx>
+#include <libiw4x/demonware/lobby/lsg-services/bandwidth-test.hxx>
+
+#include <libiw4x/demonware/platform/log/log.hxx>
 
 using namespace std;
 using namespace iw4x::demonware;
@@ -381,7 +378,7 @@ namespace iw4x
       router_init ();
 
       dw_socket_router = &router;
-      dw_lobby_service = &lobby_service::instance ();
+      dw_lobby_service = &lobby_service::impl ();
 
       uk_state = 8;
       uk_disable = false;

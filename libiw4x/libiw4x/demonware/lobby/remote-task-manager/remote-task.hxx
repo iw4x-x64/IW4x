@@ -2,16 +2,13 @@
 
 #include <cstdint>
 
-#include <libiw4x/demonware/bd-bit-buffer.hxx>
+#include <libiw4x/demonware/core/containers/bit-buffer.hxx>
 
 namespace iw4x
 {
   namespace demonware
   {
-    // Layout-compatible bdRemoteTask.
-    //
-    // 0x14012ED70 iterates 32 task slots and calls bdRemoteTask::getStatus() on
-    // each.
+    // bdRemoteTask compatible object layout.
     //
     // 0x00  next*             linked list pointer (unused, null)
     // 0x08  timeout           float (seconds)
@@ -34,16 +31,7 @@ namespace iw4x
 
     static_assert (sizeof (bd_remote_task) == 0x30);
 
-    // Allocate a bd_bit_buffer via the game's allocator and fill it with the
-    // serialized contents of a bit_buffer_writer.
-    //
-    bd_bit_buffer*
-    make_bit_buffer (const bit_buffer_writer& src);
-
-    // Allocate a bd_remote_task via the game's allocator in the completed state
-    // with the given result buffer attached.
-    //
     bd_remote_task*
-    make_completed_task (bd_bit_buffer* result, uint64_t transaction_id);
+    make_completed_task (bd_bit_buffer*, uint64_t transaction_id);
   }
 }

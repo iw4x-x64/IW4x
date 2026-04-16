@@ -3,11 +3,8 @@
 #include <cstdint>
 #include <functional>
 
-#include <libiw4x/demonware/bd-bit-buffer.hxx>
-#include <libiw4x/demonware/bd-remote-task.hxx>
-
-#include <libiw4x/export.hxx>
-
+#include <libiw4x/demonware/core/containers/bit-buffer.hxx>
+#include <libiw4x/demonware/lobby/remote-task-manager/remote-task.hxx>
 
 namespace iw4x
 {
@@ -19,7 +16,7 @@ namespace iw4x
                                     bit_buffer_reader& request,
                                     bit_buffer_writer& reply)>;
 
-    class LIBIW4X_SYMEXPORT remote_task_manager
+    class remote_task_manager
     {
     public:
       remote_task_manager ();

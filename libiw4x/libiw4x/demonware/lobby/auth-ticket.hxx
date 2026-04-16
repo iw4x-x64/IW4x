@@ -14,7 +14,7 @@ namespace iw4x
       char username[16];
 
       std::array<uint8_t, 128> session_key;
-      std::array<uint8_t, 256> ticket_data; // ?
+      std::array<uint8_t, 256> ticket_data;
     };
   }
 }

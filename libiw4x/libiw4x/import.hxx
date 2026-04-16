@@ -4738,6 +4738,42 @@ namespace iw4x
   using  Sys_SendPacket_t = bool (*) (size_t len, const char *buf, const network_address *a3);
   inline Sys_SendPacket_t Sys_SendPacket = reinterpret_cast<Sys_SendPacket_t> (0x1402AA1B0);
 
+  using  bdBandwidthTestClientInit_t = bool (*) (void*);
+  inline bdBandwidthTestClientInit_t bdBandwidthTestClientInit = reinterpret_cast<bdBandwidthTestClientInit_t> (0x140321560);
+
+  using  bdBandwidthTestClientStart_t = void (*) (void*, int);
+  inline bdBandwidthTestClientStart_t bdBandwidthTestClientStart = reinterpret_cast<bdBandwidthTestClientStart_t> (0x140322260);
+
+  using  bdLobbyService_t /* guessed */ = void* (*) ();
+  inline bdLobbyService_t bdLobbyService = reinterpret_cast<bdLobbyService_t> (0x140136210);
+
+  using  bdLobbyServiceImplConnect_t = bool (*) (void*, void*, void*, bool);
+  inline bdLobbyServiceImplConnect_t bdLobbyServiceImplConnect = reinterpret_cast<bdLobbyServiceImplConnect_t> (0x14031c750);
+
+  using  bdLobbyServiceImplDisconnect_t = void (*) (void*, int);
+  inline bdLobbyServiceImplDisconnect_t bdLobbyServiceImplDisconnect = reinterpret_cast<bdLobbyServiceImplDisconnect_t> (0x14031c950);
+
+  using  bdLobbyServiceImplGetStatus_t = int32_t (*) (void*);
+  inline bdLobbyServiceImplGetStatus_t bdLobbyServiceImplGetStatus = reinterpret_cast<bdLobbyServiceImplGetStatus_t> (0x14031cb10);
+
+  using  bdLobbyServiceImplGetMatchmaking_t = void* (*) (void*);
+  inline bdLobbyServiceImplGetMatchmaking_t bdLobbyServiceImplGetMatchmaking = reinterpret_cast<bdLobbyServiceImplGetMatchmaking_t> (0x14031c990);
+
+  using  bdLobbyServiceImplGetTaskMgr_t = void* (*) (void*);
+  inline bdLobbyServiceImplGetTaskMgr_t bdLobbyServiceImplGetTaskMgr = reinterpret_cast<bdLobbyServiceImplGetTaskMgr_t> (0x14031CA30);
+
+  using  bdLobbyServiceImplGetPerformance_t = void* (*) (void*);
+  inline bdLobbyServiceImplGetPerformance_t bdLobbyServiceImplGetPerformance = reinterpret_cast<bdLobbyServiceImplGetPerformance_t> (0x14031ca70);
+
+  using  bdLobbyServiceImplGetStorage_t = void* (*) (void*);
+  inline bdLobbyServiceImplGetStorage_t bdLobbyServiceImplGetStorage = reinterpret_cast<bdLobbyServiceImplGetStorage_t> (0x14031cff0);
+
+  using  bdAlloc_t = void* (*) (size_t);
+  inline bdAlloc_t bdAlloc = reinterpret_cast<bdAlloc_t> (0x140315420);
+
+  using  bdLobbyConnectionStartTask_t = int32_t (*) (void*, void**, uint8_t, uint8_t, void*, float);
+  inline bdLobbyConnectionStartTask_t bdLobbyConnectionStartTask = reinterpret_cast<bdLobbyConnectionStartTask_t> (0x140322CC0);
+
   // Internal globals
   //
   inline void* g_lobby   = reinterpret_cast<void*> (0x140D513A0);

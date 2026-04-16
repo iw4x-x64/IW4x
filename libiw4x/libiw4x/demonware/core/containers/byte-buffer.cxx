@@ -1,4 +1,4 @@
-#include <libiw4x/demonware/bd-byte-buffer.hxx>
+#include <libiw4x/demonware/core/containers/byte-buffer.hxx>
 
 #include <cstring>
 

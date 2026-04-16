@@ -1,4 +1,4 @@
-#include <libiw4x/demonware/bd-storage.hxx>
+#include <libiw4x/demonware/lobby/storage/storage.hxx>
 
 #include <cstdint>
 #include <filesystem>
@@ -6,8 +6,9 @@
 #include <string>
 #include <vector>
 
-#include <libiw4x/demonware/bd-bit-buffer.hxx>
-#include <libiw4x/demonware/bd-remote-task-manager.hxx>
+#include <libiw4x/demonware/core/containers/bit-buffer.hxx>
+#include <libiw4x/demonware/lobby/remote-task-manager/remote-task-manager.hxx>
+
 #include <libiw4x/logger.hxx>
 
 using namespace std;
@@ -17,9 +18,11 @@ namespace iw4x
 {
   namespace demonware
   {
+    alignas (16) bd_storage_stub bd_storage {};
+
     namespace
     {
-      // The bdStorage service ID.
+     // The bdStorage service ID.
       //
       constexpr uint8_t storage_service_id (10);
 
@@ -138,7 +141,8 @@ namespace iw4x
       {
         if (!publisher_loaded)
         {
-          publisher_data = read_file_data (publisher_filename, "publisher file");
+          publisher_data =
+            read_file_data (publisher_filename, "publisher file");
           publisher_loaded = true;
         }
 
@@ -183,10 +187,10 @@ namespace iw4x
       {
         reply.write_uint64 (file_id);
         reply.write_uint32 (file_size);
-        reply.write_uint32 (0);          // create_time
-        reply.write_bool (true);         // has_data
-        reply.write_bool (false);        // visibility
-        reply.write_uint64 (0);          // owner_id
+        reply.write_uint32 (0); // create_time
+        reply.write_bool (true); // has_data
+        reply.write_bool (false); // visibility
+        reply.write_uint64 (0); // owner_id
         reply.write_string (filename);
       }
 
@@ -304,7 +308,8 @@ namespace iw4x
 
               if (!user_exists || user_data.empty ())
               {
-                log::warning << "dw: storage: user file not available for download";
+                log::warning
+                  << "dw: storage: user file not available for download";
                 reply.write_uint32 (0);
                 reply.write_uint8 (0);
                 return true;
@@ -330,7 +335,8 @@ namespace iw4x
 
             if (data.empty ())
             {
-              log::warning << "dw: storage: publisher file not available for download";
+              log::warning
+                << "dw: storage: publisher file not available for download";
               reply.write_uint32 (0);
               reply.write_uint8 (0);
               return true;
@@ -338,8 +344,8 @@ namespace iw4x
 
             auto file_size (static_cast<uint32_t> (data.size ()));
 
-            log::info << "dw: storage: getFile -> " << publisher_filename << " ("
-                      << file_size << "B)";
+            log::info << "dw: storage: getFile -> " << publisher_filename
+                      << " (" << file_size << "B)";
 
             reply.write_uint32 (0);
             reply.write_uint8 (1);

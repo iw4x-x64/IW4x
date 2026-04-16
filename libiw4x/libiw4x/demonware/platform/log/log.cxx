@@ -1,4 +1,4 @@
-#include <libiw4x/demonware/bd-platform-log.hxx>
+#include <libiw4x/demonware/platform/log/log.hxx>
 
 #include <cstdarg>
 #include <cstdio>
@@ -6,13 +6,12 @@
 #include <libiw4x/logger.hxx>
 
 using namespace std;
-using namespace iw4x::log;
 
 namespace iw4x
 {
   namespace demonware
   {
-    [[gnu::ms_abi]] void
+    void
     bd_log_message (int type,
                     const char* base_channel,
                     const char* channel,
@@ -56,8 +55,8 @@ namespace iw4x
         m = s;
       }
 
-      auto nn ([] (const char* p) {return p ? p : "";});
-      info << format ("[{} {}] {}", nn (base_channel), nn (channel), m);
+      auto c ([] (const char* p) {return p ? p : "";});
+      log::trace_l3 << format ("[{} {}] {}", c (base_channel), c (channel), m);
 
       va_end (ap);
     }

@@ -6,7 +6,7 @@ namespace iw4x
 {
   namespace demonware
   {
-    class LIBIW4X_SYMEXPORT bandwidth_test_client
+    class bandwidth_test_client
     {
     public:
       bandwidth_test_client ();

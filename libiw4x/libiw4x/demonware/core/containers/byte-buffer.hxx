@@ -35,7 +35,7 @@ namespace iw4x
     // prefixed with a one-byte type tag followed by the data in native byte
     // order.
     //
-    class LIBIW4X_SYMEXPORT byte_buffer_writer
+    class byte_buffer_writer
     {
     public:
       byte_buffer_writer () = default;
@@ -124,7 +124,7 @@ namespace iw4x
     //
     // Note that the reader does not own the data.
     //
-    class LIBIW4X_SYMEXPORT byte_buffer_reader
+    class byte_buffer_reader
     {
     public:
       byte_buffer_reader (const std::uint8_t* data, std::size_t size)

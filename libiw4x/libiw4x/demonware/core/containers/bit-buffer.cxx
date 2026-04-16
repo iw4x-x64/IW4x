@@ -1,7 +1,9 @@
-#include <libiw4x/demonware/bd-bit-buffer.hxx>
+#include <libiw4x/demonware/core/containers/bit-buffer.hxx>
 
 #include <cassert>
 #include <cstring>
+
+#include <libiw4x/import.hxx>
 
 using namespace std;
 
@@ -314,6 +316,41 @@ namespace iw4x
 
       out.resize (static_cast<size_t> (length));
       return reader_.read_bytes (out.data (), length);
+    }
+
+    bd_bit_buffer*
+    make_bit_buffer (const bit_buffer_writer& w)
+    {
+      void* vtable (reinterpret_cast<void*> (0x1403DA2D0));
+
+      auto b (static_cast<bd_bit_buffer*> (bdAlloc (sizeof (bd_bit_buffer))));
+      auto s (w.size ());
+      auto d (static_cast<uint8_t*> (bdAlloc (s + 1)));
+
+      memcpy (d, w.data (), s);
+      d[s] = 0;
+
+      // Wire up the fake buffer. Note how we force the type checking flag
+      // to true and initially set the reference count to 1. This closely
+      // mimics a freshly constructed native object.
+      //
+      *b = bd_bit_buffer
+      {
+        .vtable             = vtable,
+        .refcount           = 1,
+        .pad0               = 0,
+        .data               = d,
+        .capacity           = static_cast<int32_t> (s),
+        .element_count      = static_cast<int32_t> (s),
+        .write_position     = static_cast<int32_t> (w.bit_size ()),
+        .max_write_position = static_cast<int32_t> (w.bit_size ()),
+        .read_position      = 0,
+        .flags              = 0,
+        .type_checking      = 1,
+        .pad1               = 0
+      };
+
+      return b;
     }
   }
 }

@@ -2,32 +2,15 @@
 
 #include <cstdint>
 
-#include <libiw4x/export.hxx>
+#include <libiw4x/demonware/lobby/connection.hxx>
 
 namespace iw4x
 {
   namespace demonware
   {
-    // Layout-compatible bdLobbyConnection.
+    // bdLobbyServiceImpl compatible object layout.
     //
-    // The game holds a pointer to this at lobby_service 0x90 and reads the
-    // reference count at 0x08. Note that all interaction is routed through
-    // hooked lobby service accessors. We just need to make sure the connection
-    // object exists as a valid target and its reference count never drops to
-    // zero.
-    //
-    struct bd_lobby_connection
-    {
-      void*   vtable;     // 0x00
-      int32_t refcount;   // 0x08
-      uint8_t body[0xF4]; // 0x0C: zero-initialized
-    };
-
-    static_assert (sizeof (bd_lobby_connection) == 0x100);
-
-    // Layout-compatible bdLobbyServiceImpl singleton.
-    //
-    // This is a 0x140-byte structure that mirrors the game's singleton at
+    // This is a 0x140-byte structure that mirrors bdLobbyServiceImpl singleton at
     // 0x140714A50. The vtable at 0x00 has 4 entries (destructor, onConnect,
     // pump, onDisconnect). Notice the inline bdRemoteTaskManager at 0x18. The
     // sub-service pointers are scattered at 0x40, 0x60, and 0x80, while our
@@ -54,13 +37,13 @@ namespace iw4x
 
     static_assert (sizeof (bd_lobby_service_impl) == 0x140);
 
-    class LIBIW4X_SYMEXPORT lobby_service
+    class lobby_service
     {
     public:
       lobby_service ();
 
       static bd_lobby_service_impl&
-      instance ();
+      impl ();
     };
   }
 }
