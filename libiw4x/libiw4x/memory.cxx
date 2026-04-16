@@ -29,8 +29,8 @@ namespace iw4x
     {{0x66, 0x0F, 0x1F, 0x84, 0x00, 0x00, 0x00, 0x00, 0x00}}  // 9
   }};
 
-  void*
-  memwrite (void* dst, int val, size_t size)
+  void* memory::
+  write (void* dst, int val, size_t size)
   {
     // Empty op is a no-op.
     //
@@ -82,14 +82,14 @@ namespace iw4x
     return memset (dst, val, size);
   }
 
-  void*
-  memwrite (uintptr_t dst, int val, size_t size)
+  void* memory::
+  write (uintptr_t dst, int val, size_t size)
   {
-    return memwrite (reinterpret_cast<void*> (dst), val, size);
+    return write (reinterpret_cast<void*> (dst), val, size);
   }
 
-  void*
-  memwrite (void* dst, const void* src, size_t size)
+  void* memory::
+  write (void* dst, const void* src, size_t size)
   {
     if (size == 0)
       return dst;
@@ -116,7 +116,7 @@ namespace iw4x
 
         // Delegate to the smart filler.
         //
-        memwrite (out + pos, 0x90, len);
+        write (out + pos, 0x90, len);
         pos += len;
       }
       else
@@ -143,9 +143,9 @@ namespace iw4x
     return dst;
   }
 
-  void*
-  memwrite (uintptr_t dst, const void* src, size_t size)
+  void* memory::
+  write (uintptr_t dst, const void* src, size_t size)
   {
-    return memwrite (reinterpret_cast<void*> (dst), src, size);
+    return write (reinterpret_cast<void*> (dst), src, size);
   }
 }
