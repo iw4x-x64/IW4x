@@ -4774,6 +4774,9 @@ namespace iw4x
   using  bdLobbyConnectionStartTask_t = int32_t (*) (void*, void**, uint8_t, uint8_t, void*, float);
   inline bdLobbyConnectionStartTask_t bdLobbyConnectionStartTask = reinterpret_cast<bdLobbyConnectionStartTask_t> (0x140322CC0);
 
+  using  R_LoadGraphicsAssets_t = void (*) (void);
+  inline R_LoadGraphicsAssets_t R_LoadGraphicsAssets = reinterpret_cast<R_LoadGraphicsAssets_t> (0x14002FA70);
+
   // Internal globals
   //
   inline void* g_lobby   = reinterpret_cast<void*> (0x140D513A0);

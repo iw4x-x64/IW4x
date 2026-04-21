@@ -3,6 +3,7 @@
 // Must be included first on MinGW
 //
 #include <winsock2.h>
+#include <ws2tcpip.h>
 
 #ifndef WIN32_LEAN_AND_MEAN
 #  define WIN32_LEAN_AND_MEAN
