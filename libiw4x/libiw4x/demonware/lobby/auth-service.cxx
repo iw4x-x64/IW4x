@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <random>
 #include <string>
+#include <functional>
 
 #include <libiw4x/utility-win32.hxx>
 
@@ -51,8 +52,8 @@ namespace iw4x
       seed_seq ss {rd (), rd (), rd (), rd ()};
       independent_bits_engine<mt19937_64, 8, unsigned char> r (ss);
 
-      ranges::generate (auth_ticket.session_key, ref (r));
-      ranges::generate (auth_ticket.ticket_data, ref (r));
+      ranges::generate (auth_ticket.session_key, std::ref (r));
+      ranges::generate (auth_ticket.ticket_data, std::ref (r));
     }
 
     const bd_auth_ticket& auth_service::

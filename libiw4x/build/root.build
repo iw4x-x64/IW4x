@@ -1,4 +1,4 @@
-cxx.std = latest
+cxx.std = experimental
 
 using cxx
 
@@ -25,6 +25,13 @@ if ($cxx.target.system == 'win32-msvc')
 
 if ($cxx.target.system == 'win32-msvc')
   cxx.coptions += /wd4251 /wd4275 /wd4800
+
+# https://github.com/gcc-mirror/gcc/commit/62c126db6b6017011dcbe6945aab371ab48f8ded
+#
+# /mingw-gcc-16.0.1-build/gcc-16.0.1-20260305
+#
+if ($cxx.target.system == 'mingw32')
+  cxx.loptions += -Wl,--allow-multiple-definition
 
 # Pre-defined semantics to distinguish between development and consumption
 # builds.
