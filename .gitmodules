@@ -1,0 +1,3 @@
+[submodule "libiw4x/upstream/open-asset-tools"]
+	path = libiw4x/upstream/open-asset-tools
+	url = https://github.com/iw4x-x64/open-asset-tools.git
