@@ -15,11 +15,11 @@ namespace iw4x
     // runs of single-byte NOPs with optimal multi-byte architectural NOP
     // sequences to relieve the instruction decoder.
     //
-    static LIBIW4X_SYMEXPORT void*
-    write (void* dst, int val, size_t size);
+    static void*
+    write (void* destination, int value, size_t size);
 
-    static LIBIW4X_SYMEXPORT void*
-    write (uintptr_t dst, int val, size_t size);
+    static void*
+    write (uintptr_t destination, int value, size_t size);
 
     // Copy memory.
     //
@@ -27,24 +27,24 @@ namespace iw4x
     // source buffer contains runs of 0x90, we expand them into multi-byte
     // NOPs in the destination.
     //
-    static LIBIW4X_SYMEXPORT void*
-    write (void* dst, const void* src, size_t size);
+    static void*
+    write (void* destination, const void* source, size_t size);
 
-    static LIBIW4X_SYMEXPORT void*
-    write (uintptr_t dst, const void* src, size_t size);
+    static void*
+    write (uintptr_t destination, const void* source, size_t size);
 
     // Convenience wrappers for static arrays.
     //
     template <size_t N>
     static inline void*
-    write (uintptr_t dst, const uint8_t (&src)[N])
+    write (uintptr_t destination, const uint8_t (&source)[N])
     {
-      return write (dst, src, N);
+      return write (destination, source, N);
     }
 
     template <size_t N>
     static inline void*
-    write (uintptr_t dst, const char (&src)[N])
+    write (uintptr_t destination, const char (&source)[N])
     {
       // If we are passing a string literal (which is the 99% use case here),
       // N includes the null terminator. Since we are patching code, we almost
@@ -53,7 +53,7 @@ namespace iw4x
       // So we strip it. If we really want to write a null byte, we can use the
       // raw pointer overload or a uint8_t array.
       //
-      return write (dst, src, N - 1);
+      return write (destination, source, N - 1);
     }
   };
 }

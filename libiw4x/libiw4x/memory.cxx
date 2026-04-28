@@ -30,26 +30,26 @@ namespace iw4x
   }};
 
   void* memory::
-  write (void* dst, int val, size_t size)
+  write (void* destination, int value, size_t size)
   {
     // Empty op is a no-op.
     //
     if (size == 0)
-      return dst;
+      return destination;
 
     // If this is a request for 0x90 (NOP) fill, we try to be smart and use
     // the optimal multi-byte sequences.
     //
-    if (val == 0x90)
+    if (value == 0x90)
     {
-      uint8_t* out (static_cast<uint8_t*> (dst));
+      uint8_t* output (static_cast<uint8_t*> (destination));
 
       // We only have sequences up to 9 bytes.
       //
       size_t chunks (size / 9);
-      size_t rem (size % 9);
+      size_t remainder (size % 9);
 
-      const uint8_t* seq (nops[8].data ());
+      const uint8_t* sequence (nops[8].data ());
 
       // To avoid the overhead of calling memcpy inside the loop (which creates
       // a massive stall for such small writes), we cast the sequence to a
@@ -59,43 +59,43 @@ namespace iw4x
       //
       // Note: this assumes unaligned access is safe, which it is on x64.
       //
-      uint64_t seq_u64 (*reinterpret_cast<const uint64_t*> (seq));
-      uint8_t seq_u8 (seq[8]);
+      uint64_t sequence_u64 (*reinterpret_cast<const uint64_t*> (sequence));
+      uint8_t sequence_u8 (sequence[8]);
 
       for (size_t i (0); i != chunks; ++i)
       {
-        *reinterpret_cast<uint64_t*> (out) = seq_u64;
-        out[8] = seq_u8;
-        out += 9;
+        *reinterpret_cast<uint64_t*> (output) = sequence_u64;
+        output[8] = sequence_u8;
+        output += 9;
       }
 
       // Handle the tail.
       //
-      if (rem != 0)
-        memcpy (out, nops[rem - 1].data (), rem);
+      if (remainder != 0)
+        memcpy (output, nops[remainder - 1].data (), remainder);
 
-      return dst;
+      return destination;
     }
 
     // For all non-NOP cases, fall back to the ordinary byte blast.
     //
-    return memset (dst, val, size);
+    return memset (destination, value, size);
   }
 
   void* memory::
-  write (uintptr_t dst, int val, size_t size)
+  write (uintptr_t destination, int value, size_t size)
   {
-    return write (reinterpret_cast<void*> (dst), val, size);
+    return write (reinterpret_cast<void*> (destination), value, size);
   }
 
   void* memory::
-  write (void* dst, const void* src, size_t size)
+  write (void* destination, const void* source, size_t size)
   {
     if (size == 0)
-      return dst;
+      return destination;
 
-    uint8_t* out (static_cast<uint8_t*> (dst));
-    const uint8_t* in (static_cast<const uint8_t*> (src));
+    uint8_t* output (static_cast<uint8_t*> (destination));
+    const uint8_t* input (static_cast<const uint8_t*> (source));
 
     // Iterate over the source buffer. We are looking for runs of 0x90 which we
     // interpret as "placeholders for optimized NOPs".
@@ -104,20 +104,20 @@ namespace iw4x
     // copying raw data where 0x90 is a valid value (e.g., offsets or immediate
     // values), this logic will corrupt it.
     //
-    for (size_t pos (0); pos < size;)
+    for (size_t position (0); position < size;)
     {
       // Check if we hit a NOP placeholder.
       //
-      if (in[pos] == 0x90)
+      if (input[position] == 0x90)
       {
-        size_t len (0);
-        while (pos + len < size && in[pos + len] == 0x90)
-          len++;
+        size_t length (0);
+        while (position + length < size && input[position + length] == 0x90)
+          length++;
 
         // Delegate to the smart filler.
         //
-        write (out + pos, 0x90, len);
-        pos += len;
+        write (output + position, 0x90, length);
+        position += length;
       }
       else
       {
@@ -127,25 +127,25 @@ namespace iw4x
         // We use memchr here as it will use SIMD internally to scan for the
         // 0x90 byte much faster than a scalar loop would.
         //
-        const void* match (memchr (in + pos, 0x90, size - pos));
+        const void* match (memchr (input + position, 0x90, size - position));
 
-        size_t len (match
-                    ? static_cast<const uint8_t*> (match) - (in + pos)
-                    : size - pos);
+        size_t length (match
+                    ? static_cast<const uint8_t*> (match) - (input + position)
+                    : size - position);
 
         // Bulk copy the non-NOP code.
         //
-        memcpy (out + pos, in + pos, len);
-        pos += len;
+        memcpy (output + position, input + position, length);
+        position += length;
       }
     }
 
-    return dst;
+    return destination;
   }
 
   void* memory::
-  write (uintptr_t dst, const void* src, size_t size)
+  write (uintptr_t destination, const void* source, size_t size)
   {
-    return write (reinterpret_cast<void*> (dst), src, size);
+    return write (reinterpret_cast<void*> (destination), source, size);
   }
 }
