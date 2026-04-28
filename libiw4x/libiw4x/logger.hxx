@@ -24,10 +24,10 @@ namespace iw4x
     ~logger ();
 
     logger (const logger&) = delete;
-    logger& operator= (const logger&) = delete;
+    logger& operator = (const logger&) = delete;
 
     logger (logger&&) = delete;
-    logger& operator= (logger&&) = delete;
+    logger& operator = (logger&&) = delete;
   };
 
   extern class logger* logger;
@@ -39,7 +39,7 @@ namespace iw4x
       inline std::atomic<quill::Logger*>&
       logger () noexcept
       {
-        static std::atomic<quill::Logger*> instance (nullptr);
+        constinit static std::atomic<quill::Logger*> instance (nullptr);
         return instance;
       }
     }
@@ -60,15 +60,14 @@ namespace iw4x
     // Notice that development builds open the full trace range.
     //
 #if LIBIW4X_DEVELOP
-    inline constexpr quill::LogLevel
-      min_level (quill::LogLevel::TraceL3);
+    inline constexpr quill::LogLevel min_level (quill::LogLevel::TraceL3);
 #else
-    inline constexpr quill::LogLevel
-      min_level (quill::LogLevel::Info);
+    inline constexpr quill::LogLevel min_level (quill::LogLevel::Info);
 #endif
 
     template <typename T, typename S>
-    concept Streamable = requires (S& stream, T&& value) {
+    concept Streamable = requires (S& stream, T&& value)
+    {
       {
         stream << std::forward<T> (value)
       } -> std::convertible_to<std::ostream&>;
@@ -99,8 +98,7 @@ namespace iw4x
       bool                  active_;
 
       stream_accumulator (quill::SourceLocation location)
-        : location_ (location),
-          active_ (true) {}
+        : location_ (location), active_ (true) {}
 
       // Notice the move constructor and the active_ flag.
       //
@@ -112,12 +110,12 @@ namespace iw4x
       stream_accumulator (stream_accumulator&& other) noexcept
         : location_ (other.location_),
           stream_ (std::move (other.stream_)),
-          active_ (other.active_)
+          active_ (std::exchange (other.active_, false))
       {
         other.active_ = false;
       }
 
-      stream_accumulator& operator= (stream_accumulator&&) = delete;
+      stream_accumulator& operator = (stream_accumulator&&) = delete;
 
       ~stream_accumulator ()
       {
@@ -129,7 +127,7 @@ namespace iw4x
 
             if (logger_ptr != nullptr && logger_ptr->should_log_statement (L))
             {
-              std::string message (stream_.str ());
+              std::string message (std::move (stream_).str ());
 
               // We avoid pushing completely empty strings to the backend.
               //
@@ -141,9 +139,9 @@ namespace iw4x
       }
 
       template <typename T>
-      requires Streamable<T, decltype(stream_)>
+        requires Streamable<T, decltype (stream_)>
       stream_accumulator&
-      operator<< (T&& value)
+      operator << (T&& value)
       {
         if constexpr (L >= min_level)
           stream_ << std::forward<T> (value);
@@ -152,7 +150,7 @@ namespace iw4x
       }
 
       stream_accumulator&
-      operator<< (std::ostream& (*manipulator) (std::ostream&))
+      operator << (std::ostream& (*manipulator) (std::ostream&) )
       {
         if constexpr (L >= min_level)
           manipulator (stream_);
@@ -160,13 +158,12 @@ namespace iw4x
         return *this;
       }
 
-      template <typename F>
-      requires std::invocable<F, std::ostream&>
+      template <std::invocable<std::ostream&> F>
       stream_accumulator&
-      operator<< (F&& func)
+      operator << (F&& func)
       {
         if constexpr (L >= min_level)
-          std::forward<F> (func) (stream_);
+          std::invoke (std::forward<F> (func), stream_);
 
         return *this;
       }
@@ -179,7 +176,9 @@ namespace iw4x
         requires (stream_accumulator<L>& accumulator,
                   std::remove_cvref_t<T> const& value)
       {
-        { accumulator << value } -> std::same_as<stream_accumulator<L>&>;
+        {
+            accumulator << value
+        } -> std::same_as<stream_accumulator<L>&>;
       };
 
       // Capture the source location for the first operand of operator<<.
@@ -189,11 +188,11 @@ namespace iw4x
       // signature. Instead, we capture the call site location during the
       // implicit conversion of the right-hand operand.
       //
-      // That is, when evaluating 'log::error << "foo"', overload resolution selects
-      // an operator<< that accepts this wrapper type. The compiler performs an
-      // implicit conversion of the operand, invoking the wrapper's templated
-      // constructor which specifies std::source_location::current () as a
-      // default argument.
+      // That is, when evaluating 'log::error << "foo"', overload resolution
+      // selects an operator<< that accepts this wrapper type. The compiler
+      // performs an implicit conversion of the operand, invoking the wrapper's
+      // templated constructor which specifies std::source_location::current ()
+      // as a default argument.
       //
       // Notice also that the payload is then type-erased via a function pointer
       // and forwarded to the stream accumulator.
@@ -206,7 +205,7 @@ namespace iw4x
         void (*format_func_)  (stream_accumulator<L>&, void const*);
         void (*destroy_func_) (void*);
 
-        alignas(std::max_align_t) std::byte storage_[128];
+        alignas (std::max_align_t) std::byte storage_ [128];
 
         quill::SourceLocation location_;
 
@@ -244,7 +243,8 @@ namespace iw4x
               sizeof (type) <= sizeof (storage_),
               "Type is too large for inline storage in first_arg.");
 
-            new (&storage_) type (std::forward<T> (value));
+            std::construct_at (reinterpret_cast<type*> (&storage_),
+                               std::forward<T> (value));
 
             payload_ = &storage_;
 
@@ -270,8 +270,7 @@ namespace iw4x
             // Thus, we capture a type-erased destruction function that uses
             // std::destroy_at to explicitly invoke the destructor of 'type'.
             //
-            destroy_func_ =
-              [] (void* p)
+            destroy_func_ = [] (void* p)
             {
               std::destroy_at (static_cast<type*> (p));
             };
@@ -285,10 +284,10 @@ namespace iw4x
         }
 
         first_arg (const first_arg&) = delete;
-        first_arg& operator= (const first_arg&) = delete;
+        first_arg& operator = (const first_arg&) = delete;
 
         first_arg (first_arg&&) = delete;
-        first_arg& operator= (first_arg&&) = delete;
+        first_arg& operator = (first_arg&&) = delete;
       };
     }
 
@@ -296,7 +295,7 @@ namespace iw4x
     struct severity
     {
       stream_accumulator<L>
-      operator<< (detail::first_arg<L> arg) const
+      operator << (detail::first_arg<L> arg) const
       {
         // Seed the accumulator with the source location and apply the first
         // argument's formatting function.
@@ -328,13 +327,12 @@ namespace iw4x
 
       explicit
       rate_limiter (duration interval) noexcept
-        : interval_ (interval),
-          last_time_ (time_point::min ()) {}
+        : interval_ (interval), last_time_ (time_point::min ()) {}
 
       bool
-      operator() () noexcept
+      operator () () noexcept
       {
-        time_point now (clock::now ());
+        time_point now  (clock::now ());
         time_point last (last_time_.load (std::memory_order_acquire));
 
         // Allow the event if this is the first occurrence or if the elapsed
