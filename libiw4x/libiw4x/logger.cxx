@@ -35,10 +35,7 @@ namespace iw4x
     auto fs (Frontend::create_or_get_sink<FileSink>    ("iw4x.log", r));
 
     PatternFormatterOptions pf (
-      "%(time) [%(log_level_short_code)] %(logger:<16) %(caller_function:<32) "
-      "%(short_source_location:<24) %(message)",
-      "%H:%M:%S.%Qms",
-      Timezone::LocalTime);
+      "[%(log_level_short_code)] %(short_source_location:<24) %(message)");
 
     Logger* l (Frontend::create_or_get_logger ("iw4x", {cs, fs}, pf));
 
