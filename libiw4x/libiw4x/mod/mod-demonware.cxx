@@ -146,7 +146,7 @@ namespace iw4x
 
       alignas (16) bd_router router {};
 
-      [[gnu::ms_abi]] int64_t
+      int64_t
       router_stub (void*)
       {
         return 0;
@@ -270,7 +270,7 @@ namespace iw4x
 
       int32_t last_playlist_state (-1);
 
-      void __attribute__ ((ms_abi))
+      void
       live_storage_fetch_playlists (int controller)
       {
         if (uk_playlist_state != last_playlist_state)
@@ -298,7 +298,7 @@ namespace iw4x
         reinterpret_cast<has_active_slot_t> (0x1402005C0));
 
       using readiness_check_t = bool (*) (int);
-      readiness_check_t readiness_check (
+      readiness_check_t readiness_check (g
         reinterpret_cast<readiness_check_t> (0x1401FE180));
 
       using get_status_accessor_t = bool (*) (int);
@@ -308,7 +308,7 @@ namespace iw4x
       int32_t uk_stats_last_game_state (-1);
       uint8_t uk_stats_last_playlists (0xFF);
 
-      void __attribute__ ((ms_abi))
+      void
       live_storage_download_stats_from_dir (int controller)
       {
         if (uk_playlist_state != uk_stats_last_game_state ||
@@ -334,7 +334,7 @@ namespace iw4x
 
       bool profile_init_diag_logged (false);
 
-      void* __attribute__ ((ms_abi))
+      void*
       client_connect (int controller, uint16_t mode)
       {
         if (!profile_init_diag_logged)
@@ -349,7 +349,7 @@ namespace iw4x
 
       bool signin_diag_logged (false);
 
-      void __attribute__ ((ms_abi))
+      void
       live_frame (int controller)
       {
         // Poke the session gate to keep the internal sign-in watchdog happy.
