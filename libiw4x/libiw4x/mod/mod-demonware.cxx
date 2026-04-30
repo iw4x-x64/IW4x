@@ -298,7 +298,7 @@ namespace iw4x
         reinterpret_cast<has_active_slot_t> (0x1402005C0));
 
       using readiness_check_t = bool (*) (int);
-      readiness_check_t readiness_check (g
+      readiness_check_t readiness_check (
         reinterpret_cast<readiness_check_t> (0x1401FE180));
 
       using get_status_accessor_t = bool (*) (int);

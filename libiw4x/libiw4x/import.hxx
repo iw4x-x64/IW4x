@@ -5,10 +5,12 @@
 #  ifndef NOMINMAX
 #    define NOMINMAX
 #    include <winsock2.h>
+#    include <windows.h>
 #    include <d3d9.h>
 #    undef NOMINMAX
 #  else
 #    include <winsock2.h>
+#    include <windows.h>
 #    include <d3d9.h>
 #  endif
 #  undef WIN32_LEAN_AND_MEAN
@@ -16,10 +18,12 @@
 #  ifndef NOMINMAX
 #    define NOMINMAX
 #    include <winsock2.h>
+#    include <windows.h>
 #    include <d3d9.h>
 #    undef NOMINMAX
 #  else
 #    include <winsock2.h>
+#    include <windows.h>
 #    include <d3d9.h>
 #  endif
 #endif
