@@ -15,6 +15,7 @@ namespace iw4x
   constexpr int32_t min_hook_size (14);
   constexpr int32_t max_hook_size (32);
   constexpr int64_t max_hook_disp (INT32_MAX);
+  constexpr size_t  max_instruction_expansion (8);
 
   struct prologue_data
   {
@@ -23,8 +24,9 @@ namespace iw4x
     ZydisDecodedInstruction ins[max_hook_size];
     ZydisDecodedOperand ops[max_hook_size][ZYDIS_MAX_OPERAND_COUNT];
 
-    // Zero out the sizes. The arrays will be overwritten as we decode, so no
-    // need to waste cycles clearing them.
+    // Zero out the tracking sizes. The underlying structural arrays will be
+    // overwritten as we decode the instructions, so there is no need to waste
+    // CPU cycles clearing them here.
     //
     prologue_data ()
       : ds (0), di (0) {}
@@ -34,9 +36,10 @@ namespace iw4x
   {
     prologue_data p;
     void* f;
+    size_t cs;
 
-    frame_data (prologue_data const& p_, void* f_)
-      : p (p_), f (f_) {}
+    frame_data (prologue_data const& p_, void* f_, size_t cs_)
+      : p (p_), f (f_), cs (cs_) {}
   };
 
   struct relocation_data
@@ -55,14 +58,16 @@ namespace iw4x
     auto
     decode ([] (void* t) -> prologue_data
     {
-      ZydisDecoder d {};
+      ZydisDecoder d;
       ZydisDecoderInit (&d, ZYDIS_MACHINE_MODE_LONG_64, ZYDIS_STACK_WIDTH_64);
 
-      prologue_data p {};
+      prologue_data p;
 
-      // Keep decoding until we have at least 14 bytes for our absolute jump.
-      // Note that we cannot split instructions, so we might pull in a bit more
-      // than the strict minimum.
+      // Keep decoding instructions until we have accumulated at least 14 bytes,
+      // which is the exact minimum size required to place our absolute jump.
+      // Note that since we cannot split x86 instructions halfway through, we
+      // will likely end up pulling in a little bit more than the strict
+      // minimum.
       //
       while (p.ds < min_hook_size && p.di < max_hook_size)
       {
@@ -88,16 +93,18 @@ namespace iw4x
       GetSystemInfo (&si);
 
       size_t ag (si.dwAllocationGranularity);
-      size_t as (p.ds + min_hook_size);
+      size_t as (p.ds + (p.di * max_instruction_expansion) + min_hook_size);
 
       auto ta (reinterpret_cast<uint64_t> (t));
       uintptr_t min_a (ta > max_hook_disp ? ta - max_hook_disp : 0);
       uintptr_t max_a (ta < UINTPTR_MAX - max_hook_disp ? ta + max_hook_disp
                                                         : UINTPTR_MAX);
 
-      // Find an isolated memory frame close to the target function. We need to
-      // stay within 2GB for RIP-relative addressing to remain valid after
-      // relocation. Walk the page tables up and down.
+      // Find an isolated memory frame that is located close to the target
+      // function. The requirement here is to stay within the 2GB boundary so
+      // that any 32-bit RIP-relative addressing used in the stolen prologue
+      // instructions remains valid after we relocate them. We do this by
+      // walking the page tables both up and down.
       //
       auto
       probe ([as, ag, min_a, max_a] (uintptr_t addr, bool down) -> void*
@@ -141,10 +148,10 @@ namespace iw4x
       });
 
       if (void* f = probe (ta, true))
-        return frame_data (p, f);
+        return frame_data (p, f, as);
 
       if (void* f = probe (ta, false))
-        return frame_data (p, f);
+        return frame_data (p, f, as);
 
       throw runtime_error ("unable to allocate isolated address frame");
     });
@@ -159,13 +166,34 @@ namespace iw4x
       size_t rd (0);
       uint64_t ra (ta);
 
-      // Re-encode the stolen prologue instructions into our new frame. Any
-      // RIP-relative memory access needs to be adjusted because its distance
-      // to the target data has changed.
+      auto byte_relative_only ([] (ZydisMnemonic mnemonic) -> bool
+      {
+        switch (mnemonic)
+        {
+        case ZYDIS_MNEMONIC_JCXZ:
+        case ZYDIS_MNEMONIC_JECXZ:
+        case ZYDIS_MNEMONIC_JRCXZ:
+        case ZYDIS_MNEMONIC_LOOP:
+        case ZYDIS_MNEMONIC_LOOPE:
+        case ZYDIS_MNEMONIC_LOOPNE:
+          return true;
+
+        default:
+          return false;
+        }
+      });
+
+      // Re-encode the stolen prologue instructions and place them into our
+      // newly allocated trampoline frame. Because the physical distance to the
+      // original target has changed, any RIP-relative memory accesses or
+      // relative branches must be adjusted to point exactly to their original
+      // destinations.
       //
       for (size_t i (0); i < f.p.di; ++i)
       {
-        ZydisEncoderRequest r {};
+        ZydisEncoderRequest r;
+        memset (&r, 0, sizeof (r));
+
         ZydisDecodedInstruction* ri (&f.p.ins[i]);
         ZydisDecodedOperand* ro (f.p.ops[i]);
         ZyanU8 rv (ri->operand_count_visible);
@@ -181,21 +209,45 @@ namespace iw4x
           {
             int64_t dv (ro[n].mem.disp.value);
             int64_t at (static_cast<int64_t> (ra + ri->length + dv));
-            int64_t dr (static_cast<int64_t> (at - (fa + rd + ri->length)));
 
-            // If it falls outside the 32-bit window, the target is out of reach
-            // from our newly allocated trampoline page.
+            r.operands[n].mem.displacement = at;
+          }
+          else if (ro[n].type == ZYDIS_OPERAND_TYPE_IMMEDIATE &&
+                   ro[n].imm.is_relative &&
+                   ri->mnemonic != ZYDIS_MNEMONIC_XBEGIN)
+          {
+            int64_t dv (ro[n].imm.is_signed
+                        ? ro[n].imm.value.s
+                        : static_cast<int64_t> (ro[n].imm.value.u));
+            int64_t at (static_cast<int64_t> (ra + ri->length + dv));
+
+            // We must catch cases where a relative branch attempts to jump
+            // internally within the relocated prologue block itself. If it
+            // does, we cannot simply re-encode it because the relative layout
+            // has shifted under us.
             //
-            if (dr < INT32_MIN || dr > INT32_MAX)
-              throw runtime_error ("RIP-relative displacement out of range");
+            if (at >= static_cast<int64_t> (ta) &&
+                at < static_cast<int64_t> (ta + f.p.ds))
+              throw runtime_error ("relative branch into relocated prologue");
 
-            r.operands[n].mem.displacement = dr;
+            r.operands[n].imm.s = at;
+            r.operands[n].imm.u = static_cast<ZyanU64> (at);
+
+            if (r.branch_width == ZYDIS_BRANCH_WIDTH_8 &&
+                !byte_relative_only (ri->mnemonic))
+            {
+              r.branch_type = ZYDIS_BRANCH_TYPE_NEAR;
+              r.branch_width = ZYDIS_BRANCH_WIDTH_32;
+            }
           }
         }
 
-        ZyanUSize rl (f.p.ds + min_hook_size - rd);
+        ZyanUSize rl (f.cs - rd);
 
-        if (ZYAN_FAILED (ZydisEncoderEncodeInstruction (&r, fo + rd, &rl)))
+        if (ZYAN_FAILED (ZydisEncoderEncodeInstructionAbsolute (&r,
+                                                                fo + rd,
+                                                                &rl,
+                                                                fa + rd)))
           throw runtime_error ("unable to encode relocated instruction");
 
         rd += rl;
@@ -209,9 +261,11 @@ namespace iw4x
     apply ([] (void*& t, void* s, relocation_data& r) -> void
     {
       auto
-      commit ([] (uint8_t* b, void* src)
+      commit ([] (uint8_t* b, void* dst)
       {
-        ZydisEncoderRequest req {};
+        ZydisEncoderRequest req;
+        memset (&req, 0, sizeof (req));
+
         req.mnemonic = ZYDIS_MNEMONIC_JMP;
         req.machine_mode = ZYDIS_MACHINE_MODE_LONG_64;
         req.operand_count = 1;
@@ -228,25 +282,41 @@ namespace iw4x
         if (ZYAN_FAILED (ZydisEncoderEncodeInstruction (&req, in, &il)))
           throw runtime_error ("unable to encode absolute jump");
 
-        memmove (b, in, il);
-        memmove (b + il, static_cast<const void*> (&src), sizeof (src));
+        memcpy (b, in, il);
+        memcpy (b + il, &dst, sizeof (dst));
       });
 
       auto to (reinterpret_cast<uint8_t*> (t));
       auto fo (reinterpret_cast<uint8_t*> (r.f));
 
-      // Stitch it all together. Reintegrate trampoline to original function
-      // tail.
-      //
-      commit (fo + r.rd, to + r.ds);
+      uint8_t* ta (fo + r.rd);
+      void* re (reinterpret_cast<uint8_t*> (t) + r.ds);
+      DWORD old_protect (0);
 
-      // Update entry point.
+      // Write the absolute jump into the trampoline frame, pointing it back to
+      // the remainder of the original function.
       //
-      t = fo;
+      commit (ta, re);
 
-      // Overwrite original prologue with detour branch.
+      if (!VirtualProtect (to, r.ds, PAGE_EXECUTE_READWRITE, &old_protect))
+        throw runtime_error ("unable to make detour target writable");
+
+      // Write the actual hook jump over the original function prologue.
       //
       commit (to, s);
+
+      size_t ps (14);
+      if (r.ds > ps)
+        memset (to + ps, 0x90, r.ds - ps);
+
+      DWORD unused (0);
+      VirtualProtect (to, r.ds, old_protect, &unused);
+      VirtualProtect (fo, r.rd + min_hook_size, PAGE_EXECUTE_READ, &unused);
+
+      FlushInstructionCache (GetCurrentProcess (), fo, r.rd + min_hook_size);
+      FlushInstructionCache (GetCurrentProcess (), to, r.ds);
+
+      t = fo;
     });
 
     prologue_data p (decode (t));
