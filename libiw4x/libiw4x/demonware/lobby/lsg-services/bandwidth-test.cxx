@@ -46,7 +46,7 @@ namespace iw4x
         a.sin_addr.s_addr = htonl (INADDR_LOOPBACK);
         a.sin_port = 0;
 
-        if (bind (local_socket,
+        if (::bind (local_socket,
                   reinterpret_cast<sockaddr*> (&a),
                   sizeof (a)) == SOCKET_ERROR)
         {
