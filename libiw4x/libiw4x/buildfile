@@ -20,9 +20,9 @@ discord_dir = $src_root/upstream/discord
 #
 oat_dir = $src_root/upstream/open-asset-tools/src
 
-if ($cxx.target.system == 'mingw32')
-  cxx.libs += $steam_dir/redistributable_bin/win64/steam_api64.lib           \
-              $discord_dir/redistributable_bin/win64/discord_partner_sdk.lib
+cxx.libs += $steam_dir/redistributable_bin/win64/steam_api64.lib           \
+            $discord_dir/redistributable_bin/win64/discord_partner_sdk.lib
+
 
 lib{iw4x}: {hxx ixx txx cxx}{** -{version utility-*installed}} \
            {hxx            }{     version                    } \
