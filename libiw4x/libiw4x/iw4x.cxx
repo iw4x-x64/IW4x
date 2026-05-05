@@ -19,6 +19,7 @@
 #include <libiw4x/mod/mod-scheduler.hxx>
 #include <libiw4x/mod/mod-ui.hxx>
 #include <libiw4x/mod/mod-menu.hxx>
+#include <libiw4x/mod/mod-window.hxx>
 
 using namespace std;
 
@@ -247,6 +248,7 @@ namespace iw4x
         mod::oob_module ();
         mod::network_module ();
         mod::menu_module ();
+        mod::window_module ();
 
         // __scrt_common_main_seh
         //
