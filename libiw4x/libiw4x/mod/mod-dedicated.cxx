@@ -204,11 +204,11 @@ namespace iw4x
       void
       post_init ()
       {
-        Dvar_RegisterString (
-          "sv_motd",
-          "",
-          0,
-          "Message of the day displayed in the server browser");
+        // Dvar_RegisterString (
+        //   "sv_motd",
+        //   "",
+        //   0,
+        //   "Message of the day displayed in the server browser");
 
         // sv_lanOnly: when true the server suppresses master-server heartbeats
         // and only shows up on the LAN server list.
