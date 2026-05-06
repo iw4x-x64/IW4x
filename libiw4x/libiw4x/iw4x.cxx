@@ -20,6 +20,7 @@
 #include <libiw4x/mod/mod-ui.hxx>
 #include <libiw4x/mod/mod-menu.hxx>
 #include <libiw4x/mod/mod-window.hxx>
+#include <libiw4x/mod/mod-dvar.hxx>
 
 using namespace std;
 
@@ -249,6 +250,7 @@ namespace iw4x
         mod::network_module ();
         mod::menu_module ();
         mod::window_module ();
+        mod::dvar_module ();
 
         // __scrt_common_main_seh
         //
