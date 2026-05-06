@@ -23,7 +23,7 @@ namespace iw4x
         oob_pipeline& operator = (const oob_pipeline&) = delete;
 
         oob_disposition
-        process (const network_address&, const message&);
+        process (const netadr_t&, const msg_t&);
 
         void
         tick ();

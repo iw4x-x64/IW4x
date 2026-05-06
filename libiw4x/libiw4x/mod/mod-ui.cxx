@@ -14,10 +14,10 @@ namespace iw4x
   {
     namespace
     {
-      menu_definition&
+      menuDef_t&
       find_menu (const char* name)
       {
-        xasset_header h (DB_FindXAssetHeader (XASSET_TYPE_MENU, name));
+        XAssetHeader h (DB_FindXAssetHeader (ASSET_TYPE_MENU, name));
 
         // FIXME: DB_FindXAssetHeader will deadlock if the
         //        asset can't be found.
@@ -25,12 +25,12 @@ namespace iw4x
         return *h.menu;
       }
 
-      item_definition&
-      find_item (menu_definition& m, const char* name)
+      itemDef_s&
+      find_item (menuDef_t& m, const char* name)
       {
-        for (int i (0); i < m.item_count; ++i)
+        for (int i (0); i < m.itemCount; ++i)
         {
-          item_definition* d (m.items [i]);
+          itemDef_s* d (m.items [i]);
 
           // The engine's UI structures provide zero pointer safety guarantees.
           // We have to validate the item and its text pointer before doing our
@@ -48,26 +48,26 @@ namespace iw4x
         exit (1);
       }
 
-      menu_event_handler*
+      MenuEventHandler*
       make_event_handler (const char* script)
       {
-        menu_event_handler* h (new menu_event_handler ());
+        MenuEventHandler* h (new MenuEventHandler ());
 
-        h->event_type = 0;
-        h->event_data_union.unconditional_script = _strdup (script);
+        h->eventType = 0;
+        h->eventData.unconditionalScript = _strdup (script);
 
         return h;
       }
 
-      menu_event_handler_set*
+      MenuEventHandlerSet*
       make_event_handler_set (initializer_list<const char*> scripts)
       {
-        menu_event_handler_set* hs (new menu_event_handler_set ());
+        MenuEventHandlerSet* hs (new MenuEventHandlerSet ());
 
-        hs->event_handler_count = static_cast<int> (scripts.size ());
-        hs->event_handlers = new menu_event_handler* [scripts.size ()];
+        hs->eventHandlerCount = static_cast<int> (scripts.size ());
+        hs->eventHandlers = new MenuEventHandler* [scripts.size ()];
 
-        ranges::transform (scripts, hs->event_handlers, make_event_handler);
+        ranges::transform (scripts, hs->eventHandlers, make_event_handler);
 
         return hs;
       }
@@ -77,8 +77,8 @@ namespace iw4x
                   const char* item,
                   initializer_list<const char*> scripts)
       {
-        menu_definition& m (find_menu (menu));
-        item_definition& i (find_item (m, item));
+        menuDef_t& m (find_menu (menu));
+        itemDef_s& i (find_item (m, item));
 
         i.action = make_event_handler_set (scripts);
       }

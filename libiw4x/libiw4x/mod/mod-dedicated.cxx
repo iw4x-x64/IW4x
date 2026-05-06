@@ -169,7 +169,7 @@ namespace iw4x
       inline Cbuf_AddText_t Cbuf_AddText (
         reinterpret_cast<Cbuf_AddText_t> (0x1401EC4A0));
 
-      using Dvar_RegisterEnum_t = dvar* (*) (const char* name,
+      using Dvar_RegisterEnum_t = dvar_t* (*) (const char* name,
                                              const char** value_names,
                                              unsigned int flags,
                                              int default_index,
@@ -187,7 +187,7 @@ namespace iw4x
       // cached after registration so the heartbeat helper can read it without
       // doing a string lookup on every tick.
       //
-      dvar* sv_lan_only_dvar (nullptr);
+      dvar_t* sv_lan_only_dvar (nullptr);
 
       // Enqueue a command with a trailing newline so Cbuf_AddText treats it as
       // a complete command token.

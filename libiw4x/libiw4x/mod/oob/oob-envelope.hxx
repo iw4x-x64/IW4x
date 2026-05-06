@@ -27,7 +27,7 @@ namespace iw4x
       // forwarded to the engine.
       //
       std::optional<oob_envelope>
-      parse_envelope (const network_address&, const message&);
+      parse_envelope (const netadr_t&, const msg_t&);
     }
   }
 }

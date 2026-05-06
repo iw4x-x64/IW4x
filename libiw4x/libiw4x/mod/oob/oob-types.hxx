@@ -18,7 +18,7 @@ namespace iw4x
 
       struct oob_source_endpoint
       {
-        network_address address;
+        netadr_t address;
       };
 
       // The disposition tells the pipeline what to do with an incoming

@@ -23,7 +23,7 @@ namespace iw4x
     extern "C"
     {
       bool
-      oob_dispatch (const network_address* a, const message* m)
+      oob_dispatch (const netadr_t* a, const msg_t* m)
       {
         const oob::oob_disposition d (active_pipeline->process (*a, *m));
         return d != oob::oob_disposition::forward_to_engine;

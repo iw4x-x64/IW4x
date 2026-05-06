@@ -20,6 +20,7 @@ namespace iw4x
     static constexpr int mc (18);
 
     SOCKET bd_s (INVALID_SOCKET);
+    auto* const ip_socket (reinterpret_cast<uint64_t*> (0x1467E8490));
 
     // Steal the Demonware (bdNet) socket for our own out-of-band traffic.
     //
@@ -136,14 +137,14 @@ namespace iw4x
     }
 
     void
-    sv_connectionless_packet (network_address* a, message* m)
+    sv_connectionless_packet (netadr_t* a, msg_t* m)
     {
       // We only really care about remote OOB packets, which are indicated by a
       // 0xFFFFFFFF header. That is, skip loopback traffic (type 2) so we don't
       // end up flooding the console with the host's internal chatter.
       //
-      if (a->type != NETWORK_ADDRESS_LOOPBACK && m != nullptr &&
-          m->data != nullptr && m->current_size > 4)
+      if (a->type != NA_LOOPBACK && m != nullptr &&
+          m->data != nullptr && m->cursize > 4)
       {
         const unsigned char* h (
           reinterpret_cast<const unsigned char*> (m->data));
@@ -153,7 +154,7 @@ namespace iw4x
 
         if (o)
         {
-          string c (grep_oob (m->data, m->current_size));
+          string c (grep_oob (m->data, m->cursize));
 
           // Before the engine gets its hands on a 'connect' command, we need to
           // make sure we clean up those stale DW transport pointers.
@@ -192,14 +193,14 @@ namespace iw4x
     //
 
     bool
-    sys_send_packet (int l, const char* d, const network_address* a)
+    sys_send_packet (int l, const char* d, const netadr_t* a)
     {
       // The engine tags addresses from NET_GetPacket as BROADCAST (3) and keeps
       // them that way during the challenge/response phase. We need to intercept
       // both IP and BROADCAST so they go through our sendto path rather than
       // the engine's internal conversion.
       //
-      if (a->type != NETWORK_ADDRESS_IP && a->type != NETWORK_ADDRESS_BROADCAST)
+      if (a->type != NA_IP && a->type != NA_BROADCAST)
       {
         return Sys_SendPacket (l, d, a);
       }

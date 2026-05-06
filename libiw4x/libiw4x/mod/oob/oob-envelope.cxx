@@ -41,13 +41,13 @@ namespace iw4x
       }
 
       optional<oob_envelope>
-      parse_envelope (const network_address& a, const message& m)
+      parse_envelope (const netadr_t& a, const msg_t& m)
       {
         log::trace_l3 << "parsing packet for oob envelope";
 
         // Check if we even have enough bytes to bother parsing.
         //
-        if (m.data == nullptr || m.current_size < min_sz)
+        if (m.data == nullptr || m.cursize < min_sz)
         {
           log::trace_l3 << "dropping undersized or null packet";
           return nullopt;
@@ -67,7 +67,7 @@ namespace iw4x
         // and is delimited by whitespace or null.
         //
         const char* p (m.data + 4);
-        const char* e (m.data + m.current_size);
+        const char* e (m.data + m.cursize);
 
         const char* const s (p);
 

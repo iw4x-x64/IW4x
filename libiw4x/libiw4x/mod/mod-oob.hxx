@@ -9,7 +9,7 @@ namespace iw4x
     extern "C"
     {
       bool
-      oob_dispatch (const network_address*, const message*);
+      oob_dispatch (const netadr_t*, const msg_t*);
     }
 
     class oob_module

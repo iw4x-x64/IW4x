@@ -343,13 +343,13 @@ namespace con
   }
 }
 
-static_assert (sizeof (iw4x::menu_definition) == sizeof (IW4::menuDef_t));
-static_assert (sizeof (iw4x::menu_list) == sizeof (IW4::MenuList));
-static_assert (sizeof (iw4x::item_definition) == sizeof (IW4::itemDef_s));
-static_assert (sizeof (iw4x::statement) == sizeof (IW4::Statement_s));
-static_assert (sizeof (iw4x::expression_supporting_data) ==
+static_assert (sizeof (iw4x::menuDef_t) == sizeof (IW4::menuDef_t));
+static_assert (sizeof (iw4x::MenuList) == sizeof (IW4::MenuList));
+static_assert (sizeof (iw4x::itemDef_s) == sizeof (IW4::itemDef_s));
+static_assert (sizeof (iw4x::Statement_s) == sizeof (IW4::Statement_s));
+static_assert (sizeof (iw4x::ExpressionSupportingData) ==
                sizeof (IW4::ExpressionSupportingData));
-static_assert (sizeof (iw4x::menu_event_handler_set) ==
+static_assert (sizeof (iw4x::MenuEventHandlerSet) ==
                sizeof (IW4::MenuEventHandlerSet));
 
 namespace iw4x
@@ -358,7 +358,7 @@ namespace iw4x
   {
     namespace
     {
-      template <typename OatAssetType, xasset_type engine_type, auto member>
+      template <typename OatAssetType, XAssetType engine_type, auto member>
       class engine_asset_creator final : public AssetCreator<OatAssetType>
       {
       public:
@@ -366,7 +366,7 @@ namespace iw4x
         CreateAsset (const std::string& asset_name,
                      AssetCreationContext& context) override
         {
-          const xasset_header header (
+          const XAssetHeader header (
             DB_FindXAssetHeader (engine_type, asset_name.c_str ()));
 
           auto* const engine_ptr (header.*member);
@@ -384,12 +384,12 @@ namespace iw4x
 
       using material_creator =
         engine_asset_creator<IW4::AssetMaterial,
-                             XASSET_TYPE_MATERIAL,
-                             &xasset_header::material_pointer>;
+                             ASSET_TYPE_MATERIAL,
+                             &XAssetHeader::material>;
 
       using sound_creator = engine_asset_creator<IW4::AssetSound,
-                                                 XASSET_TYPE_SOUND,
-                                                 &xasset_header::sound>;
+                                                 ASSET_TYPE_SOUND,
+                                                 &XAssetHeader::sound>;
 
       // Repair parent back-pointers in menu item definitions.
       //
@@ -398,17 +398,17 @@ namespace iw4x
       // it after parsing.
       //
       void
-      repair_menu_runtime_links (menu_definition* menu)
+      repair_menu_runtime_links (menuDef_t* menu)
       {
         if (menu == nullptr)
           return;
 
-        assert (menu->item_count >= 0);
+        assert (menu->itemCount >= 0);
 
-        if (menu->item_count <= 0 || menu->items == nullptr)
+        if (menu->itemCount <= 0 || menu->items == nullptr)
           return;
 
-        for (int i (0); i < menu->item_count; ++i)
+        for (int i (0); i < menu->itemCount; ++i)
         {
           auto* const item (menu->items [i]);
 
@@ -485,15 +485,15 @@ namespace iw4x
         }
 
         auto* const raw_list (
-          reinterpret_cast<menu_list*> (list_info->Asset ()));
+          reinterpret_cast<MenuList*> (list_info->Asset ()));
 
-        std::vector<menu_definition*> menus;
+        std::vector<menuDef_t*> menus;
 
-        if (raw_list->menu_count > 0 && raw_list->menus != nullptr)
+        if (raw_list->menuCount > 0 && raw_list->menus != nullptr)
         {
-          menus.reserve (raw_list->menu_count);
+          menus.reserve (raw_list->menuCount);
 
-          for (int i (0); i < raw_list->menu_count; ++i)
+          for (int i (0); i < raw_list->menuCount; ++i)
           {
             auto* const menu (raw_list->menus [i]);
 

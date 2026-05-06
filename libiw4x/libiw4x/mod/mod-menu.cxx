@@ -46,23 +46,23 @@ namespace iw4x
 
       struct live_menu_slot
       {
-        ui_context*      context;
+        UiContext*      context;
         int              index;
-        menu_definition* original;
-        menu_definition* replacement;
-        bool             stack_slot;   // True: menu_stack[], false: menus[].
+        menuDef_t* original;
+        menuDef_t* replacement;
+        bool             stack_slot;   // True: menuStack[], false: menus[].
       };
 
       struct appended_menu
       {
-        ui_context* context;
-        menu_definition* menu;
+        UiContext* context;
+        menuDef_t* menu;
       };
 
       struct owned_menu_list
       {
-        std::unique_ptr<menu_list>           asset;
-        std::unique_ptr<menu_definition*[]>  menus;
+        std::unique_ptr<MenuList>           asset;
+        std::unique_ptr<menuDef_t*[]>  menus;
       };
 
       struct menu_override_store
@@ -70,9 +70,9 @@ namespace iw4x
         std::vector<std::shared_ptr<void>>              keepalive;
         std::vector<owned_menu_list>                    owned_menu_lists;
 
-        std::unordered_map<menu_key, menu_definition*>  menus_by_name;
+        std::unordered_map<menu_key, menuDef_t*>  menus_by_name;
         std::unordered_map<menu_key, bool>              appendable_by_name;
-        std::unordered_map<menu_key, menu_list*>        menu_lists_by_path;
+        std::unordered_map<menu_key, MenuList*>        menu_lists_by_path;
 
         std::vector<live_menu_slot>                     replaced_slots;
         std::vector<appended_menu>                      appended_menus;
@@ -101,7 +101,7 @@ namespace iw4x
       }
 
       menu_key
-      menu_name_key (const menu_definition* menu)
+      menu_name_key (const menuDef_t* menu)
       {
         if (menu == nullptr || menu->window.name == nullptr)
           return {};
@@ -110,24 +110,24 @@ namespace iw4x
       }
 
       int
-      bounded_menu_count (const ui_context* c)
+      bounded_menu_count (const UiContext* c)
       {
         if (c == nullptr)
           return 0;
 
-        return std::clamp (c->menu_count, 0, max_context_menus);
+        return std::clamp (c->menuCount, 0, max_context_menus);
       }
 
       int
-      bounded_open_menu_count (const ui_context* c)
+      bounded_open_menu_count (const UiContext* c)
       {
         if (c == nullptr)
           return 0;
 
-        return std::clamp (c->open_menu_count, 0, max_menu_stack);
+        return std::clamp (c->openMenuCount, 0, max_menu_stack);
       }
 
-      std::array<ui_context*, 2>
+      std::array<UiContext*, 2>
       ui_contexts ()
       {
         return {UI_GetFrontendContext (), UI_GetClientDC ()};
@@ -136,13 +136,13 @@ namespace iw4x
       bool
       has_menu_in_live_contexts (const menu_key& name_key)
       {
-        for (ui_context* c : ui_contexts ())
+        for (UiContext* c : ui_contexts ())
         {
           const int n (bounded_menu_count (c));
 
           for (int i (0); i < n; ++i)
           {
-            const menu_definition* m (c->menus [i]);
+            const menuDef_t* m (c->Menus [i]);
 
             if (m == nullptr || m->window.name == nullptr)
               continue;
@@ -156,7 +156,7 @@ namespace iw4x
       }
 
       void
-      remove_menu_from_context (ui_context* context, menu_definition* menu)
+      remove_menu_from_context (UiContext* context, menuDef_t* menu)
       {
         if (context == nullptr || menu == nullptr)
           return;
@@ -166,16 +166,16 @@ namespace iw4x
 
         for (int read (0); read < n; ++read)
         {
-          menu_definition* m (context->menus [read]);
+          menuDef_t* m (context->Menus [read]);
 
           if (m != menu)
-            context->menus [write++] = m;
+            context->Menus [write++] = m;
         }
 
         for (int i (write); i < n; ++i)
-          context->menus [i] = nullptr;
+          context->Menus [i] = nullptr;
 
-        context->menu_count = write;
+        context->menuCount = write;
       }
 
       void
@@ -191,16 +191,16 @@ namespace iw4x
             if (slot.index >= bounded_open_menu_count (slot.context))
               continue;
 
-            if (slot.context->menu_stack [slot.index] == slot.replacement)
-              slot.context->menu_stack [slot.index] = slot.original;
+            if (slot.context->menuStack [slot.index] == slot.replacement)
+              slot.context->menuStack [slot.index] = slot.original;
           }
           else
           {
             if (slot.index >= bounded_menu_count (slot.context))
               continue;
 
-            if (slot.context->menus [slot.index] == slot.replacement)
-              slot.context->menus [slot.index] = slot.original;
+            if (slot.context->Menus [slot.index] == slot.replacement)
+              slot.context->Menus [slot.index] = slot.original;
           }
         }
 
@@ -212,9 +212,9 @@ namespace iw4x
 
       bool
       try_replace_slot (menu_override_store& store,
-                        ui_context* context,
+                        UiContext* context,
                         int index,
-                        menu_definition* current,
+                        menuDef_t* current,
                         bool stack_slot,
                         std::unordered_set<menu_key>& matched)
       {
@@ -231,9 +231,9 @@ namespace iw4x
           live_menu_slot {context, index, current, it->second, stack_slot});
 
         if (stack_slot)
-          context->menu_stack [index] = it->second;
+          context->menuStack [index] = it->second;
         else
-          context->menus [index] = it->second;
+          context->Menus [index] = it->second;
 
         matched.insert (key);
         return true;
@@ -243,7 +243,7 @@ namespace iw4x
       append_unmatched_menus (menu_override_store& store,
                               const std::unordered_set<menu_key>& matched)
       {
-        ui_context* frontend (UI_GetFrontendContext ());
+        UiContext* frontend (UI_GetFrontendContext ());
 
         for (const auto& [name_key, menu] : store.menus_by_name)
         {
@@ -263,7 +263,7 @@ namespace iw4x
             continue;
           }
 
-          frontend->menus [frontend->menu_count++] = menu;
+          frontend->Menus [frontend->menuCount++] = menu;
           store.appended_menus.push_back ({frontend, menu});
         }
       }
@@ -273,7 +273,7 @@ namespace iw4x
       {
         std::unordered_set<menu_key> matched;
 
-        for (ui_context* c : ui_contexts ())
+        for (UiContext* c : ui_contexts ())
         {
           const int n_menus (bounded_menu_count (c));
           const int n_stack (bounded_open_menu_count (c));
@@ -282,7 +282,7 @@ namespace iw4x
             try_replace_slot (store,
                               c,
                               i,
-                              c->menus [i],
+                              c->Menus [i],
                               /* stack_slot */ false,
                               matched);
 
@@ -290,7 +290,7 @@ namespace iw4x
             try_replace_slot (store,
                               c,
                               i,
-                              c->menu_stack [i],
+                              c->menuStack [i],
                               /* stack_slot */ true,
                               matched);
         }
@@ -366,20 +366,20 @@ namespace iw4x
       }
 
       owned_menu_list
-      make_owned_menu_list (const menu_list* template_asset,
-                            const std::vector<menu_definition*>& accepted)
+      make_owned_menu_list (const MenuList* template_asset,
+                            const std::vector<menuDef_t*>& accepted)
       {
         assert (template_asset != nullptr);
 
         owned_menu_list out;
-        out.asset = std::make_unique<menu_list> ();
-        out.menus = std::make_unique<menu_definition*[]> (accepted.size ());
+        out.asset = std::make_unique<MenuList> ();
+        out.menus = std::make_unique<menuDef_t*[]> (accepted.size ());
 
         for (std::size_t i (0); i < accepted.size (); ++i)
           out.menus [i] = accepted [i];
 
         out.asset->name = template_asset->name;
-        out.asset->menu_count = static_cast<int> (accepted.size ());
+        out.asset->menuCount = static_cast<int> (accepted.size ());
         out.asset->menus = out.menus.get ();
 
         return out;
@@ -401,10 +401,10 @@ namespace iw4x
 
           store->keepalive.emplace_back (parsed->keepalive);
 
-          std::vector<menu_definition*> accepted;
+          std::vector<menuDef_t*> accepted;
           accepted.reserve (parsed->menus.size ());
 
-          for (menu_definition* m : parsed->menus)
+          for (menuDef_t* m : parsed->menus)
           {
             const menu_key key (menu_name_key (m));
             const bool exists (has_menu_in_live_contexts (key));
@@ -423,7 +423,7 @@ namespace iw4x
           if (accepted.empty () && !is_menu_list && !src.allow_new_menus)
             continue;
 
-          menu_list* final_list (parsed->menu_list_asset);
+          MenuList* final_list (parsed->menu_list_asset);
 
           if (accepted.size () != parsed->menus.size ())
           {
@@ -458,15 +458,15 @@ namespace iw4x
         bypass_guard& operator = (const bypass_guard&) = delete;
       };
 
-      xasset_header
-      find_original_asset (xasset_type type, const char* name)
+      XAssetHeader
+      find_original_asset (XAssetType type, const char* name)
       {
         bypass_guard g;
         return DB_FindXAssetHeader (type, name);
       }
 
-      xasset_header
-      db_find_xasset_header (xasset_type type, const char* name)
+      XAssetHeader
+      db_find_xasset_header (XAssetType type, const char* name)
       {
         if (db_find_xasset_header_bypass || name == nullptr)
           return DB_FindXAssetHeader (type, name);
@@ -477,25 +477,25 @@ namespace iw4x
         {
           const menu_key key (normalize_key (name));
 
-          if (type == XASSET_TYPE_MENU)
+          if (type == ASSET_TYPE_MENU)
           {
             const auto it (store->menus_by_name.find (key));
 
             if (it != store->menus_by_name.end ())
             {
-              xasset_header h {};
+              XAssetHeader h {};
               h.menu = it->second;
               return h;
             }
           }
-          else if (type == XASSET_TYPE_MENU_LIST)
+          else if (type == ASSET_TYPE_MENULIST)
           {
             const auto it (store->menu_lists_by_path.find (key));
 
             if (it != store->menu_lists_by_path.end ())
             {
-              xasset_header h {};
-              h.menu_list_pointer = it->second;
+              XAssetHeader h {};
+              h.menuList = it->second;
               return h;
             }
           }

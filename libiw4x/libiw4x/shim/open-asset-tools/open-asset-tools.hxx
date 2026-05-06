@@ -14,8 +14,8 @@ namespace iw4x
     struct parsed_menu_file
     {
       std::string source_path;
-      menu_list* menu_list_asset;
-      std::vector<menu_definition*> menus;
+      MenuList* menu_list_asset;
+      std::vector<menuDef_t*> menus;
       std::shared_ptr<void> keepalive;
     };
 

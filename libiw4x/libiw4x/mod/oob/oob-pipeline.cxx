@@ -20,7 +20,7 @@ namespace iw4x
       }
 
       oob_disposition oob_pipeline::
-      process (const network_address& a, const message& m)
+      process (const netadr_t& a, const msg_t& m)
       {
         // First, see if this is even an OOB message we care about. If not, let
         // the engine deal with it.
