@@ -1,8 +1,11 @@
 #include <libiw4x/iw4x.hxx>
+#include <libiw4x/win32/process-threads-api.hxx>
 
 #include <array>
 #include <string>
 #include <cstring>
+
+#include <MinHook.h>
 
 using namespace std;
 
@@ -177,6 +180,24 @@ namespace iw4x
                       MB_ICONERROR);
           exit (1);
         }
+
+        // Set up the hooks before we hand control back to the host.
+        // There will eventually be quite a few of these, so keep them
+        // together here where it is easy to see which parts of the
+        // process we take over during startup.
+        //
+        // MinHook lets us create everything first and then enable the
+        // complete set at once. So this is also the place to add the
+        // other hooks as they appear.
+        //
+        MH_Initialize ();
+
+        MH_CreateHookApi (
+          L"kernel32.dll", "ExitProcess",
+          reinterpret_cast <LPVOID>  (&win32::exit_process),
+          win32::exit_process_original ());
+
+        MH_EnableHook (MH_ALL_HOOKS);
 
         // And with our early setup out of the way, continue with the CRT entry
         // point the host was going to use. From here startup proceeds normally
