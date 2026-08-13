@@ -15,6 +15,19 @@ cxx.poptions =+ "-I$out_root" "-I$src_root"
 obja{*}: cxx.poptions += -DLIBIW4X_STATIC_BUILD
 objs{*}: cxx.poptions += -DLIBIW4X_SHARED_BUILD
 
+# Link options.
+#
+# Use DllMain as the image entry point. See iw4x.cxx for why MinGW
+# startup cannot happen from the usual loader callback and how we
+# arrange to run it afterwards.
+#
+# There is one slightly non-obvious detail here: dllcrt2.o still needs
+# to be linked even though we no longer enter through DllMainCRTStartup.
+# _CRT_INIT() lives there and the deferred path in iw4x.cxx calls it
+# directly.
+#
+libs{iw4x}: cxx.loptions += -Wl,--entry=DllMain
+
 # Export options.
 #
 lib{iw4x}:
