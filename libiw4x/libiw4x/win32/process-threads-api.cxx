@@ -14,6 +14,31 @@ namespace iw4x
   {
     namespace
     {
+      // Note that this protocol is deliberately a little racy. Process
+      // termination is already a one-way operation and we only need
+      // enough coordination here to give the first caller a reasonable
+      // opportunity to run global destruction before somebody finally
+      // tears the process down. We do not need to turn this into a
+      // general-purpose shutdown protocol with a perfectly ordered
+      // observable state.
+      //
+      // In particular, some of the fields below are published
+      // independently, so another ExitProcess() caller can observe
+      // termination in progress while the winning thread is still
+      // publishing the rest of its state. All accesses are atomic, so
+      // this is not a C++ data race. It does mean that a losing caller
+      // can occasionally make its decision from a partially published
+      // snapshot.
+      //
+      // This is intentional. Every path through this protocol ends in
+      // either ExitProcess() or TerminateProcess(), and there is no
+      // state that must remain meaningful afterwards. If two
+      // terminating threads race closely enough to expose one of these
+      // intermediate states, terminating the process is already the
+      // required outcome. Keeping the protocol small also matters here
+      // since it runs precisely when normal application lifetime
+      // assumptions are starting to disappear.
+      //
       struct termination
       {
         static constexpr unsigned long deadline = 5000;
