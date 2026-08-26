@@ -366,13 +366,21 @@ namespace iw4x
       if (handle_ == INVALID_HANDLE_VALUE)
         return false;
 
-      if (first_)
+      for (;;)
       {
-        first_ = false;
+        if (first_)
+          first_ = false;
+        else if (FindNextFileW (handle_, &entry_) == 0)
+          return false;
+
+        const wchar_t* n (entry_.cFileName);
+
+        if (n[0] == L'.' &&
+            (n[1] == L'\0' || (n[1] == L'.' && n[2] == L'\0')))
+          continue;
+
         return true;
       }
-
-      return FindNextFileW (handle_, &entry_) != 0;
     }
 
     std::int64_t directory::
