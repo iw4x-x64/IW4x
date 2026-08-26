@@ -1,0 +1,21 @@
+LIBRARY XCurl.dll
+EXPORTS
+curl_global_init = libiw4x.xcurl_global_init
+curl_global_cleanup = libiw4x.xcurl_global_cleanup
+curl_easy_init = libiw4x.xcurl_easy_init
+curl_easy_setopt = libiw4x.xcurl_easy_setopt
+curl_easy_getinfo = libiw4x.xcurl_easy_getinfo
+curl_easy_cleanup = libiw4x.xcurl_easy_cleanup
+curl_easy_strerror = libiw4x.xcurl_easy_strerror
+curl_easy_escape = libiw4x.xcurl_easy_escape
+curl_easy_unescape = libiw4x.xcurl_easy_unescape
+curl_free = libiw4x.xcurl_free
+curl_slist_append = libiw4x.xcurl_slist_append
+curl_slist_free_all = libiw4x.xcurl_slist_free_all
+curl_multi_init = libiw4x.xcurl_multi_init
+curl_multi_add_handle = libiw4x.xcurl_multi_add_handle
+curl_multi_remove_handle = libiw4x.xcurl_multi_remove_handle
+curl_multi_perform = libiw4x.xcurl_multi_perform
+curl_multi_poll = libiw4x.xcurl_multi_poll
+curl_multi_info_read = libiw4x.xcurl_multi_info_read
+curl_multi_cleanup = libiw4x.xcurl_multi_cleanup
