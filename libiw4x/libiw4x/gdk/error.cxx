@@ -1,5 +1,6 @@
 #include <libiw4x/gdk/error.hxx>
 
+#include <cstdio>
 #include <string_view>
 
 #include <quill/Backend.h>
@@ -50,10 +51,14 @@ namespace iw4x
 
       text<description_size> m ("{}", what);
 
-      MessageBoxA (nullptr,
-                   m.c_str (),
-                   "IW4x",
-                   MB_OK | MB_ICONERROR | MB_TOPMOST | MB_SETFOREGROUND);
+      std::fprintf (stderr, "iw4x: %s\n", m.c_str ());
+      std::fflush (stderr);
+
+      if (GetConsoleWindow () == nullptr)
+        MessageBoxA (nullptr,
+                     m.c_str (),
+                     "IW4x",
+                     MB_OK | MB_ICONERROR | MB_TOPMOST | MB_SETFOREGROUND);
 
       __fastfail (FAST_FAIL_FATAL_APP_EXIT);
     }
