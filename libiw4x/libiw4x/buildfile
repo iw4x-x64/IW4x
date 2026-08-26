@@ -4,10 +4,10 @@ import libs += libcurl%liba{curl}
 import libs += libminhook%liba{minhook}
 import libs += libquill%liba{quill}
 
-lib{iw4x}: {hxx ixx txx cxx}{** -version -xcurl/forward} \
-           {hxx            }{    version}                         \
-           def{iw4x}                                              \
-           $libs
+./: lib{iw4x}: {hxx ixx txx cxx}{** -version -xcurl/forward} \
+               {hxx            }{    version               } \
+               {def            }{iw4x                      } \
+               $libs
 
 libs{XCurl}: xcurl/cxx{forward} xcurl/def{XCurl}
 {
