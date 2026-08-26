@@ -4,6 +4,7 @@
 
 #include <libiw4x/logger.hxx>
 
+#include <libiw4x/gdk/async.hxx>
 #include <libiw4x/gdk/feature.hxx>
 #include <libiw4x/gdk/system.hxx>
 
@@ -13,7 +14,8 @@ namespace iw4x
   {
     namespace
     {
-      using runtime = catalog<xruntime_feature,
+      using runtime = catalog<xasync,
+                              xruntime_feature,
                               xsystem>;
     }
 

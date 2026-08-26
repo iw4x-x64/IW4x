@@ -6,6 +6,7 @@
 #include <libiw4x/gdk/text.hxx>
 #include <libiw4x/gdk/types.hxx>
 #include <libiw4x/gdk/vtable.hxx>
+#include <libiw4x/gdk/async.hxx>
 #include <libiw4x/gdk/system.hxx>
 #include <libiw4x/gdk/feature.hxx>
 #include <libiw4x/gdk/registry.hxx>
@@ -93,12 +94,14 @@ main ()
 
   {
     assert (provides (feature::system));
+    assert (provides (feature::async));
+    assert (provides (feature::task_queue));
     assert (provides (feature::error));
     assert (!provides (feature::game_save));
     assert (!provides (static_cast<feature> (99)));
 
-    assert (interface_count () == 2);
-    assert (family_count () == 2);
+    assert (interface_count () == 3);
+    assert (family_count () == 5);
   }
 
   {
