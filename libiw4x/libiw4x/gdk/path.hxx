@@ -88,6 +88,9 @@ namespace iw4x
       wchar_t     value_[capacity];
     };
 
+    chars
+    narrow (const wchar_t*, char* buffer, std::size_t size) noexcept;
+
     bool
     is_directory (const path&) noexcept;
 

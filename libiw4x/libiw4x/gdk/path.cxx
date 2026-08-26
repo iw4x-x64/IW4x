@@ -117,6 +117,30 @@ namespace iw4x
       return chars (b, static_cast<std::size_t> (r));
     }
 
+    chars
+    narrow (const wchar_t* w, char* b, std::size_t n) noexcept
+    {
+      if (n == 0)
+        return chars ();
+
+      int r (WideCharToMultiByte (CP_UTF8,
+                                  0,
+                                  w,
+                                  -1,
+                                  b,
+                                  static_cast<int> (n),
+                                  nullptr,
+                                  nullptr));
+
+      if (r <= 0)
+      {
+        b[0] = '\0';
+        return chars ();
+      }
+
+      return chars (b, static_cast<std::size_t> (r) - 1);
+    }
+
     namespace
     {
       bool
