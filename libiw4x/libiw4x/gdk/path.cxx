@@ -177,13 +177,13 @@ namespace iw4x
 
       for (std::size_t i (1); i != p.size (); ++i)
       {
-        if (s[i] != L'\\')
+        if (s[i] != L'\\' && s[i] != L'/')
           continue;
 
         w.clear ();
         w.extend (s, i);
 
-        if (w.size () > 2)
+        if (w.size () != 0 && w.c_str ()[w.size () - 1] != L':')
           make_directory (w.c_str ());
       }
 
