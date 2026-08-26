@@ -1,5 +1,9 @@
 #include <libiw4x/gdk/task-queue.hxx>
 
+#include <libiw4x/gdk/async.hxx>
+
+#include <new>
+
 #include <libiw4x/logger.hxx>
 
 #include <libiw4x/gdk/error.hxx>
@@ -378,6 +382,280 @@ namespace iw4x
     stop_queues () noexcept
     {
       pool ().stop ();
+    }
+    namespace
+    {
+      task_queue&
+      resolve (task_queue* q) noexcept
+      {
+        return q != nullptr ? *q : process_queue ();
+      }
+
+      struct adapted
+      {
+        void  (*run) (void*, bool);
+        void*   context;
+      };
+
+      void
+      run_adapted (void* p, bool canceled) noexcept
+      {
+        auto* a (static_cast<adapted*> (p));
+
+        a->run (a->context, canceled);
+
+        delete a;
+      }
+
+      struct completion
+      {
+        void  (*run) (void*);
+        void*   context;
+      };
+
+      void
+      run_completion (void* p, bool) noexcept
+      {
+        auto* c (static_cast<completion*> (p));
+
+        c->run (c->context);
+
+        delete c;
+      }
+
+      bool
+      submit_adapted (task_port& p,
+                      std::uint32_t delay,
+                      void* context,
+                      void (*f) (void*, bool)) noexcept
+      {
+        auto* a (new (std::nothrow) adapted {f, context});
+
+        if (a == nullptr)
+          return false;
+
+        if (p.submit (delay, &run_adapted, a))
+          return true;
+
+        delete a;
+        return false;
+      }
+    }
+
+    HRESULT WINAPI xasync::
+    queue_create (void*,
+                  dispatch_mode w,
+                  dispatch_mode c,
+                  task_queue** out) noexcept
+    {
+      return guard ("XTaskQueueCreate", [&] () -> HRESULT
+      {
+        if (out == nullptr)
+          raise (E_POINTER, "no result pointer");
+
+        task_queue* q (create_queue (w, c));
+
+        if (q == nullptr)
+          raise (E_OUTOFMEMORY, "no room for another task queue");
+
+        info ("task queue created, work {} completion {}",
+              static_cast<std::uint32_t> (w),
+              static_cast<std::uint32_t> (c));
+
+        *out = q;
+        return S_OK;
+      });
+    }
+
+    HRESULT WINAPI xasync::
+    queue_create_composite (void*,
+                            task_port* w,
+                            task_port* c,
+                            task_queue** out) noexcept
+    {
+      return guard ("XTaskQueueCreateComposite", [&] () -> HRESULT
+      {
+        if (out == nullptr || w == nullptr || c == nullptr)
+          raise (E_POINTER, "no port or no result pointer");
+
+        task_queue* q (create_composite_queue (*w, *c));
+
+        if (q == nullptr)
+          raise (E_OUTOFMEMORY, "no room for another task queue");
+
+        *out = q;
+        return S_OK;
+      });
+    }
+
+    HRESULT WINAPI xasync::
+    queue_get_port (void*, task_queue* q, port p, task_port** out) noexcept
+    {
+      return guard ("XTaskQueueGetPort", [&] () -> HRESULT
+      {
+        l2 ("XTaskQueueGetPort ({})", static_cast<std::uint32_t> (p));
+
+        if (out == nullptr)
+          raise (E_POINTER, "no result pointer");
+
+        *out = &resolve (q)[p];
+        return S_OK;
+      });
+    }
+
+    HRESULT WINAPI xasync::
+    queue_duplicate_handle (void*, task_queue* q, task_queue** out) noexcept
+    {
+      return guard ("XTaskQueueDuplicateHandle", [&] () -> HRESULT
+      {
+        if (q == nullptr || out == nullptr)
+          raise (E_POINTER, "no queue or no result pointer");
+
+        l1 ("task queue duplicated, {} references", q->duplicate ());
+
+        *out = q;
+        return S_OK;
+      });
+    }
+
+    bool WINAPI xasync::
+    queue_dispatch (void*, task_queue* q, port p, std::uint32_t t) noexcept
+    {
+      return guard ("XTaskQueueDispatch", false, [&] () -> bool
+      {
+        if (q == nullptr)
+          return false;
+
+        bool r ((*q)[p].dispatch (t));
+
+        if (r)
+          l1 ("XTaskQueueDispatch ({}) ran a callback",
+              static_cast<std::uint32_t> (p));
+
+        return r;
+      });
+    }
+
+    HRESULT WINAPI xasync::
+    queue_close_handle (void*, task_queue* q) noexcept
+    {
+      return guard ("XTaskQueueCloseHandle", [&] () -> HRESULT
+      {
+        if (q != nullptr)
+          l1 ("task queue closed, {} references", q->close ());
+
+        return S_OK;
+      });
+    }
+
+    HRESULT WINAPI xasync::
+    queue_submit_callback (void*,
+                           task_queue* q,
+                           port p,
+                           void* context,
+                           void (*f) (void*, bool)) noexcept
+    {
+      return guard ("XTaskQueueSubmitCallback", [&] () -> HRESULT
+      {
+        if (q == nullptr || f == nullptr)
+          raise_invalid ("no queue or no callback");
+
+        l2 ("XTaskQueueSubmitCallback ({})", static_cast<std::uint32_t> (p));
+
+        return submit_adapted ((*q)[p], 0, context, f) ? S_OK : E_ABORT;
+      });
+    }
+
+    HRESULT WINAPI xasync::
+    queue_submit_delayed_callback (void*,
+                                   task_queue* q,
+                                   port p,
+                                   std::uint32_t delay,
+                                   void* context,
+                                   void (*f) (void*, bool)) noexcept
+    {
+      return guard ("XTaskQueueSubmitDelayedCallback", [&] () -> HRESULT
+      {
+        if (q == nullptr || f == nullptr)
+          raise_invalid ("no queue or no callback");
+
+        l2 ("XTaskQueueSubmitDelayedCallback ({}, {} ms)",
+            static_cast<std::uint32_t> (p),
+            delay);
+
+        return submit_adapted ((*q)[p], delay, context, f) ? S_OK : E_ABORT;
+      });
+    }
+
+    HRESULT WINAPI xasync::
+    queue_terminate (void*,
+                     task_queue* q,
+                     bool wait,
+                     void* context,
+                     void (*f) (void*)) noexcept
+    {
+      return guard ("XTaskQueueTerminate", [&] () -> HRESULT
+      {
+        if (q == nullptr)
+          raise_invalid ("no queue");
+
+        if (!q->terminate ())
+          return E_ABORT;
+
+        info ("task queue terminating");
+
+        (*q)[port::work].terminate ();
+
+        if (f != nullptr)
+        {
+          auto* c (new (std::nothrow) completion {f, context});
+
+          if (c == nullptr ||
+              !(*q)[port::completion].submit (0, &run_completion, c))
+          {
+            delete c;
+
+            warn ("the queue would not take its termination callback");
+          }
+        }
+
+        (*q)[port::completion].terminate ();
+
+        if (wait)
+          while ((*q)[port::completion].dispatch (INFINITE))
+            ;
+
+        return S_OK;
+      });
+    }
+
+    bool WINAPI xasync::
+    queue_get_current_process (void*, task_queue** out) noexcept
+    {
+      return guard ("XTaskQueueGetCurrentProcessTaskQueue", false, [&] () -> bool
+      {
+        l2 ("XTaskQueueGetCurrentProcessTaskQueue");
+
+        if (out == nullptr)
+          return false;
+
+        task_queue& q (process_queue ());
+
+        q.duplicate ();
+
+        *out = &q;
+        return true;
+      });
+    }
+
+    HRESULT WINAPI xasync::
+    queue_set_current_process (void*, task_queue* q) noexcept
+    {
+      return guard ("XTaskQueueSetCurrentProcessTaskQueue", [&] () -> HRESULT
+      {
+        set_process_queue (q);
+        return S_OK;
+      });
     }
   }
 }
