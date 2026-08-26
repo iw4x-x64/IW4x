@@ -106,4 +106,24 @@ main ()
     assert (narrow (L"one", b, sizeof (b)) == chars ("one"));
     assert (std::strcmp (b, "one") == 0);
   }
+
+  {
+    FILETIME t {};
+
+    assert (to_seconds (t) == -11644473600LL);
+
+    std::uint64_t v (11644473600ULL * 10000000ULL);
+
+    t.dwLowDateTime = static_cast<DWORD> (v);
+    t.dwHighDateTime = static_cast<DWORD> (v >> 32);
+
+    assert (to_seconds (t) == 0);
+
+    v += 1000ULL * 10000000ULL;
+
+    t.dwLowDateTime = static_cast<DWORD> (v);
+    t.dwHighDateTime = static_cast<DWORD> (v >> 32);
+
+    assert (to_seconds (t) == 1000);
+  }
 }

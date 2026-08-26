@@ -107,11 +107,20 @@ main ()
 
     std::size_t n (0);
     assert (result_size (&b, &n) == pending);
+    assert (xasync::get_result_size (nullptr, &b, &n) == pending);
 
     assert ((*q)[port::work].dispatch (0));
 
     assert (xasync::get_status (nullptr, &b, false) == S_OK);
     assert (result_size (&b, &n) == S_OK && n == sizeof (std::uint32_t));
+
+    n = 0;
+    assert (xasync::get_result_size (nullptr, &b, &n) == S_OK);
+    assert (n == sizeof (std::uint32_t));
+
+    assert (xasync::get_result_size (nullptr, &b, nullptr) == E_INVALIDARG);
+
+    assert (xasync::get_status (nullptr, &b, true) == S_OK);
 
     auto* o (static_cast<counting*> (pending_operation (&b, counted)));
     assert (o != nullptr && o->value () == 42);

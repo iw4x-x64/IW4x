@@ -14,6 +14,7 @@
 #include <libiw4x/gdk/runtime.hxx>
 #include <libiw4x/gdk/registry.hxx>
 #include <libiw4x/gdk/identity.hxx>
+#include <libiw4x/gdk/feature.hxx>
 #include <libiw4x/gdk/networking.hxx>
 #include <libiw4x/gdk/unmodelled.hxx>
 
@@ -107,10 +108,31 @@ main ()
   }
 
   {
-    auto d (reinterpret_cast<HRESULT (*) (void*, void*, void*, void*)> (
-              const_cast<void*> (slot_of<xpackage> (0x58))));
+    auto declines ([] (const void* e, void* p) -> bool
+    {
+      auto d (reinterpret_cast<HRESULT (*) (void*, void*, void*, void*)> (
+                const_cast<void*> (e)));
 
-    assert (d (self<xpackage> (), nullptr, nullptr, nullptr) == E_NOTIMPL);
+      return d (p, nullptr, nullptr, nullptr) == E_NOTIMPL;
+    });
+
+    assert (declines (slot_of<xpackage> (0x58), self<xpackage> ()));
+    assert (declines (slot_of<xpackage> (0x140), self<xpackage> ()));
+    assert (declines (slot_of<xgame_event> (0x18), self<xgame_event> ()));
+    assert (declines (slot_of<xunidentified> (0x18),
+                      self<xunidentified> ()));
+
+    void* o (nullptr);
+
+    assert (QueryApiImpl (&xpackage::api, &xpackage::id, &o) == S_OK);
+    assert (o == self<xpackage> ());
+
+    assert (QueryApiImpl (&xgame_event::api, &xgame_event::id, &o) == S_OK);
+    assert (o == self<xgame_event> ());
+
+    assert (QueryApiImpl (&xunidentified::api, &xunidentified::id, &o) ==
+            S_OK);
+    assert (o == self<xunidentified> ());
 
     assert (!provides (feature::package));
     assert (!provides (feature::game_event));
@@ -185,8 +207,39 @@ main ()
             S_OK);
     assert (allowed && why == deny_reason::none);
 
+    void* other (nullptr);
+
+    assert (xuser::duplicate_handle (nullptr, user, &other) == S_OK);
+    assert (other == user);
+
+    assert (xuser::close_handle (nullptr, other) == S_OK);
+
     int nobody (0);
     assert (xuser::get_id (nullptr, &nobody, &id) == E_INVALIDARG);
+    assert (xuser::duplicate_handle (nullptr, &nobody, &other) ==
+            E_INVALIDARG);
+  }
+
+  {
+    async_block b {};
+    b.queue = queue;
+
+    assert (xuser::resolve_privilege_async (nullptr, user, 0, 254, &b) ==
+            S_OK);
+    drain ();
+
+    assert (xuser::resolve_privilege_result (nullptr, &b) == S_OK);
+  }
+
+  {
+    auto f (reinterpret_cast<char (*) (void*, std::uint32_t)> (
+              const_cast<void*> (slot_of<xruntime_feature> (0x18))));
+
+    assert (f (self<xruntime_feature> (),
+               static_cast<std::uint32_t> (feature::user)) == 1);
+
+    assert (f (self<xruntime_feature> (),
+               static_cast<std::uint32_t> (feature::display)) == 0);
   }
 
   {
@@ -349,6 +402,42 @@ main ()
   }
 
   {
+    async_block b {};
+    b.queue = queue;
+
+    assert (xnetworking::query_security_information_async (nullptr,
+                                                           nullptr,
+                                                           &b) == S_OK);
+    drain ();
+
+    std::size_t n (1);
+
+    assert (xnetworking::query_security_information_result_size (nullptr,
+                                                                 &b,
+                                                                 &n) == S_OK);
+    assert (n == 0);
+
+    std::size_t used (1);
+    void*       out (&used);
+
+    assert (xnetworking::query_security_information_result (nullptr,
+                                                            &b,
+                                                            0,
+                                                            &used,
+                                                            nullptr,
+                                                            &out) == S_OK);
+    assert (out == nullptr && used == 0);
+
+    assert (xnetworking::verify_server_certificate (nullptr,
+                                                    nullptr,
+                                                    nullptr) == S_OK);
+
+    assert (xnetworking::verify_server_certificate (nullptr,
+                                                    nullptr,
+                                                    &used) == S_OK);
+  }
+
+  {
     connectivity_hint h {};
 
     assert (xnetworking::get_connectivity_hint (nullptr, &h) == S_OK);
@@ -372,6 +461,25 @@ main ()
     assert (xnetworking::unregister_connectivity_changed (nullptr,
                                                           token,
                                                           false) == S_OK);
+  }
+
+  {
+    assert (storable (chars ("settings")));
+    assert (storable (chars ("a.b")));
+    assert (storable (chars (".hidden")));
+
+    assert (!storable (chars ("")));
+    assert (!storable (chars (".")));
+    assert (!storable (chars ("..")));
+    assert (!storable (chars ("a/b")));
+    assert (!storable (chars ("a\\b")));
+    assert (!storable (chars ("c:")));
+    assert (!storable (chars ("a*")));
+    assert (!storable (chars ("a?")));
+    assert (!storable (chars ("a\"")));
+    assert (!storable (chars ("a<")));
+    assert (!storable (chars ("a>")));
+    assert (!storable (chars ("a|")));
   }
 
   {

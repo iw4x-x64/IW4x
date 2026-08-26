@@ -4,6 +4,7 @@
 #include <atomic>
 
 #include <libiw4x/gdk/sync.hxx>
+#include <libiw4x/gdk/async.hxx>
 #include <libiw4x/gdk/task-queue.hxx>
 
 using namespace iw4x::gdk;
@@ -20,6 +21,12 @@ namespace
       canceled.fetch_add (1, std::memory_order_relaxed);
     else
       ran.fetch_add (1, std::memory_order_relaxed);
+  }
+
+  void
+  bare (void*) noexcept
+  {
+    ran.fetch_add (1, std::memory_order_relaxed);
   }
 
   void
@@ -172,6 +179,114 @@ main ()
     assert (&process_queue () == o);
 
     set_process_queue (&q);
+  }
+
+  {
+    task_queue* q (nullptr);
+
+    assert (xasync::queue_create (nullptr,
+                                  dispatch_mode::manual,
+                                  dispatch_mode::manual,
+                                  &q) == S_OK);
+    assert (q != nullptr);
+
+    assert (xasync::queue_create (nullptr,
+                                  dispatch_mode::manual,
+                                  dispatch_mode::manual,
+                                  nullptr) == E_POINTER);
+
+    task_port* w (nullptr);
+    task_port* c (nullptr);
+
+    assert (xasync::queue_get_port (nullptr, q, port::work, &w) == S_OK);
+    assert (xasync::queue_get_port (nullptr, q, port::completion, &c) == S_OK);
+    assert (w == &(*q)[port::work] && c == &(*q)[port::completion]);
+
+    task_queue* composite (nullptr);
+
+    assert (xasync::queue_create_composite (nullptr, w, c, &composite) ==
+            S_OK);
+    assert (composite != nullptr);
+    assert (&(*composite)[port::work] == w);
+
+    assert (xasync::queue_create_composite (nullptr, nullptr, c, &composite) ==
+            E_POINTER);
+
+    task_queue* d (nullptr);
+
+    assert (xasync::queue_duplicate_handle (nullptr, q, &d) == S_OK);
+    assert (d == q);
+
+    assert (xasync::queue_duplicate_handle (nullptr, nullptr, &d) ==
+            E_POINTER);
+
+    reset ();
+
+    assert (xasync::queue_submit_callback (nullptr,
+                                           q,
+                                           port::work,
+                                           nullptr,
+                                           &count) == S_OK);
+
+    assert (xasync::queue_dispatch (nullptr, q, port::work, 0));
+    assert (ran.load () == 1);
+
+    assert (!xasync::queue_dispatch (nullptr, q, port::work, 0));
+    assert (!xasync::queue_dispatch (nullptr, nullptr, port::work, 0));
+
+    assert (xasync::queue_submit_delayed_callback (nullptr,
+                                                   q,
+                                                   port::work,
+                                                   1,
+                                                   nullptr,
+                                                   &count) == S_OK);
+
+    assert (xasync::queue_dispatch (nullptr, q, port::work, INFINITE));
+    assert (ran.load () == 2);
+
+    assert (xasync::queue_submit_callback (nullptr,
+                                           q,
+                                           port::work,
+                                           nullptr,
+                                           nullptr) == E_INVALIDARG);
+
+    assert (xasync::queue_submit_delayed_callback (nullptr,
+                                                   nullptr,
+                                                   port::work,
+                                                   0,
+                                                   nullptr,
+                                                   &count) == E_INVALIDARG);
+
+    reset ();
+
+    assert (xasync::queue_terminate (nullptr, q, false, nullptr, &bare) ==
+            S_OK);
+
+    assert (xasync::queue_terminate (nullptr, q, false, nullptr, &bare) ==
+            E_ABORT);
+
+    assert (xasync::queue_terminate (nullptr, nullptr, false, nullptr,
+                                     nullptr) == E_INVALIDARG);
+
+    while (xasync::queue_dispatch (nullptr, q, port::completion, 0))
+      ;
+
+    assert (ran.load () == 1);
+
+    assert (xasync::queue_close_handle (nullptr, q) == S_OK);
+    assert (xasync::queue_close_handle (nullptr, nullptr) == S_OK);
+  }
+
+  {
+    task_queue* q (nullptr);
+
+    assert (xasync::queue_get_current_process (nullptr, &q));
+    assert (q == &process_queue ());
+
+    assert (!xasync::queue_get_current_process (nullptr, nullptr));
+
+    assert (xasync::queue_set_current_process (nullptr, q) == S_OK);
+    assert (&process_queue () == q);
   }
 
   stop_queues ();

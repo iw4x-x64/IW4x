@@ -3,7 +3,6 @@
 
 #include <cstring>
 
-#include <libiw4x/gdk/text.hxx>
 #include <libiw4x/gdk/types.hxx>
 #include <libiw4x/gdk/vtable.hxx>
 #include <libiw4x/gdk/async.hxx>
@@ -16,42 +15,6 @@ using namespace iw4x::gdk;
 int
 main ()
 {
-  {
-    text<64> t ("{} and {}", 1, 2);
-
-    assert (std::strcmp (t.c_str (), "1 and 2") == 0);
-  }
-
-  {
-    text<64> t ("{}", hex (0x1234ABCD, 8));
-
-    assert (std::strcmp (t.c_str (), "0x1234ABCD") == 0);
-  }
-
-  {
-    text<64> t ("{}", hex (0xF, 8));
-
-    assert (std::strcmp (t.c_str (), "0x0000000F") == 0);
-  }
-
-  {
-    text<64> t ("{} {} {}", true, 'x', -5);
-
-    assert (std::strcmp (t.c_str (), "true x -5") == 0);
-  }
-
-  {
-    text<8> t ("{}", "abcdefghijkl");
-
-    assert (std::strcmp (t.c_str (), "abcdefg") == 0);
-  }
-
-  {
-    text<64> t ("no arguments");
-
-    assert (std::strcmp (t.c_str (), "no arguments") == 0);
-  }
-
   {
     assert (xsystem::api == xsystem::api);
     assert (!(xsystem::api == xsystem::id));
