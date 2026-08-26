@@ -2,6 +2,7 @@
 #include <libiw4x/win32/process-threads-api.hxx>
 
 #include <libiw4x/gdk/runtime.hxx>
+#include <libiw4x/xcurl/runtime.hxx>
 
 #include <array>
 #include <string>
@@ -202,6 +203,7 @@ namespace iw4x
         MH_EnableHook (MH_ALL_HOOKS);
 
         gdk::install ();
+        xcurl::install ();
 
         // And with our early setup out of the way, continue with the CRT entry
         // point the host was going to use. From here startup proceeds normally
