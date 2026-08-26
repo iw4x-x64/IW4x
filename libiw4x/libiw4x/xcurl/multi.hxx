@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <cstdint>
 
 #include <libiw4x/xcurl/xcurl.hxx>
@@ -64,6 +65,9 @@ namespace iw4x
       bool
       queue (transfer&) noexcept;
 
+      [[gnu::noinline]] int
+      answered () noexcept;
+
       std::uint64_t signature_ = 0;
 
       CURLM* handle_ = nullptr;
@@ -72,6 +76,8 @@ namespace iw4x
 
       transfer*     local_[capacity] {};
       std::uint32_t locals_ = 0;
+
+      std::atomic<std::uint32_t> answered_ {0};
 
       CURLMsg       messages_[capacity] {};
       std::uint32_t head_ = 0;

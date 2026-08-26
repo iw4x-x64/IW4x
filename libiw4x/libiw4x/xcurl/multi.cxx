@@ -39,6 +39,8 @@ namespace iw4x
         locals_ = 0;
         head_ = 0;
         count_ = 0;
+
+        answered_.store (0, std::memory_order_release);
       }
 
       for (std::uint32_t i (0); i != n; ++i)
@@ -71,6 +73,9 @@ namespace iw4x
       }
 
       local_[locals_++] = &t;
+
+      answered_.store (locals_, std::memory_order_release);
+
       return CURLM_OK;
     }
 
@@ -88,6 +93,8 @@ namespace iw4x
           continue;
 
         local_[i] = local_[--locals_];
+
+        answered_.store (locals_, std::memory_order_release);
         break;
       }
 
@@ -110,13 +117,9 @@ namespace iw4x
       return true;
     }
 
-    CURLMcode multi::
-    perform (int* running) noexcept
+    int multi::
+    answered () noexcept
     {
-      int n (0);
-
-      CURLMcode r (curl_multi_perform (handle_, &n));
-
       transfer*     ls[capacity];
       std::uint32_t k (0);
 
@@ -130,31 +133,42 @@ namespace iw4x
       for (std::uint32_t i (0); i != k; ++i)
         ls[i]->deliver ();
 
+      scope_lock l (mutex_);
+
+      for (std::uint32_t i (0); i != locals_;)
       {
-        scope_lock l (mutex_);
+        transfer& t (*local_[i]);
 
-        for (std::uint32_t i (0); i != locals_;)
+        if (!t.delivered ())
         {
-          transfer& t (*local_[i]);
-
-          if (!t.delivered ())
-          {
-            ++i;
-            continue;
-          }
-
-          if (!queue (t))
-          {
-            warn ("no room for another completion, {} outstanding", count_);
-            ++i;
-            continue;
-          }
-
-          local_[i] = local_[--locals_];
+          ++i;
+          continue;
         }
 
-        n += static_cast<int> (locals_);
+        if (!queue (t))
+        {
+          warn ("no room for another completion, {} outstanding", count_);
+          ++i;
+          continue;
+        }
+
+        local_[i] = local_[--locals_];
       }
+
+      answered_.store (locals_, std::memory_order_release);
+
+      return static_cast<int> (locals_);
+    }
+
+    CURLMcode multi::
+    perform (int* running) noexcept
+    {
+      int n (0);
+
+      CURLMcode r (curl_multi_perform (handle_, &n));
+
+      if (answered_.load (std::memory_order_acquire) != 0)
+        n += answered ();
 
       if (running != nullptr)
         *running = n;
@@ -209,12 +223,8 @@ namespace iw4x
           int timeout,
           int* ready) noexcept
     {
-      {
-        scope_lock l (mutex_);
-
-        if (locals_ != 0)
-          timeout = 0;
-      }
+      if (answered_.load (std::memory_order_acquire) != 0)
+        timeout = 0;
 
       return curl_multi_poll (handle_, extra, count, timeout, ready);
     }
