@@ -1,2 +1,7 @@
 EXPORTS
 DllMain @1
+QueryApiImpl @2
+InitializeApiImpl @3
+InitializeApiImplEx @4
+XErrorReport @5
+UninitializeApiImpl @6
