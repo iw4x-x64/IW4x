@@ -2,6 +2,7 @@
 
 #include <meta>
 #include <string>
+#include <vector>
 #include <cstddef>
 #include <utility>
 #include <concepts>
@@ -130,10 +131,12 @@ namespace iw4x
       for (std::meta::info m: std::meta::members_of (
              ^^I, std::meta::access_context::current ()))
       {
-        auto as (std::meta::annotations_of_with_type (m, ^^slot));
-
-        if (as.size () == 1 && std::meta::extract<slot> (as[0]).offset == o)
-          return m;
+        for (std::meta::info a:
+               std::meta::annotations_of_with_type (m, ^^slot))
+        {
+          if (std::meta::extract<slot> (a).offset == o)
+            return m;
+        }
       }
 
       return std::meta::info ();
@@ -214,6 +217,8 @@ namespace iw4x
         return true;
       });
 
+      std::vector<std::size_t> claimed;
+
       for (std::meta::info m: std::meta::members_of (
              ^^I, std::meta::access_context::current ()))
       {
@@ -233,26 +238,26 @@ namespace iw4x
           continue;
         }
 
-        if (as.size () != 1)
+        for (std::meta::info a: as)
         {
-          if (!r.empty ())
-            r += ", ";
+          std::size_t o (std::meta::extract<slot> (a).offset);
 
-          r += I::name;
-          r += ": an entry point claims more than one slot";
-          continue;
+          if (!placed (o))
+            continue;
+
+          bool twice (false);
+
+          for (std::size_t c: claimed)
+            twice = twice || c == o;
+
+          if (twice)
+            complain (o, "is claimed twice");
+          else
+            claimed.push_back (o);
+
+          if (is_declined<I> (o) || is_declined_false<I> (o))
+            complain (o, "is both implemented and declined");
         }
-
-        std::size_t o (std::meta::extract<slot> (as[0]).offset);
-
-        if (!placed (o))
-          continue;
-
-        if (claimant<I> (o) != m)
-          complain (o, "is claimed twice");
-
-        if (is_declined<I> (o) || is_declined_false<I> (o))
-          complain (o, "is both implemented and declined");
       }
 
       if constexpr (declines_slots<I>)
