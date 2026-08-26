@@ -1,0 +1,100 @@
+#pragma once
+
+#include <cstddef>
+#include <cstdint>
+
+#include <libiw4x/xcurl/xcurl.hxx>
+#include <libiw4x/xcurl/local.hxx>
+
+namespace iw4x
+{
+  namespace xcurl
+  {
+    class transfer
+    {
+    public:
+      transfer () noexcept = default;
+
+      transfer (const transfer&) = delete;
+      transfer& operator= (const transfer&) = delete;
+
+      bool
+      open () noexcept;
+
+      void
+      close () noexcept;
+
+      CURL*
+      easy () const noexcept
+      {
+        return easy_;
+      }
+
+      CURLcode
+      set (int, long) noexcept;
+
+      CURLcode
+      set (int, void*) noexcept;
+
+      CURLcode
+      set (int, generic_function) noexcept;
+
+      CURLcode
+      get (int, long&) const noexcept;
+
+      bool
+      begin () noexcept;
+
+      bool
+      deliver () noexcept;
+
+      bool
+      local () const noexcept
+      {
+        return local_;
+      }
+
+      bool
+      delivered () const noexcept
+      {
+        return delivered_;
+      }
+
+      CURLcode
+      outcome () const noexcept
+      {
+        return outcome_;
+      }
+
+      chars
+      url () const noexcept
+      {
+        return url_;
+      }
+
+      chars
+      method () const noexcept
+      {
+        return method_;
+      }
+
+    private:
+      CURL* easy_ = nullptr;
+
+      text<url_limit>    url_;
+      text<method_limit> method_ {"GET"};
+
+      curl_write_callback write_ = nullptr;
+      curl_write_callback header_ = nullptr;
+
+      void* write_data_ = nullptr;
+      void* header_data_ = nullptr;
+
+      bool     local_ = false;
+      bool     delivered_ = false;
+      CURLcode outcome_ = CURLE_OK;
+
+      response answer_;
+    };
+  }
+}
