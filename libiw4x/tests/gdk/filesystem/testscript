@@ -1,0 +1,68 @@
+: create
+:
+$* mkdir a/b/c &a/***;
+$* type a     >'dir';
+$* type a/b   >'dir';
+$* type a/b/c >'dir'
+
+: create-again
+:
+: Creating a directory that is already there succeeds.
+:
+$* mkdir a &a/;
+$* mkdir a;
+$* type a >'dir'
+
+: type-missing
+:
+$* type missing >'other'
+
+: type-file
+:
+echo 'x' >=f;
+$* type f >'other'
+
+: roundtrip
+:
+echo 'the quick brown fox' | $* write f &f;
+$* read f >'the quick brown fox';
+$* size f >'20'
+
+: empty
+:
+$* write f &f <:'';
+$* size f >'0';
+$* read f >:''
+
+: overwrite
+:
+echo 'first' | $* write f &f;
+echo 'second' | $* write f;
+$* read f >'second'
+
+: last-write
+:
+echo 'x' | $* write f &f;
+$* age f >'recent'
+
+: list
+:
+$* mkdir d/one &d/***;
+$* mkdir d/two;
+echo 'xyz' | $* write d/f;
+$* list d >>~%EOO%
+  %(dir one 0|dir two 0|reg f 4)%{3}
+  EOO
+
+: list-empty
+:
+$* mkdir d &d/;
+$* list d >:''
+
+: list-missing
+:
+$* list missing 2>'unable to open directory' != 0
+
+: read-missing
+:
+$* read missing 2>'unable to open for reading' != 0

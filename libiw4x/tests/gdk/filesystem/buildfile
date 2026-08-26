@@ -1,0 +1,3 @@
+import libs = libiw4x%liba{iw4x}
+
+exe{driver}: {hxx cxx}{*} $libs testscript
