@@ -95,7 +95,7 @@ namespace iw4x
                                      BCRYPT_USE_SYSTEM_PREFERRED_RNG));
 
         if (s < 0)
-          raise (E_FAIL, "unable to draw a local user id, status {:#010x}",
+          raise (E_FAIL, "unable to draw a local user id, status {}",
                  hex (static_cast<std::uint32_t> (s), 8));
 
         return xuid_shape | (v & 0x0000FFFFFFFFFFFFULL);

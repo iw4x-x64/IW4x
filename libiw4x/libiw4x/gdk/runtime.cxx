@@ -97,7 +97,7 @@ namespace iw4x
       catch (...)
       {
         text<description_size> m ("unable to install the gaming runtime: "
-                                  "{:#010x}",
+                                  "{}",
                                   hex (static_cast<std::uint32_t> (
                                          report ("install")),
                                        8));
