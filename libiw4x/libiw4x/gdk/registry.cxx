@@ -4,11 +4,16 @@
 
 #include <libiw4x/logger.hxx>
 
+#include <libiw4x/gdk/ui.hxx>
+#include <libiw4x/gdk/user.hxx>
+#include <libiw4x/gdk/save.hxx>
 #include <libiw4x/gdk/async.hxx>
-#include <libiw4x/gdk/feature.hxx>
-#include <libiw4x/gdk/invite.hxx>
-#include <libiw4x/gdk/networking.hxx>
+#include <libiw4x/gdk/store.hxx>
 #include <libiw4x/gdk/system.hxx>
+#include <libiw4x/gdk/invite.hxx>
+#include <libiw4x/gdk/feature.hxx>
+#include <libiw4x/gdk/networking.hxx>
+#include <libiw4x/gdk/unmodelled.hxx>
 
 namespace iw4x
 {
@@ -19,8 +24,16 @@ namespace iw4x
       using runtime = catalog<xasync,
                               xruntime_feature,
                               xgame_invite,
+                              xgame_save,
+                              xgame_ui,
                               xnetworking,
-                              xsystem>;
+                              xstore,
+                              xsystem,
+                              xuser,
+                              xuser_gamertag,
+                              xpackage,
+                              xgame_event,
+                              xunidentified>;
     }
 
     const interface_object*

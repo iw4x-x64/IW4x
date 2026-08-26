@@ -97,11 +97,21 @@ main ()
     assert (provides (feature::async));
     assert (provides (feature::task_queue));
     assert (provides (feature::error));
-    assert (!provides (feature::game_save));
+    assert (provides (feature::game_save));
+    assert (provides (feature::user));
+    assert (provides (feature::store));
+    assert (provides (feature::game_ui));
+    assert (provides (feature::game_invite));
+    assert (provides (feature::networking));
+
+    assert (!provides (feature::display));
+    assert (!provides (feature::app_capture));
+    assert (!provides (feature::package));
+    assert (!provides (feature::game_event));
     assert (!provides (static_cast<feature> (99)));
 
-    assert (interface_count () == 3);
-    assert (family_count () == 5);
+    assert (interface_count () == 13);
+    assert (family_count () == 11);
   }
 
   {
@@ -111,7 +121,8 @@ main ()
     void* self (const_cast<interface_object*> (&object_of<xruntime_feature>));
 
     assert (f (self, static_cast<unsigned> (feature::system)) == 1);
-    assert (f (self, static_cast<unsigned> (feature::game_save)) == 0);
+    assert (f (self, static_cast<unsigned> (feature::display)) == 0);
+    assert (f (self, 99) == 0);
   }
 
   {
