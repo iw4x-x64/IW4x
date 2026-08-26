@@ -72,12 +72,20 @@ namespace iw4x
       }
       catch (const failure& e)
       {
-        l1 ("{}: {} ({:#010x})",
-            p,
-            e.what (),
-            static_cast<std::uint32_t> (e.code ()));
+        HRESULT c (e.code ());
 
-        return e.code ();
+        if (c == insufficient_buffer || c == E_ABORT)
+          l1 ("{}: {} ({:#010x})",
+              p,
+              e.what (),
+              static_cast<std::uint32_t> (c));
+        else
+          warn ("{}: {} ({:#010x})",
+                p,
+                e.what (),
+                static_cast<std::uint32_t> (c));
+
+        return c;
       }
       catch (...)
       {
