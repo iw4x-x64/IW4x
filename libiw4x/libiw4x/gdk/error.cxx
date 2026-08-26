@@ -74,13 +74,27 @@ namespace iw4x
       {
         HRESULT c (e.code ());
 
+        // Two statuses arrive here on a path the caller chose.
+        //
+        // XSAPI learns how long a name is by calling with a buffer too
+        // short to hold one and reading the answer. 0x1402F59C0 does
+        // exactly that before it decides whether it got a name, so
+        // ERROR_INSUFFICIENT_BUFFER is a step on the way to a
+        // successful call.
+        //
+        // E_ABORT is the answer of a queue that is already going down,
+        // and every shutdown reaches it.
+        //
+        // Note that every other status here belongs to a call that
+        // could not be carried out.
+        //
         if (c == insufficient_buffer || c == E_ABORT)
           l1 ("{}: {} ({:#010x})",
               p,
               e.what (),
               static_cast<std::uint32_t> (c));
         else
-          warn ("{}: {} ({:#010x})",
+          fatal ("{}: {} ({:#010x})",
                 p,
                 e.what (),
                 static_cast<std::uint32_t> (c));
