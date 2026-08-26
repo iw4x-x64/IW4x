@@ -1,12 +1,12 @@
-intf_libs = # Interface dependencies.
-impl_libs = # Implementation dependencies.
+libs =
 
-import impl_libs += libminhook%liba{minhook}
+import libs += libminhook%liba{minhook}
+import libs += libquill%liba{quill}
 
 lib{iw4x}: {hxx ixx txx cxx}{** -version} \
            {hxx            }{    version} \
            {def            }{**         } \
-           $impl_libs $intf_libs
+           $libs
 
 hxx{version}: in{version} $src_root/manifest
 
@@ -35,7 +35,7 @@ libs{iw4x}: cxx.loptions += -Wl,--entry=DllMain
 lib{iw4x}:
 {
   cxx.export.poptions = "-I$out_root" "-I$src_root"
-  cxx.export.libs = $intf_libs
+  cxx.export.libs = $libs
 }
 
 liba{iw4x}: cxx.export.poptions += -DLIBIW4X_STATIC
