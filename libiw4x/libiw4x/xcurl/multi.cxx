@@ -15,7 +15,11 @@ namespace iw4x
 
       handle_ = curl_multi_init ();
 
-      return handle_ != nullptr;
+      if (handle_ == nullptr)
+        return false;
+
+      signature_ = multi_signature;
+      return true;
     }
 
     void multi::

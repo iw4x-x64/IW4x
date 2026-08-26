@@ -57,7 +57,16 @@ namespace iw4x
       pool&      p (handles ());
       scope_lock l (p.mutex_);
 
-      p.transfer_used[&t - p.transfers] = false;
+      t.disown ();
+
+      for (std::uint32_t i (0); i != max_transfers; ++i)
+      {
+        if (&p.transfers[i] == &t)
+        {
+          p.transfer_used[i] = false;
+          break;
+        }
+      }
     }
 
     transfer*
@@ -73,11 +82,7 @@ namespace iw4x
       if (t < p.transfers || t >= p.transfers + max_transfers)
         return nullptr;
 
-      if ((reinterpret_cast<char*> (t) -
-           reinterpret_cast<char*> (p.transfers)) % sizeof (transfer) != 0)
-        return nullptr;
-
-      return t;
+      return t->ours () ? t : nullptr;
     }
 
     transfer*
@@ -128,7 +133,16 @@ namespace iw4x
       pool&      p (handles ());
       scope_lock l (p.mutex_);
 
-      p.multi_used[&m - p.multis] = false;
+      m.disown ();
+
+      for (std::uint32_t i (0); i != max_multis; ++i)
+      {
+        if (&p.multis[i] == &m)
+        {
+          p.multi_used[i] = false;
+          break;
+        }
+      }
     }
 
     multi*
@@ -144,11 +158,7 @@ namespace iw4x
       if (m < p.multis || m >= p.multis + max_multis)
         return nullptr;
 
-      if ((reinterpret_cast<char*> (m) -
-           reinterpret_cast<char*> (p.multis)) % sizeof (multi) != 0)
-        return nullptr;
-
-      return m;
+      return m->ours () ? m : nullptr;
     }
   }
 }

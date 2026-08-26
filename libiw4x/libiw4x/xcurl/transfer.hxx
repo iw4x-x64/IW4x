@@ -10,10 +10,24 @@ namespace iw4x
 {
   namespace xcurl
   {
+    inline constexpr std::uint64_t transfer_signature (0x495734582D454153ULL);
+
     class transfer
     {
     public:
       transfer () noexcept = default;
+
+      bool
+      ours () const noexcept
+      {
+        return signature_ == transfer_signature;
+      }
+
+      void
+      disown () noexcept
+      {
+        signature_ = 0;
+      }
 
       transfer (const transfer&) = delete;
       transfer& operator= (const transfer&) = delete;
@@ -79,6 +93,8 @@ namespace iw4x
       }
 
     private:
+      std::uint64_t signature_ = 0;
+
       CURL* easy_ = nullptr;
 
       text<url_limit>    url_;

@@ -16,6 +16,8 @@ namespace iw4x
       if (easy_ == nullptr)
         return false;
 
+      signature_ = transfer_signature;
+
       url_ = text<url_limit> ();
       method_ = text<method_limit> ("GET");
 

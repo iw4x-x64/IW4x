@@ -9,12 +9,26 @@ namespace iw4x
 {
   namespace xcurl
   {
+    inline constexpr std::uint64_t multi_signature (0x495734582D4D4C54ULL);
+
     class multi
     {
     public:
       static constexpr std::uint32_t capacity = 32;
 
       multi () noexcept = default;
+
+      bool
+      ours () const noexcept
+      {
+        return signature_ == multi_signature;
+      }
+
+      void
+      disown () noexcept
+      {
+        signature_ = 0;
+      }
 
       multi (const multi&) = delete;
       multi& operator= (const multi&) = delete;
@@ -49,6 +63,8 @@ namespace iw4x
     private:
       bool
       queue (transfer&) noexcept;
+
+      std::uint64_t signature_ = 0;
 
       CURLM* handle_ = nullptr;
 
