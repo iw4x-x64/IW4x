@@ -1,6 +1,8 @@
 #include <libiw4x/iw4x.hxx>
 #include <libiw4x/win32/process-threads-api.hxx>
 
+#include <libiw4x/gdk/runtime.hxx>
+
 #include <array>
 #include <string>
 #include <cstring>
@@ -198,6 +200,8 @@ namespace iw4x
           win32::exit_process_original ());
 
         MH_EnableHook (MH_ALL_HOOKS);
+
+        gdk::install ();
 
         // And with our early setup out of the way, continue with the CRT entry
         // point the host was going to use. From here startup proceeds normally
