@@ -72,6 +72,11 @@ namespace iw4x
     void
     install () noexcept
     {
+      static std::atomic<bool> installed (false);
+
+      if (installed.exchange (true, std::memory_order_acq_rel))
+        return;
+
       try
       {
         announce ();
