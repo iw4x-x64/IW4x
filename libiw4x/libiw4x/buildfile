@@ -14,6 +14,14 @@ hxx{version}: in{version} $src_root/manifest
 #
 cxx.poptions =+ "-I$out_root" "-I$src_root"
 
+# C++26 reflection, which GCC keeps behind a flag of its own.
+#
+# gdk/ builds each recovered vtable out of the entry points declared for it,
+# so a slot offset is stated once, on the function that answers it, and the
+# table is a compile time constant. See gdk/vtable.hxx.
+#
+cxx.coptions += -freflection
+
 obja{*}: cxx.poptions += -DLIBIW4X_STATIC_BUILD
 objs{*}: cxx.poptions += -DLIBIW4X_SHARED_BUILD
 
