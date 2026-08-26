@@ -6,6 +6,8 @@
 
 #include <libiw4x/gdk/async.hxx>
 #include <libiw4x/gdk/feature.hxx>
+#include <libiw4x/gdk/invite.hxx>
+#include <libiw4x/gdk/networking.hxx>
 #include <libiw4x/gdk/system.hxx>
 
 namespace iw4x
@@ -16,6 +18,8 @@ namespace iw4x
     {
       using runtime = catalog<xasync,
                               xruntime_feature,
+                              xgame_invite,
+                              xnetworking,
                               xsystem>;
     }
 
