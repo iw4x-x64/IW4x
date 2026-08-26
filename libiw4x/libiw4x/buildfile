@@ -22,6 +22,8 @@ cxx.poptions =+ "-I$out_root" "-I$src_root"
 #
 cxx.coptions += -freflection
 
+cxx.libs += -lbcrypt
+
 obja{*}: cxx.poptions += -DLIBIW4X_STATIC_BUILD
 objs{*}: cxx.poptions += -DLIBIW4X_SHARED_BUILD
 
