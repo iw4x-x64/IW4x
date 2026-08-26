@@ -40,23 +40,23 @@ namespace iw4x
       SRWLOCK lock_ = SRWLOCK_INIT;
     };
 
-    class lock
+    class scope_lock
     {
     public:
       explicit
-      lock (mutex& m) noexcept: mutex_ (&m), held_ (true)
+      scope_lock (mutex& m) noexcept: mutex_ (&m), held_ (true)
       {
         mutex_->acquire ();
       }
 
-      ~lock ()
+      ~scope_lock ()
       {
         if (held_)
           mutex_->release ();
       }
 
-      lock (const lock&) = delete;
-      lock& operator= (const lock&) = delete;
+      scope_lock (const scope_lock&) = delete;
+      scope_lock& operator= (const scope_lock&) = delete;
 
       void
       release () noexcept
@@ -88,7 +88,7 @@ namespace iw4x
       condition& operator= (const condition&) = delete;
 
       bool
-      wait (lock& l, DWORD timeout) noexcept
+      wait (scope_lock& l, DWORD timeout) noexcept
       {
         return SleepConditionVariableSRW (&condition_,
                                           l.owner ().native (),

@@ -70,7 +70,7 @@ namespace iw4x
       }
 
       {
-        lock l (mutex_);
+        scope_lock l (mutex_);
 
         if (terminated_)
           return false;
@@ -146,7 +146,7 @@ namespace iw4x
       if (timeout == 0 && queued_.load (std::memory_order_acquire) == 0)
         return false;
 
-      lock l (mutex_);
+      scope_lock l (mutex_);
 
       const std::uint64_t deadline (now () + (infinite ? 0 : timeout));
 
@@ -203,7 +203,7 @@ namespace iw4x
     terminate () noexcept
     {
       {
-        lock l (mutex_);
+        scope_lock l (mutex_);
 
         terminated_ = true;
 
@@ -218,7 +218,7 @@ namespace iw4x
     stop () noexcept
     {
       {
-        lock l (mutex_);
+        scope_lock l (mutex_);
 
         terminated_ = true;
         canceled_   = true;
@@ -238,7 +238,7 @@ namespace iw4x
     bool task_port::
     idle () const noexcept
     {
-      lock l (mutex_);
+      scope_lock l (mutex_);
 
       return count_ == 0;
     }
@@ -262,7 +262,7 @@ namespace iw4x
           std::uint32_t n;
 
           {
-            lock l (mutex_);
+            scope_lock l (mutex_);
 
             n = ports;
 
@@ -295,7 +295,7 @@ namespace iw4x
     create_queue (dispatch_mode w, dispatch_mode c) noexcept
     {
       queue_pool& p (pool ());
-      lock        l (p.mutex_);
+      scope_lock  l (p.mutex_);
 
       if (p.queues == max_queues || p.ports + 2 > max_ports)
       {
@@ -320,7 +320,7 @@ namespace iw4x
     create_composite_queue (task_port& w, task_port& c) noexcept
     {
       queue_pool& p (pool ());
-      lock        l (p.mutex_);
+      scope_lock  l (p.mutex_);
 
       if (p.queues == max_queues)
       {
