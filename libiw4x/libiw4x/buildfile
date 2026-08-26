@@ -1,12 +1,22 @@
 libs =
 
+import libs += libcurl%liba{curl}
 import libs += libminhook%liba{minhook}
 import libs += libquill%liba{quill}
 
-lib{iw4x}: {hxx ixx txx cxx}{** -version} \
-           {hxx            }{    version} \
-           {def            }{**         } \
+lib{iw4x}: {hxx ixx txx cxx}{** -version -xcurl/forward} \
+           {hxx            }{    version}                         \
+           def{iw4x}                                              \
            $libs
+
+libs{XCurl}: xcurl/cxx{forward} xcurl/def{XCurl}
+{
+  bin.lib.prefix = ''
+  cxx.loptions = -nostdlib -Wl,--entry=0
+  cxx.libs =
+}
+
+./: libs{XCurl}
 
 hxx{version}: in{version} $src_root/manifest
 
