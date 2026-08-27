@@ -281,6 +281,7 @@ namespace iw4x
         mutex         mutex_;
         task_port     owned[max_ports];
         task_queue    made[max_queues];
+        bool          made_used[max_queues] {};
         std::uint32_t ports  = 0;
         std::uint32_t queues = 0;
       };
@@ -293,6 +294,51 @@ namespace iw4x
       }
 
       std::atomic<task_queue*> current_process_queue {nullptr};
+
+      task_queue*
+      take_queue (queue_pool& p) noexcept
+      {
+        for (std::uint32_t i (0); i != max_queues; ++i)
+        {
+          if (p.made_used[i])
+            continue;
+
+          p.made_used[i] = true;
+          ++p.queues;
+
+          return &p.made[i];
+        }
+
+        warn ("no room for another task queue, {} in use", p.queues);
+        return nullptr;
+      }
+    }
+
+    void
+    release_queue (task_queue& q) noexcept
+    {
+      queue_pool& p (pool ());
+      scope_lock  l (p.mutex_);
+
+      for (std::uint32_t i (0); i != max_queues; ++i)
+      {
+        if (&p.made[i] != &q || !p.made_used[i])
+          continue;
+
+        p.made_used[i] = false;
+        --p.queues;
+
+        break;
+      }
+    }
+
+    unsigned
+    queue_count () noexcept
+    {
+      queue_pool& p (pool ());
+      scope_lock  l (p.mutex_);
+
+      return p.queues;
     }
 
     task_queue*
@@ -301,11 +347,16 @@ namespace iw4x
       queue_pool& p (pool ());
       scope_lock  l (p.mutex_);
 
-      if (p.queues == max_queues || p.ports + 2 > max_ports)
+      if (p.ports + 2 > max_ports)
       {
-        warn ("no room for another task queue, {} in use", p.queues);
+        warn ("no room for another task queue port pair, {} in use", p.ports);
         return nullptr;
       }
+
+      task_queue* q (take_queue (p));
+
+      if (q == nullptr)
+        return nullptr;
 
       task_port& wp (p.owned[p.ports++]);
       task_port& cp (p.owned[p.ports++]);
@@ -313,11 +364,9 @@ namespace iw4x
       wp.open (w);
       cp.open (c);
 
-      task_queue& q (p.made[p.queues++]);
+      q->open (wp, cp);
 
-      q.open (wp, cp);
-
-      return &q;
+      return q;
     }
 
     task_queue*
@@ -326,17 +375,14 @@ namespace iw4x
       queue_pool& p (pool ());
       scope_lock  l (p.mutex_);
 
-      if (p.queues == max_queues)
-      {
-        warn ("no room for another task queue, {} in use", p.queues);
+      task_queue* q (take_queue (p));
+
+      if (q == nullptr)
         return nullptr;
-      }
 
-      task_queue& q (p.made[p.queues++]);
+      q->open (w, c);
 
-      q.open (w, c);
-
-      return &q;
+      return q;
     }
 
     task_queue&
@@ -542,7 +588,14 @@ namespace iw4x
       return guard ("XTaskQueueCloseHandle", [&] () -> HRESULT
       {
         if (q != nullptr)
-          l1 ("task queue closed, {} references", q->close ());
+        {
+          unsigned n (q->close ());
+
+          l1 ("task queue closed, {} references", n);
+
+          if (n == 0)
+            release_queue (*q);
+        }
 
         return S_OK;
       });

@@ -117,6 +117,9 @@ namespace iw4x
       {
         ports_[0] = &w;
         ports_[1] = &c;
+
+        references_.store (1, std::memory_order_relaxed);
+        terminated_.store (false, std::memory_order_relaxed);
       }
 
       task_port&
@@ -154,6 +157,12 @@ namespace iw4x
 
     task_queue*
     create_composite_queue (task_port& work, task_port& completion) noexcept;
+
+    void
+    release_queue (task_queue&) noexcept;
+
+    unsigned
+    queue_count () noexcept;
 
     task_queue&
     process_queue () noexcept;
