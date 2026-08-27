@@ -367,4 +367,31 @@ main ()
     assert (xasync::queue_close_handle (nullptr, composite) == S_OK);
   }
 
+  {
+    task_queue* q (nullptr);
+
+    assert (xasync::queue_create (nullptr,
+                                  dispatch_mode::manual,
+                                  dispatch_mode::manual,
+                                  &q) == S_OK);
+
+    task_port* w (nullptr);
+
+    assert (xasync::queue_get_port (nullptr, q, port::work, &w) == S_OK);
+
+    task_queue* composite (nullptr);
+
+    assert (xasync::queue_create_composite (nullptr, w, w, &composite) ==
+            S_OK);
+
+    reset ();
+
+    assert (xasync::queue_terminate (nullptr, composite, false, nullptr,
+                                     &bare) == S_OK);
+
+    assert (ran.load (std::memory_order_relaxed) == 1);
+
+    assert (xasync::queue_close_handle (nullptr, composite) == S_OK);
+    assert (xasync::queue_close_handle (nullptr, q) == S_OK);
+  }
 }

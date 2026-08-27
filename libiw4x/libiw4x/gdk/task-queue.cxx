@@ -804,7 +804,7 @@ namespace iw4x
           {
             delete c;
 
-            warn ("the queue would not take its termination callback");
+            f (context);
           }
         }
 
