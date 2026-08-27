@@ -100,6 +100,12 @@ namespace iw4x
     HRESULT
     report (const char* entry_point) noexcept;
 
+    void
+    note_failure (const char* entry_point, HRESULT) noexcept;
+
+    const char*
+    last_failure (HRESULT) noexcept;
+
     template <typename F, typename R>
     concept body_of = requires (F& f)
     {
@@ -112,7 +118,12 @@ namespace iw4x
     {
       try
       {
-        return body ();
+        HRESULT r (body ());
+
+        if (FAILED (r))
+          note_failure (p, r);
+
+        return r;
       }
       catch (...)
       {

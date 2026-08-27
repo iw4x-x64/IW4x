@@ -63,6 +63,26 @@ namespace iw4x
       __fastfail (FAST_FAIL_FATAL_APP_EXIT);
     }
 
+    namespace
+    {
+      thread_local const char* failed_entry (nullptr);
+      thread_local HRESULT     failed_code (S_OK);
+    }
+
+    void
+    note_failure (const char* p, HRESULT c) noexcept
+    {
+      failed_entry = p;
+      failed_code  = c;
+    }
+
+    const char*
+    last_failure (HRESULT c) noexcept
+    {
+      return failed_entry != nullptr && failed_code == c ? failed_entry
+                                                         : nullptr;
+    }
+
     HRESULT
     report (const char* p) noexcept
     {
@@ -99,12 +119,14 @@ namespace iw4x
                 e.what (),
                 static_cast<std::uint32_t> (c));
 
+        note_failure (p, c);
         return c;
       }
       catch (...)
       {
         fail ("{}: unknown error", p);
 
+        note_failure (p, E_UNEXPECTED);
         return E_UNEXPECTED;
       }
     }
