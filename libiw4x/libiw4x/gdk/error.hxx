@@ -90,6 +90,13 @@ namespace iw4x
     [[noreturn]] void
     fatal (chars) noexcept;
 
+    template <writable... A>
+    [[noreturn]] inline void
+    fatal (const char* f, const A&... a) noexcept
+    {
+      fatal (chars (text<description_size> (f, a...)));
+    }
+
     HRESULT
     report (const char* entry_point) noexcept;
 
