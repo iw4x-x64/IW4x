@@ -94,7 +94,7 @@ namespace iw4x
               e.what (),
               static_cast<std::uint32_t> (c));
         else
-          fatal ("{}: {} ({:#010x})",
+          fail ("{}: {} ({:#010x})",
                 p,
                 e.what (),
                 static_cast<std::uint32_t> (c));
