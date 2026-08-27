@@ -15,8 +15,13 @@ namespace iw4x
   {
     using service_predicate = bool (*) (chars method, chars url);
 
+    inline constexpr std::size_t max_claimants (4);
+
     void
     serve (service_predicate) noexcept;
+
+    unsigned
+    claimant_count () noexcept;
 
     enum class user_state: std::uint32_t
     {

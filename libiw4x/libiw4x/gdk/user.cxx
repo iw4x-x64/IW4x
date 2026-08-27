@@ -82,7 +82,8 @@ namespace iw4x
       struct audience
       {
         mutex             mutex_;
-        service_predicate claims = nullptr;
+        service_predicate claims[max_claimants] {};
+        unsigned          claimants = 0;
       };
 
       audience&
@@ -98,7 +99,13 @@ namespace iw4x
         audience&  a (claimed ());
         scope_lock l (a.mutex_);
 
-        return a.claims != nullptr && a.claims (method, url);
+        for (unsigned i (0); i != a.claimants; ++i)
+        {
+          if (a.claims[i] (method, url))
+            return true;
+        }
+
+        return false;
       }
 
       inline constexpr std::size_t token_capacity (256);
@@ -172,7 +179,33 @@ namespace iw4x
       audience&  a (claimed ());
       scope_lock l (a.mutex_);
 
-      a.claims = p;
+      if (p == nullptr)
+        return;
+
+      for (unsigned i (0); i != a.claimants; ++i)
+      {
+        if (a.claims[i] == p)
+          return;
+      }
+
+      if (a.claimants == max_claimants)
+      {
+        warn ("no room for another service claimant, {} in use",
+              max_claimants);
+
+        return;
+      }
+
+      a.claims[a.claimants++] = p;
+    }
+
+    unsigned
+    claimant_count () noexcept
+    {
+      audience&  a (claimed ());
+      scope_lock l (a.mutex_);
+
+      return a.claimants;
     }
 
     HRESULT WINAPI xuser::
