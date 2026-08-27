@@ -249,8 +249,8 @@ namespace iw4x
 
     namespace
     {
-      constexpr std::uint32_t max_queues = 8;
-      constexpr std::uint32_t max_ports  = 2 * max_queues;
+      constexpr std::uint32_t max_queues = 64;
+      constexpr std::uint32_t max_ports  = 32;
 
       struct queue_pool
       {
