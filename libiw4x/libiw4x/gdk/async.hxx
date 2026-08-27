@@ -129,7 +129,7 @@ namespace iw4x
                   const void* id,
                   std::size_t size,
                   void* buffer,
-                  std::uintptr_t extra) noexcept;
+                  std::size_t* used) noexcept;
 
       [[= slot {0xE8}]] static HRESULT WINAPI
       precall (void*) noexcept;

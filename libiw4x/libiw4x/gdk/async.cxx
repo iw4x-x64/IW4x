@@ -457,7 +457,8 @@ namespace iw4x
       take_result (async_block* a,
                    const void* id,
                    std::size_t size,
-                   void* buffer) noexcept
+                   void* buffer,
+                   std::size_t* used) noexcept
       {
         held_state r (a);
 
@@ -489,6 +490,9 @@ namespace iw4x
             hr = report (r->name);
           }
         }
+
+        if (SUCCEEDED (hr) && used != nullptr)
+          *used = r->size;
 
         retire (r.get ());
         return hr;
@@ -554,7 +558,7 @@ namespace iw4x
             std::size_t size,
             void* buffer) noexcept
     {
-      return take_result (a, id.token (), size, buffer);
+      return take_result (a, id.token (), size, buffer, nullptr);
     }
 
     HRESULT
@@ -645,16 +649,17 @@ namespace iw4x
                 const void* id,
                 std::size_t size,
                 void* buffer,
-                std::uintptr_t extra) noexcept
+                std::size_t* used) noexcept
     {
       return guard ("XAsyncGetResult", [&] () -> HRESULT
       {
-        l2 ("XAsyncGetResult (size {})", size);
+        HRESULT hr (take_result (a, id, size, buffer, used));
 
-        if (extra != 0)
-          warn ("XAsyncGetResult extra argument {:#x}", extra);
+        l2 ("XAsyncGetResult (size {}) used {}",
+            size,
+            used != nullptr ? *used : 0);
 
-        return take_result (a, id, size, buffer);
+        return hr;
       });
     }
 
