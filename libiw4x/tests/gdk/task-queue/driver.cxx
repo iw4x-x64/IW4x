@@ -290,4 +290,81 @@ main ()
   }
 
   stop_queues ();
+
+  {
+    unsigned before (queue_count ());
+
+    for (unsigned i (0); i != 128; ++i)
+    {
+      task_queue* q (nullptr);
+
+      assert (xasync::queue_create (nullptr,
+                                    dispatch_mode::manual,
+                                    dispatch_mode::manual,
+                                    &q) == S_OK);
+      assert (q != nullptr);
+
+      task_port* w (nullptr);
+      task_port* c (nullptr);
+
+      assert (xasync::queue_get_port (nullptr, q, port::work, &w) == S_OK);
+      assert (xasync::queue_get_port (nullptr, q, port::completion, &c) ==
+              S_OK);
+
+      task_queue* composite (nullptr);
+
+      assert (xasync::queue_create_composite (nullptr, w, c, &composite) ==
+              S_OK);
+
+      reset ();
+
+      assert (xasync::queue_submit_callback (nullptr,
+                                             q,
+                                             port::work,
+                                             nullptr,
+                                             &count) == S_OK);
+
+      assert (xasync::queue_dispatch (nullptr, q, port::work, 0));
+      assert (ran.load (std::memory_order_relaxed) == 1);
+
+      assert (xasync::queue_close_handle (nullptr, composite) == S_OK);
+      assert (xasync::queue_close_handle (nullptr, q) == S_OK);
+    }
+
+    assert (queue_count () == before);
+  }
+
+  {
+    task_queue* q (nullptr);
+
+    assert (xasync::queue_create (nullptr,
+                                  dispatch_mode::manual,
+                                  dispatch_mode::manual,
+                                  &q) == S_OK);
+
+    task_port* w (nullptr);
+
+    assert (xasync::queue_get_port (nullptr, q, port::work, &w) == S_OK);
+
+    task_queue* composite (nullptr);
+
+    assert (xasync::queue_create_composite (nullptr, w, w, &composite) ==
+            S_OK);
+
+    assert (xasync::queue_close_handle (nullptr, q) == S_OK);
+
+    reset ();
+
+    assert (xasync::queue_submit_callback (nullptr,
+                                           composite,
+                                           port::work,
+                                           nullptr,
+                                           &count) == S_OK);
+
+    assert (xasync::queue_dispatch (nullptr, composite, port::work, 0));
+    assert (ran.load (std::memory_order_relaxed) == 1);
+
+    assert (xasync::queue_close_handle (nullptr, composite) == S_OK);
+  }
+
 }

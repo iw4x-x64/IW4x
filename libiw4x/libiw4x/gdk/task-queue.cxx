@@ -39,7 +39,17 @@ namespace iw4x
     void task_port::
     open (dispatch_mode m) noexcept
     {
-      mode_ = m;
+      {
+        scope_lock l (mutex_);
+
+        mode_       = m;
+        head_       = 0;
+        count_      = 0;
+        terminated_ = false;
+        canceled_   = false;
+
+        queued_.store (0, std::memory_order_release);
+      }
 
       std::uint32_t n (worker_count (m));
 
@@ -262,26 +272,38 @@ namespace iw4x
         void
         stop () noexcept
         {
-          task_port* ps[max_ports];
-          std::uint32_t n;
+          task_port*    ps[max_ports];
+          std::uint32_t n (0);
 
           {
             scope_lock l (mutex_);
 
-            n = ports;
-
-            for (std::uint32_t i (0); i != n; ++i)
-              ps[i] = &owned[i];
+            for (std::uint32_t i (0); i != max_ports; ++i)
+            {
+              if (port_used[i])
+                ps[n++] = &owned[i];
+            }
           }
 
           for (std::uint32_t i (0); i != n; ++i)
             ps[i]->stop ();
         }
 
+        struct held_ports
+        {
+          std::uint32_t work       = max_ports;
+          std::uint32_t completion = max_ports;
+        };
+
         mutex         mutex_;
         task_port     owned[max_ports];
         task_queue    made[max_queues];
         bool          made_used[max_queues] {};
+        bool          made_owns[max_queues] {};
+        held_ports    made_ports[max_queues];
+        bool          port_used[max_ports] {};
+        bool          port_owned[max_ports] {};
+        std::uint32_t port_borrows[max_ports] {};
         std::uint32_t ports  = 0;
         std::uint32_t queues = 0;
       };
@@ -312,24 +334,110 @@ namespace iw4x
         warn ("no room for another task queue, {} in use", p.queues);
         return nullptr;
       }
+
+      std::uint32_t
+      take_port (queue_pool& p) noexcept
+      {
+        for (std::uint32_t i (0); i != max_ports; ++i)
+        {
+          if (p.port_used[i])
+            continue;
+
+          p.port_used[i] = true;
+          ++p.ports;
+
+          return i;
+        }
+
+        return max_ports;
+      }
+
+      void
+      give_port (queue_pool& p, std::uint32_t i) noexcept
+      {
+        if (i == max_ports)
+          return;
+
+        p.port_used[i] = false;
+        --p.ports;
+      }
+
+      std::uint32_t
+      port_index (queue_pool& p, task_port& t) noexcept
+      {
+        if (&t < p.owned || &t >= p.owned + max_ports)
+          return max_ports;
+
+        return static_cast<std::uint32_t> (&t - p.owned);
+      }
+
+      bool
+      spent (queue_pool& p, std::uint32_t i) noexcept
+      {
+        return i != max_ports &&
+               p.port_used[i] &&
+               !p.port_owned[i] &&
+               p.port_borrows[i] == 0;
+      }
     }
 
     void
     release_queue (task_queue& q) noexcept
     {
       queue_pool& p (pool ());
-      scope_lock  l (p.mutex_);
 
-      for (std::uint32_t i (0); i != max_queues; ++i)
+      std::uint32_t done[2] {max_ports, max_ports};
+
       {
-        if (&p.made[i] != &q || !p.made_used[i])
-          continue;
+        scope_lock l (p.mutex_);
 
-        p.made_used[i] = false;
-        --p.queues;
+        for (std::uint32_t i (0); i != max_queues; ++i)
+        {
+          if (&p.made[i] != &q || !p.made_used[i])
+            continue;
 
-        break;
+          queue_pool::held_ports h (p.made_ports[i]);
+
+          std::uint32_t is[2] {h.work, h.completion};
+
+          for (std::uint32_t k (0); k != 2; ++k)
+          {
+            std::uint32_t j (is[k]);
+
+            if (j == max_ports)
+              continue;
+
+            if (p.made_owns[i])
+              p.port_owned[j] = false;
+            else if (p.port_borrows[j] != 0)
+              --p.port_borrows[j];
+
+            if (spent (p, j))
+              done[k] = j;
+          }
+
+          p.made_ports[i] = queue_pool::held_ports ();
+          p.made_owns[i]  = false;
+          p.made_used[i]  = false;
+
+          --p.queues;
+          break;
+        }
       }
+
+      for (std::uint32_t j: done)
+      {
+        if (j != max_ports)
+          p.owned[j].stop ();
+      }
+
+      if (done[0] == max_ports && done[1] == max_ports)
+        return;
+
+      scope_lock l (p.mutex_);
+
+      for (std::uint32_t j: done)
+        give_port (p, j);
     }
 
     unsigned
@@ -347,19 +455,34 @@ namespace iw4x
       queue_pool& p (pool ());
       scope_lock  l (p.mutex_);
 
-      if (p.ports + 2 > max_ports)
+      std::uint32_t wi (take_port (p));
+      std::uint32_t ci (take_port (p));
+
+      task_queue* q (wi != max_ports && ci != max_ports ? take_queue (p)
+                                                        : nullptr);
+
+      if (q == nullptr)
       {
-        warn ("no room for another task queue port pair, {} in use", p.ports);
+        if (wi == max_ports || ci == max_ports)
+          warn ("no room for another task queue port pair, {} in use",
+                p.ports);
+
+        give_port (p, wi);
+        give_port (p, ci);
+
         return nullptr;
       }
 
-      task_queue* q (take_queue (p));
+      std::uint32_t i (static_cast<std::uint32_t> (q - p.made));
 
-      if (q == nullptr)
-        return nullptr;
+      p.made_ports[i] = queue_pool::held_ports {wi, ci};
+      p.made_owns[i]  = true;
 
-      task_port& wp (p.owned[p.ports++]);
-      task_port& cp (p.owned[p.ports++]);
+      p.port_owned[wi] = true;
+      p.port_owned[ci] = true;
+
+      task_port& wp (p.owned[wi]);
+      task_port& cp (p.owned[ci]);
 
       wp.open (w);
       cp.open (c);
@@ -379,6 +502,19 @@ namespace iw4x
 
       if (q == nullptr)
         return nullptr;
+
+      std::uint32_t i (static_cast<std::uint32_t> (q - p.made));
+      std::uint32_t wi (port_index (p, w));
+      std::uint32_t ci (port_index (p, c));
+
+      p.made_ports[i] = queue_pool::held_ports {wi, ci};
+      p.made_owns[i]  = false;
+
+      if (wi != max_ports)
+        ++p.port_borrows[wi];
+
+      if (ci != max_ports)
+        ++p.port_borrows[ci];
 
       q->open (w, c);
 
