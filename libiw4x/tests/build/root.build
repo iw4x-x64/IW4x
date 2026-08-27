@@ -2,6 +2,12 @@ cxx.std = latest
 
 using cxx
 
+# C++26 reflection, which GCC keeps behind a flag of its own. The library
+# headers these drivers include are built with it, so the drivers need it
+# too.
+#
+cxx.coptions += -freflection
+
 hxx{*}: extension = hxx
 ixx{*}: extension = ixx
 txx{*}: extension = txx
