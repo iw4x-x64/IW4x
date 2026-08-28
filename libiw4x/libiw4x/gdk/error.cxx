@@ -3,8 +3,6 @@
 #include <cstdio>
 #include <string_view>
 
-#include <quill/Backend.h>
-
 #include <libiw4x/logger.hxx>
 
 namespace iw4x
@@ -47,7 +45,7 @@ namespace iw4x
     {
       fail ("{}", std::string_view (what.data (), what.size ()));
 
-      quill::Backend::stop ();
+      logger::stop ();
 
       text<description_size> m ("{}", what);
 
