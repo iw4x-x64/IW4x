@@ -1,0 +1,155 @@
+# file      : libcurl/buildfile
+# license   : curl License; see accompanying COPYING file
+
+# Version script.
+#
+define vsc: file
+vsc{*}: extension = vers
+
+import imp_libs  = libssl%lib{ssl}
+import imp_libs += libcrypto%lib{crypto}
+import imp_libs += libz%lib{z}
+
+lib{curl}: {h c}{**} $imp_libs
+
+tclass = $c.target.class
+tsys   = $c.target.system
+
+linux   = ($tclass == 'linux')
+bsd     = ($tclass == 'bsd')
+macos   = ($tclass == 'macos')
+windows = ($tclass == 'windows')
+
+libs{curl}: vsc{libcurl}: include = ($linux || $bsd ? adhoc : false)
+
+vsc{libcurl}: lib/in{libcurl}
+{
+  in.symbol = '@'
+
+  CURL_LT_SHLIB_VERSIONED_FLAVOUR = 'OPENSSL_'
+}
+
+# It seems that for earlier versions of clang the __has_include_next() macro
+# is broken in the -frewrite-includes mode. So, in particular, the following
+# fragment of llvm-6.0's stdatomic.h:
+#
+#  #if __STDC_HOSTED__ && __has_include_next(<stdatomic.h>)
+#  # include_next <stdatomic.h>
+#  #else
+#  ...
+#  typedef _Atomic(_Bool)              atomic_bool;
+#  ...
+#  #endif
+#
+#  expands into:
+#
+#  #if __STDC_HOSTED__ && (1)/*__has_include_next(<stdatomic.h>)*/
+#  #if 0 /* expanded by -frewrite-includes */
+#  # include_next <stdatomic.h>
+#  #endif /* expanded by -frewrite-includes */
+#  # 31 "/usr/lib/llvm-6.0/lib/clang/6.0.0/include/stdatomic.h" 3
+#  # 32 "/usr/lib/llvm-6.0/lib/clang/6.0.0/include/stdatomic.h" 3
+#  #else
+#  ...
+#  typedef _Atomic(_Bool)              atomic_bool;
+#  ...
+#  #endif
+#
+# This ends up with no atomic_* types defined, etc.
+#
+# Thus, we enable reprocessing for the source files which (indirectly) include
+# <stdatomic.h> for Clang versions prior to 7.0.
+#
+if ($c.id == 'clang' && $c.version.major < 7)
+  lib/obj{easy version hostip}: cc.reprocess = true
+
+# Build options.
+#
+c.poptions += -DBUILDING_LIBCURL -DHAVE_CONFIG_H \
+              -DOS="\"$c.target\"" -DVERSION="\"$version.project_id\""
+
+if! $windows
+  c.poptions += -DCURL_HIDDEN_SYMBOLS
+
+switch $tclass, $tsys
+{
+  case 'windows', 'win32-msvc'
+    c.poptions += -DWIN32
+}
+
+c.poptions =+ "-I$src_base" "-I$src_base/include" "-I$src_base/lib"
+
+obja{*}: c.poptions += -DCURL_STATICLIB
+
+if! $windows
+  c.coptions += -fvisibility=hidden
+
+switch $c.class
+{
+  case 'gcc'
+  {
+    # Disable warnings that pop up with -Wall -Wextra. Upstream doesn't seem
+    # to care about these and it is not easy to disable specific warnings in a
+    # way that works across compilers/version (some -Wno-* options are only
+    # recognized in newer versions).
+    #
+    c.coptions += -Wno-all -Wno-extra -Wno-deprecated-declarations
+  }
+  case 'msvc'
+  {
+    # Disable warnings that pop up with /W3.
+    #
+    c.coptions += /wd4028 /wd4996
+  }
+}
+
+switch $tclass, $tsys
+{
+  case 'linux' | 'bsd'
+  {
+    # Make sure all symbols are resolvable.
+    #
+    c.loptions += -Wl,--no-undefined
+
+    c.loptions += "-Wl,--version-script=$out_base/libcurl.vers"
+    c.libs     += -pthread
+  }
+  case 'macos'
+  {
+    # Note that upstream generates the libcurl-symbols.expsym file on MacOS
+    # and passes it to linker via the -exported_symbols_list option. This
+    # looks redundant, since the __visibility__("default") attribute is also
+    # used for the API function declarations. Thus, we don't bother
+    # generating/passing the exported symbol list file.
+    #
+    c.libs += -framework CoreFoundation      \
+              -framework SystemConfiguration \
+              -framework Security
+  }
+  case 'windows', 'mingw32'
+  {
+    c.loptions += -Wl,--enable-auto-image-base
+    c.libs     += -lws2_32 -lcrypt32 -lbcrypt
+  }
+  case 'windows'
+  {
+    c.libs += ws2_32.lib crypt32.lib normaliz.lib advapi32.lib
+  }
+}
+
+# Export options.
+#
+lib{curl}:  cc.export.poptions  = "-I$src_base/include"
+liba{curl}: cc.export.poptions += -DCURL_STATICLIB
+
+# See bootstrap.build for details.
+#
+if $version.pre_release
+  lib{curl}: bin.lib.version = @"-$version.project_id"
+else
+  lib{curl}: bin.lib.version = @"-$abi_version_major" linux@"$abi_version"
+
+# Install headers from the include/curl/ subdirectory only.
+#
+h{*}:              install = false
+include/curl/h{*}: install = include/curl/

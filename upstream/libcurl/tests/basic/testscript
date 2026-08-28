@@ -1,0 +1,26 @@
+# file      : tests/basic/testscript
+# license   : curl License; see accompanying COPYING file
+
+: http
+:
+$* --verbose 'http://cppget.org/robots.txt' >>~%EOO% 2>!
+  %.+
+  EOO
+
+: https
+:
+: Test that an HTTPS URL is queried successfully via the system SSL backend
+: on Windows and MacOS/Clang and fails for other targets that use the OpenSSL
+: backend by default.
+:
+if ($c.target.class == 'windows' || \
+    $c.target.class == 'macos' && $c.id == 'clang-apple')
+{
+  $* 'https://cppget.org/robots.txt' >>~%EOO%
+    %.+
+    EOO
+}
+else
+{
+  $* 'https://cppget.org/robots.txt' 2>~'%failed to request .+%' != 0
+}

@@ -1,0 +1,5 @@
+# Vendored trees are kept byte-identical to the upstream packages, so that
+# re-vendoring is a plain copy and the only diff is the patch set. Line
+# ending normalisation would defeat that.
+#
+* -text
