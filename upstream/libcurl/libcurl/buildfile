@@ -9,46 +9,83 @@ vsc{*}: extension = vers
 import imp_libs = libz%lib{z}
 
 lib{curl}: h{**}                              \
-           c{**  -lib/vquic/curl_msh3         \
+           c{**  -lib/vauth/**                \
+                 -lib/vquic/curl_msh3         \
                  -lib/vquic/curl_ngtcp2       \
                  -lib/vquic/curl_osslq        \
                  -lib/vquic/curl_quiche       \
                  -lib/vquic/vquic-tls         \
                  -lib/vssh/**                 \
                  -lib/vtls/bearssl            \
+                 -lib/vtls/cipher_suite       \
                  -lib/vtls/gtls               \
+                 -lib/vtls/keylog             \
                  -lib/vtls/mbedtls            \
                  -lib/vtls/mbedtls_threadlock \
                  -lib/vtls/openssl            \
                  -lib/vtls/rustls             \
                  -lib/vtls/sectransp          \
                  -lib/vtls/wolfssl            \
-                 -lib/vauth/gsasl             \
-                 -lib/vauth/krb5_gssapi       \
-                 -lib/vauth/spnego_gssapi     \
+                 -lib/altsvc                  \
+                 -lib/amigaos                 \
                  -lib/asyn-ares               \
                  -lib/c-hyper                 \
+                 -lib/cf-h1-proxy             \
+                 -lib/cf-h2-proxy             \
+                 -lib/cf-haproxy              \
+                 -lib/cookie                  \
+                 -lib/curl_des                \
+                 -lib/curl_fnmatch            \
+                 -lib/curl_get_line           \
+                 -lib/curl_gssapi             \
+                 -lib/curl_ntlm_core          \
+                 -lib/curl_path               \
                  -lib/curl_rtmp               \
+                 -lib/curl_sasl               \
+                 -lib/curl_sha512_256         \
                  -lib/dict                    \
+                 -lib/doh                     \
                  -lib/file                    \
+                 -lib/fileinfo                \
+                 -lib/fopen                   \
                  -lib/ftp                     \
                  -lib/ftplistparser           \
                  -lib/gopher                  \
+                 -lib/hmac                    \
+                 -lib/hostip4                 \
+                 -lib/hostsyn                 \
+                 -lib/hsts                    \
+                 -lib/http_aws_sigv4          \
+                 -lib/http_digest             \
+                 -lib/http_negotiate          \
+                 -lib/http_ntlm               \
+                 -lib/http_proxy              \
                  -lib/imap                    \
+                 -lib/inet_pton               \
                  -lib/krb5                    \
                  -lib/ldap                    \
                  -lib/macos                   \
+                 -lib/md4                     \
+                 -lib/md5                     \
+                 -lib/memdebug                \
                  -lib/mqtt                    \
+                 -lib/netrc                   \
+                 -lib/noproxy                 \
                  -lib/openldap                \
                  -lib/pop3                    \
                  -lib/psl                     \
                  -lib/rtsp                    \
+                 -lib/sha256                  \
                  -lib/smb                     \
                  -lib/smtp                    \
+                 -lib/socks                   \
                  -lib/socks_gssapi            \
+                 -lib/socks_sspi              \
+                 -lib/strtok                  \
                  -lib/telnet                  \
                  -lib/tftp                    \
-                 -lib/ws                    } \
+                 -lib/ws }                    \
+           lib/vauth/c{vauth}                 \
            $imp_libs
 
 tclass = $c.target.class
