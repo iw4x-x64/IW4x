@@ -6,3 +6,6 @@ location: upstream/libz/
 
 :
 location: upstream/libcurl/
+
+:
+location: upstream/libquill/
