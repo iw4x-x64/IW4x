@@ -3,7 +3,6 @@
 #include <quill/Backend.h>
 #include <quill/Frontend.h>
 #include <quill/sinks/ConsoleSink.h>
-#include <quill/sinks/FileSink.h>
 
 namespace iw4x::logger::detail
 {
