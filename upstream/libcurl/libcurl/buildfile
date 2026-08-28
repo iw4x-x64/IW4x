@@ -6,11 +6,50 @@
 define vsc: file
 vsc{*}: extension = vers
 
-import imp_libs  = libssl%lib{ssl}
-import imp_libs += libcrypto%lib{crypto}
-import imp_libs += libz%lib{z}
+import imp_libs = libz%lib{z}
 
-lib{curl}: {h c}{**} $imp_libs
+lib{curl}: h{**}                              \
+           c{**  -lib/vquic/curl_msh3         \
+                 -lib/vquic/curl_ngtcp2       \
+                 -lib/vquic/curl_osslq        \
+                 -lib/vquic/curl_quiche       \
+                 -lib/vquic/vquic-tls         \
+                 -lib/vssh/**                 \
+                 -lib/vtls/bearssl            \
+                 -lib/vtls/gtls               \
+                 -lib/vtls/mbedtls            \
+                 -lib/vtls/mbedtls_threadlock \
+                 -lib/vtls/openssl            \
+                 -lib/vtls/rustls             \
+                 -lib/vtls/sectransp          \
+                 -lib/vtls/wolfssl            \
+                 -lib/vauth/gsasl             \
+                 -lib/vauth/krb5_gssapi       \
+                 -lib/vauth/spnego_gssapi     \
+                 -lib/asyn-ares               \
+                 -lib/c-hyper                 \
+                 -lib/curl_rtmp               \
+                 -lib/dict                    \
+                 -lib/file                    \
+                 -lib/ftp                     \
+                 -lib/ftplistparser           \
+                 -lib/gopher                  \
+                 -lib/imap                    \
+                 -lib/krb5                    \
+                 -lib/ldap                    \
+                 -lib/macos                   \
+                 -lib/mqtt                    \
+                 -lib/openldap                \
+                 -lib/pop3                    \
+                 -lib/psl                     \
+                 -lib/rtsp                    \
+                 -lib/smb                     \
+                 -lib/smtp                    \
+                 -lib/socks_gssapi            \
+                 -lib/telnet                  \
+                 -lib/tftp                    \
+                 -lib/ws                    } \
+           $imp_libs
 
 tclass = $c.target.class
 tsys   = $c.target.system

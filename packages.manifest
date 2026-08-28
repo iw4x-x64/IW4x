@@ -1,2 +1,8 @@
 : 1
 location: libiw4x/
+
+:
+location: upstream/libz/
+
+:
+location: upstream/libcurl/
