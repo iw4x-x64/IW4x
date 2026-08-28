@@ -13,3 +13,5 @@ if ($c.target.system == 'win32-msvc')
 
 if ($c.class == 'msvc')
   c.coptions += /wd4251 /wd4275 /wd4800
+
+bin.lib = static

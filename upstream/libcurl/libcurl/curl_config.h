@@ -27,32 +27,26 @@
 /* See the ../../README-DEV for the SSL backend and CA information lookup
  * configuration.
  */
-#define USE_OPENSSL 1
-#define USE_TLS_SRP 1
+#undef  USE_OPENSSL
+#undef  USE_TLS_SRP
+#undef  CURL_WITH_MULTI_SSL
+#undef  USE_SECTRANSP
 
-#if (defined(__APPLE__) && defined(__clang__)) || defined(_WIN32)
-#  define CURL_WITH_MULTI_SSL        1
-#  if defined(__APPLE__)
-#    define USE_SECTRANSP            1
-#    define CURL_DEFAULT_SSL_BACKEND "secure-transport"
-#  else
-#    define USE_SCHANNEL             1
-#    define CURL_DEFAULT_SSL_BACKEND "schannel"
-#  endif
-#endif
+#define USE_SCHANNEL             1
+#define CURL_DEFAULT_SSL_BACKEND "schannel"
 
 #undef  CURL_CA_BUNDLE
 #undef  CURL_CA_PATH
-#define CURL_CA_FALLBACK 1
+#undef  CURL_CA_FALLBACK
 
-#define CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG 1
+#undef  CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG
 
 #undef  USE_WOLFSSL
 
 /* Enabled features.
  */
 #define HAVE_LIBZ      1
-#define USE_WEBSOCKETS 1
+#undef  USE_WEBSOCKETS
 
 /* On MacOS enable IPv6 if only build with Clang, since GCC 14 fails with
  * 'attributes should be specified before the declarator in a function
@@ -66,31 +60,31 @@
 #endif
 
 #undef CURL_DISABLE_COOKIES
-#undef CURL_DISABLE_DICT
+#define CURL_DISABLE_DICT 1
 #undef CURL_DISABLE_DOH
-#undef CURL_DISABLE_FILE
-#undef CURL_DISABLE_FTP
-#undef CURL_DISABLE_GOPHER
+#define CURL_DISABLE_FILE 1
+#define CURL_DISABLE_FTP 1
+#define CURL_DISABLE_GOPHER 1
 #undef CURL_DISABLE_HTTP
 #undef CURL_DISABLE_HTTP_AUTH
-#undef CURL_DISABLE_IMAP
+#define CURL_DISABLE_IMAP 1
 #undef CURL_DISABLE_MIME
 #undef CURL_DISABLE_LIBCURL_OPTION
 #undef CURL_DISABLE_NETRC
 #undef CURL_DISABLE_PARSEDATE
-#undef CURL_DISABLE_POP3
+#define CURL_DISABLE_POP3 1
 #undef CURL_DISABLE_PROGRESS_METER
 #undef CURL_DISABLE_PROXY
-#undef CURL_DISABLE_RTSP
+#define CURL_DISABLE_RTSP 1
 #undef CURL_DISABLE_SHUFFLE_DNS
-#undef CURL_DISABLE_SMB
-#undef CURL_DISABLE_SMTP
-#undef CURL_DISABLE_TELNET
-#undef CURL_DISABLE_TFTP
+#define CURL_DISABLE_SMB 1
+#define CURL_DISABLE_SMTP 1
+#define CURL_DISABLE_TELNET 1
+#define CURL_DISABLE_TFTP 1
 #undef CURL_DISABLE_VERBOSE_STRINGS
 #undef CURL_DISABLE_ALTSVC
 #undef CURL_DISABLE_GETOPTIONS
-#undef CURL_DISABLE_MQTT
+#define CURL_DISABLE_MQTT 1
 #undef CURL_DISABLE_SOCKETPAIR
 #undef CURL_DISABLE_HEADERS_API
 #undef CURL_DISABLE_HSTS
