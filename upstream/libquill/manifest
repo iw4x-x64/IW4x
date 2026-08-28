@@ -1,0 +1,16 @@
+: 1
+name: libquill
+version: 12.1.0
+type: lib,binless
+language: c++
+project: quill
+summary:  Asynchronous low latency C++ logging library
+license: MIT
+package-description-file: PACKAGE-README.md
+url: https://github.com/odygrd/quill
+doc-url: https://quillcpp.readthedocs.io/en/latest/
+src-url: https://github.com/odygrd/quill
+package-url: https://github.com/build2-packaging/quill
+package-email: packaging@build2.org ; Mailing list.
+depends: * build2 >= 0.17.0
+depends: * bpkg >= 0.17.0

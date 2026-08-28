@@ -1,0 +1,29 @@
+# Uncomment to suppress warnings coming from external libraries.
+#
+#cxx.internal.scope = current
+
+cxx.std = latest
+
+using cxx
+
+hxx{*}: extension = hpp
+hxx{*}: extension = h
+ixx{*}: extension = ipp
+txx{*}: extension = tpp
+cxx{*}: extension = cpp
+
+# The test target for cross-testing (running tests under Wine, etc).
+#
+test.target = $cxx.target
+
+# Configuration variables.
+#
+config [bool] config.libquill.no_exceptions ?= false
+config [bool] config.libquill.no_thread_name_support ?= false
+config [bool] config.libquill.use_sequential_thread_id ?= false
+config [bool] config.libquill.x86arch ?= false
+config [bool] config.libquill.disable_non_prefixed_macros ?= false
+config [bool] config.libquill.disable_function_name ?= false
+config [bool] config.libquill.detailed_function_name ?= false
+config [bool] config.libquill.disable_file_info ?= false
+config [bool] config.libquill.enable_assertions ?= false

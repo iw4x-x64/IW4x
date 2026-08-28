@@ -1,0 +1,62 @@
+intf_libs = # Interface dependencies.
+#import xxxx_libs += libhello%lib{hello}
+
+lib{quill}: {hxx ixx txx}{**} $intf_libs
+
+# Export options.
+#
+out_pfx = [dir_path] $out_root/include/
+src_pfx = [dir_path] $src_root/include/
+
+lib{quill}:
+{
+  cxx.export.poptions = "-I$out_pfx" "-I$src_pfx"
+  cxx.export.libs = $intf_libs
+}
+
+if $config.libquill.no_exceptions
+  lib{quill}: cxx.export.poptions += -DQUILL_NO_EXCEPTIONS
+
+if $config.libquill.no_thread_name_support
+  lib{quill}: cxx.export.poptions += -DQUILL_NO_THREAD_NAME_SUPPORT
+
+if $config.libquill.use_sequential_thread_id
+  lib{quill}: cxx.export.poptions += -DQUILL_USE_SEQUENTIAL_THREAD_ID
+
+if $config.libquill.x86arch
+  lib{quill}: cxx.export.poptions += -DQUILL_X86ARCH
+
+if $config.libquill.disable_non_prefixed_macros
+  lib{quill}: cxx.export.poptions += -DQUILL_DISABLE_NON_PREFIXED_MACROS
+
+if $config.libquill.disable_function_name
+  lib{quill}: cxx.export.poptions += -DQUILL_DISABLE_FUNCTION_NAME
+
+if $config.libquill.detailed_function_name
+  lib{quill}: cxx.export.poptions += -DQUILL_DETAILED_FUNCTION_NAME
+
+if $config.libquill.disable_file_info
+  lib{quill}: cxx.export.poptions += -DQUILL_DISABLE_FILE_INFO
+
+if $config.libquill.enable_assertions
+  lib{quill}: cxx.export.poptions += -DQUILL_ENABLE_ASSERTIONS
+
+if ($cxx.target.class == 'windows')
+{
+  if ($cxx.target.system == 'mingw32')
+    lib{quill}: cxx.export.libs += -lucrtbase
+}
+else
+{
+  cxx.libs += -pthread
+  lib{quill}: cxx.export.libs += -pthread
+}
+
+# Install into the quill/ subdirectory of, say, /usr/include/
+# recreating subdirectories.
+#
+{hxx ixx txx}{*}:
+{
+  install         = include/quill/
+  install.subdirs = true
+}
