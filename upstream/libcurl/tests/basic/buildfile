@@ -1,0 +1,6 @@
+# file      : tests/basic/buildfile
+# license   : curl License; see accompanying COPYING file
+
+import libs = libcurl%lib{curl}
+
+exe{driver}: {h c}{*} $libs testscript

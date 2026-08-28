@@ -1,0 +1,9 @@
+# file      : build/root.build
+# license   : curl License; see accompanying COPYING file
+
+$out_root/
+{
+  include libcurl/
+}
+
+export $out_root/libcurl/$import.target
