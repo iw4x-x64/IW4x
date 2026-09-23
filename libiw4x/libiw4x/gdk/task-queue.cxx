@@ -3,6 +3,7 @@
 #include <libiw4x/gdk/async.hxx>
 
 #include <new>
+#include <functional>
 
 #include <libiw4x/logger.hxx>
 #include <libiw4x/contract.hxx>
@@ -379,8 +380,12 @@ namespace iw4x
       uint32_t
       port_index (queue_pool& p, task_port& t) noexcept
       {
-        if (&t < p.owned || &t >= p.owned + max_ports)
+        less<> before;
+
+        if (before (&t, p.owned) || !before (&t, p.owned + max_ports))
+        {
           return max_ports;
+        }
 
         return static_cast<uint32_t> (&t - p.owned);
       }
