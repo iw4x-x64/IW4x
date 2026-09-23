@@ -38,6 +38,8 @@ extern "C" BOOL WINAPI _CRT_INIT (HANDLE, DWORD, LPVOID);
 
 namespace iw4x
 {
+  using namespace gdk;
+
   constinit static HMODULE module_ (nullptr);
 
   HMODULE
@@ -202,7 +204,7 @@ namespace iw4x
 
         MH_EnableHook (MH_ALL_HOOKS);
 
-        gdk::install ();
+        install ();
         xcurl::install ();
 
         // And with our early setup out of the way, continue with the CRT entry
