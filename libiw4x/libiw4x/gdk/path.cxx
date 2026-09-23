@@ -1,6 +1,7 @@
 #include <libiw4x/gdk/path.hxx>
 
 #include <new>
+#include <cwchar>
 
 using namespace std;
 
@@ -34,12 +35,7 @@ namespace iw4x
       if (p == nullptr)
         return whole ();
 
-      size_t n (0);
-
-      for (; p[n] != L'\0'; ++n)
-        ;
-
-      return extend (p, n);
+      return extend (p, wcslen (p));
     }
 
     bool path::

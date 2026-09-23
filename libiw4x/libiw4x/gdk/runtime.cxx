@@ -1,6 +1,7 @@
 #include <libiw4x/gdk/runtime.hxx>
 
 #include <atomic>
+#include <string_view>
 
 #include <MinHook.h>
 
@@ -31,13 +32,15 @@ namespace iw4x
         if (n == nullptr)
           return false;
 
-        const char* f (n);
+        string_view f (n);
+        size_t s (f.find_last_of ("\\/"));
 
-        for (const char* p (n); *p != '\0'; ++p)
-          if (*p == '\\' || *p == '/')
-            f = p + 1;
+        if (s != string_view::npos)
+        {
+          f.remove_prefix (s + 1);
+        }
 
-        return _stricmp (f, runtime_module) == 0;
+        return _stricmp (f.data (), runtime_module) == 0;
       }
 
       HMODULE (WINAPI* load_library_ex_a) (LPCSTR, HANDLE, DWORD) (nullptr);
