@@ -1,5 +1,8 @@
 #include <libiw4x/xcurl/multi.hxx>
 
+#include <span>
+#include <algorithm>
+
 #include <libiw4x/logger.hxx>
 
 #include <libiw4x/xcurl/registry.hxx>
@@ -37,8 +40,7 @@ namespace iw4x
 
         n = locals_;
 
-        for (uint32_t i (0); i != n; ++i)
-          ls[i] = local_[i];
+        copy_n (local_, n, ls);
 
         locals_ = 0;
         head_ = 0;
@@ -47,8 +49,8 @@ namespace iw4x
         answered_.store (0, memory_order_release);
       }
 
-      for (uint32_t i (0); i != n; ++i)
-        curl_multi_remove_handle (handle_, ls[i]->easy ());
+      for (transfer* t: span (ls, n))
+        curl_multi_remove_handle (handle_, t->easy ());
 
       if (handle_ != nullptr)
       {
@@ -91,15 +93,14 @@ namespace iw4x
 
       scope_lock l (mutex_);
 
-      for (uint32_t i (0); i != locals_; ++i)
-      {
-        if (local_[i] != &t)
-          continue;
+      transfer** e (local_ + locals_);
+      transfer** i (find (local_, e, &t));
 
-        local_[i] = local_[--locals_];
+      if (i != e)
+      {
+        *i = local_[--locals_];
 
         answered_.store (locals_, memory_order_release);
-        break;
       }
 
       return CURLM_OK;
@@ -130,12 +131,13 @@ namespace iw4x
       {
         scope_lock l (mutex_);
 
-        for (uint32_t i (0); i != locals_; ++i)
-          ls[k++] = local_[i];
+        k = locals_;
+
+        copy_n (local_, k, ls);
       }
 
-      for (uint32_t i (0); i != k; ++i)
-        ls[i]->deliver ();
+      for (transfer* t: span (ls, k))
+        t->deliver ();
 
       scope_lock l (mutex_);
 

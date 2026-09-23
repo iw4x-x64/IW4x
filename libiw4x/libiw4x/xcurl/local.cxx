@@ -106,16 +106,14 @@ namespace iw4x
       const endpoint*
       lookup (string_view method, string_view url) noexcept
       {
-#pragma GCC unroll 8
-        for (const endpoint& e: endpoints)
+        const endpoint* e (ranges::find_if (endpoints, [&] (const endpoint& x)
         {
-          if (method == e.method &&
-              url.contains (e.host) &&
-              url.contains (e.path))
-            return &e;
-        }
+          return method == x.method &&
+                 url.contains (x.host) &&
+                 url.contains (x.path);
+        }));
 
-        return nullptr;
+        return e != ranges::end (endpoints) ? e : nullptr;
       }
 
       struct platform_endpoint

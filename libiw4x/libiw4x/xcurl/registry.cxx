@@ -1,5 +1,6 @@
 #include <libiw4x/xcurl/registry.hxx>
 
+#include <algorithm>
 #include <functional>
 
 #include <libiw4x/logger.hxx>
@@ -39,22 +40,21 @@ namespace iw4x
       pool&      p (handles ());
       scope_lock l (p.mutex_);
 
-      for (uint32_t i (0); i != max_transfers; ++i)
+      bool* u (ranges::find (p.transfer_used, false));
+
+      if (u == ranges::end (p.transfer_used))
       {
-        if (p.transfer_used[i])
-          continue;
-
-        transfer& t (p.transfers[i]);
-
-        if (!t.open ())
-          return nullptr;
-
-        p.transfer_used[i] = true;
-        return &t;
+        warn ("no room for another transfer, {} in use", max_transfers);
+        return nullptr;
       }
 
-      warn ("no room for another transfer, {} in use", max_transfers);
-      return nullptr;
+      transfer& t (p.transfers[u - p.transfer_used]);
+
+      if (!t.open ())
+        return nullptr;
+
+      *u = true;
+      return &t;
     }
 
     void
@@ -119,22 +119,21 @@ namespace iw4x
       pool&      p (handles ());
       scope_lock l (p.mutex_);
 
-      for (uint32_t i (0); i != max_multis; ++i)
+      bool* u (ranges::find (p.multi_used, false));
+
+      if (u == ranges::end (p.multi_used))
       {
-        if (p.multi_used[i])
-          continue;
-
-        multi& m (p.multis[i]);
-
-        if (!m.open ())
-          return nullptr;
-
-        p.multi_used[i] = true;
-        return &m;
+        warn ("no room for another multi handle, {} in use", max_multis);
+        return nullptr;
       }
 
-      warn ("no room for another multi handle, {} in use", max_multis);
-      return nullptr;
+      multi& m (p.multis[u - p.multi_used]);
+
+      if (!m.open ())
+        return nullptr;
+
+      *u = true;
+      return &m;
     }
 
     void
