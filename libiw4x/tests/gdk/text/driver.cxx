@@ -83,12 +83,14 @@ main ()
   }
 
   {
-    assert (std::strcmp (text<64> ("{}", hex (0)).c_str (), "0x0") == 0);
-    assert (std::strcmp (text<64> ("{}", hex (0xABCDEF)).c_str (),
+    assert (std::strcmp (text<64> ("{}", hex_number (0)).c_str (),
+                         "0x0") == 0);
+    assert (std::strcmp (text<64> ("{}", hex_number (0xABCDEF)).c_str (),
                          "0xABCDEF") == 0);
-    assert (std::strcmp (text<64> ("{}", hex (0xF, 8)).c_str (),
+    assert (std::strcmp (text<64> ("{}", hex_number (0xF, 8)).c_str (),
                          "0x0000000F") == 0);
-    assert (std::strcmp (text<64> ("{}", hex (0x123456789ABCDEF0ULL, 16))
+    assert (std::strcmp (text<64> ("{}",
+                                   hex_number (0x123456789ABCDEF0ULL, 16))
                            .c_str (),
                          "0x123456789ABCDEF0") == 0);
   }

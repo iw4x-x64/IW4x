@@ -84,7 +84,7 @@ namespace iw4x
 
         if (s < 0)
           raise (E_FAIL, "unable to draw a local user id, status {}",
-                 hex (static_cast<uint32_t> (s), 8));
+                 hex_number (static_cast<uint32_t> (s), 8));
 
         return xuid_shape | (v & 0x0000FFFFFFFFFFFFULL);
       }
@@ -94,7 +94,7 @@ namespace iw4x
       {
         uint64_t v (random_identity ());
 
-        text<32> s ("{}", hex (v, 16));
+        text<32> s ("{}", hex_number (v, 16));
 
         file f;
 
@@ -169,7 +169,8 @@ namespace iw4x
       {
         text<gamertag_capacity> d (
           "IW4x-{}",
-          hex (static_cast<uint32_t> (xuid () & 0xFFFFFFFFULL), 8));
+          hex_number (static_cast<uint32_t> (xuid () & 0xFFFFFFFFULL),
+                      8));
 
         n.size = d.size ();
 

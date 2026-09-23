@@ -126,7 +126,7 @@ namespace iw4x
           size_t k (gamertag (n, sizeof (n)));
 
           token_ = text<token_capacity> ("IW4x1.0 xuid={} gamertag={}",
-                                         hex (xuid (), 16),
+                                         hex_number (xuid (), 16),
                                          string_view (n, k));
 
           return sizeof (token_and_signature) + token_.size () + 1;

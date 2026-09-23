@@ -160,7 +160,7 @@ namespace iw4x
           path r (storage_root ());
 
           r.append (L"cloud");
-          r.append (text<32> ("{}", hex (xuid (), 16)));
+          r.append (text<32> ("{}", hex_number (xuid (), 16)));
 
           if (!r.whole ())
             raise (E_FAIL, "the game save root does not fit in a path");

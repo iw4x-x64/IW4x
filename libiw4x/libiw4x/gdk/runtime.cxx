@@ -108,9 +108,9 @@ namespace iw4x
       {
         text<description_size> m ("unable to install the gaming runtime: "
                                   "{}",
-                                  hex (static_cast<uint32_t> (
-                                         report ("install")),
-                                       8));
+                                  hex_number (static_cast<uint32_t> (
+                                                report ("install")),
+                                              8));
 
         fatal (m);
       }

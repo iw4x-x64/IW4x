@@ -9,13 +9,14 @@ namespace iw4x
 {
   namespace gdk
   {
-    struct hex
+    struct hex_number
     {
       std::uint64_t value;
       unsigned      width;
 
       explicit constexpr
-      hex (std::uint64_t v, unsigned w = 0) noexcept: value (v), width (w) {}
+      hex_number (std::uint64_t v, unsigned w = 0) noexcept
+        : value (v), width (w) {}
     };
 
     class text_writer
@@ -32,7 +33,7 @@ namespace iw4x
       void write (char) noexcept;
       void write (bool) noexcept;
       void write (const void*) noexcept;
-      void write (hex) noexcept;
+      void write (hex_number) noexcept;
 
       template <std::integral T>
       void

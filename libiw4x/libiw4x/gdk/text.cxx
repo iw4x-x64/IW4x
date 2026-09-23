@@ -48,11 +48,11 @@ namespace iw4x
     void text_writer::
     write (const void* v) noexcept
     {
-      write (hex (reinterpret_cast<uintptr_t> (v)));
+      write (hex_number (reinterpret_cast<uintptr_t> (v)));
     }
 
     void text_writer::
-    write (hex v) noexcept
+    write (hex_number v) noexcept
     {
       static const char table[] = "0123456789ABCDEF";
 
