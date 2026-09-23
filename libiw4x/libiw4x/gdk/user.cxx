@@ -4,6 +4,7 @@
 #include <cstring>
 
 #include <libiw4x/logger.hxx>
+#include <libiw4x/contract.hxx>
 
 #include <libiw4x/gdk/error.hxx>
 #include <libiw4x/gdk/sync.hxx>
@@ -523,6 +524,8 @@ namespace iw4x
         if (!component_bound (c, bound))
           raise_invalid ("unrecovered gamertag component {}",
                          static_cast<uint32_t> (c));
+
+        LIBIW4X_ASSERT (bound < gamertag_capacity);
 
         char n[gamertag_capacity];
 

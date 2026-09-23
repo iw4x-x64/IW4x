@@ -7,6 +7,7 @@
 #include <bcrypt.h>
 
 #include <libiw4x/logger.hxx>
+#include <libiw4x/contract.hxx>
 
 #include <libiw4x/gdk/error.hxx>
 #include <libiw4x/gdk/sync.hxx>
@@ -111,6 +112,8 @@ namespace iw4x
       size_t
       bounded (const char* s, size_t n, size_t limit) noexcept
       {
+        LIBIW4X_PRE (s != nullptr || n == 0);
+
         if (n <= limit)
           return n;
 
@@ -177,10 +180,14 @@ namespace iw4x
 
         n.size = d.size ();
 
+        LIBIW4X_ASSERT (n.size < gamertag_capacity);
+
         memcpy (n.value, d.c_str (), n.size);
       }
 
       size_t k (bounded (n.value, n.size, size - 1));
+
+      LIBIW4X_ASSERT (k < size);
 
       memcpy (b, n.value, k);
 
@@ -195,6 +202,8 @@ namespace iw4x
       scope_lock  l (n.mutex_);
 
       size_t k (bounded (v.data (), v.size (), gamertag_capacity - 1));
+
+      LIBIW4X_ASSERT (k < gamertag_capacity);
 
       if (string_view (n.value, n.size) == v.substr (0, k))
         return;
