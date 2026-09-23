@@ -251,6 +251,13 @@ namespace iw4x
         result (size_t size, void* buffer) override
         {
           auto* b (&answer (static_cast<save_blob*> (buffer)));
+
+          if (size < count_ * sizeof (save_blob))
+            raise (insufficient_buffer,
+                   "a {} byte buffer holds none of {} blobs",
+                   size,
+                   count_);
+
           auto* p (static_cast<uint8_t*> (buffer) +
                    count_ * sizeof (save_blob));
           auto* e (static_cast<uint8_t*> (buffer) + size);
