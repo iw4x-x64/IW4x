@@ -1,5 +1,7 @@
 #pragma once
 
+#include <bit>
+#include <array>
 #include <cstdint>
 #include <cstddef>
 
@@ -31,28 +33,12 @@ namespace iw4x
     constexpr bool
     operator== (const guid& x, const guid& y) noexcept
     {
-      if consteval
-      {
-        if (x.data1 != y.data1 || x.data2 != y.data2 || x.data3 != y.data3)
-          return false;
+      using words = std::array<std::uint64_t, 2>;
 
-        for (std::size_t i (0); i != sizeof (x.data4); ++i)
-          if (x.data4[i] != y.data4[i])
-            return false;
+      words a (std::bit_cast<words> (x));
+      words b (std::bit_cast<words> (y));
 
-        return true;
-      }
-      else
-      {
-        std::uint64_t xl, xh, yl, yh;
-
-        __builtin_memcpy (&xl, reinterpret_cast<const char*> (&x),     8);
-        __builtin_memcpy (&xh, reinterpret_cast<const char*> (&x) + 8, 8);
-        __builtin_memcpy (&yl, reinterpret_cast<const char*> (&y),     8);
-        __builtin_memcpy (&yh, reinterpret_cast<const char*> (&y) + 8, 8);
-
-        return (((xl ^ yl) | (xh ^ yh)) == 0);
-      }
+      return ((a[0] ^ b[0]) | (a[1] ^ b[1])) == 0;
     }
 
     bool operator<  (const guid&, const guid&) = delete;
