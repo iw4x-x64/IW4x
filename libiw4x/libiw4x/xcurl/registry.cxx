@@ -4,6 +4,7 @@
 #include <functional>
 
 #include <libiw4x/logger.hxx>
+#include <libiw4x/contract.hxx>
 
 using namespace std;
 
@@ -63,12 +64,16 @@ namespace iw4x
       pool&      p (handles ());
       scope_lock l (p.mutex_);
 
+      LIBIW4X_PRE (t.ours ());
+
       t.disown ();
 
       for (uint32_t i (0); i != max_transfers; ++i)
       {
         if (&p.transfers[i] == &t)
         {
+          LIBIW4X_ASSERT (p.transfer_used[i]);
+
           p.transfer_used[i] = false;
           break;
         }
@@ -142,12 +147,16 @@ namespace iw4x
       pool&      p (handles ());
       scope_lock l (p.mutex_);
 
+      LIBIW4X_PRE (m.ours ());
+
       m.disown ();
 
       for (uint32_t i (0); i != max_multis; ++i)
       {
         if (&p.multis[i] == &m)
         {
+          LIBIW4X_ASSERT (p.multi_used[i]);
+
           p.multi_used[i] = false;
           break;
         }
