@@ -1,5 +1,7 @@
 #include <libiw4x/gdk/save.hxx>
 
+#include <utility>
+
 #include <libiw4x/logger.hxx>
 
 #include <libiw4x/gdk/sync.hxx>
@@ -292,7 +294,7 @@ namespace iw4x
           for (size_t i (0); i != count_; ++i)
           {
             writes_[i].name = writes[i].name;
-            writes_[i].data = static_cast<blob&&> (writes[i].data);
+            writes_[i].data = move (writes[i].data);
           }
         }
 

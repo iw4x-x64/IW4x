@@ -2,6 +2,7 @@
 
 #include <atomic>
 #include <new>
+#include <utility>
 
 #include <libiw4x/logger.hxx>
 
@@ -278,7 +279,7 @@ namespace iw4x
 
           p = r->provider;
           c = r->provider_context;
-          o = static_cast<operation_ptr&&> (r->local);
+          o = move (r->local);
 
           r->provider = nullptr;
           r->provider_context = nullptr;
@@ -542,7 +543,7 @@ namespace iw4x
       r->queue = &q;
       r->id = id.token ();
       r->name = id.name;
-      r->local = static_cast<operation_ptr&&> (o);
+      r->local = move (o);
 
       l1 ("{} begun", id.name);
 
@@ -597,7 +598,7 @@ namespace iw4x
 
       task_queue& t (q != nullptr ? *q : process_queue ());
 
-      auto* p (new (nothrow) posted {static_cast<event_ptr&&> (e)});
+      auto* p (new (nothrow) posted {move (e)});
 
       if (p == nullptr)
         return false;
