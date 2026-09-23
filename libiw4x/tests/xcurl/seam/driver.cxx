@@ -68,7 +68,7 @@ main ()
   assert (token_for (user, microsoft_url) == E_NOTIMPL);
 
   xcurl::install ();
-  xcurl::serve_platform_at (xcurl::chars ("platform.iw4x"), 3074);
+  xcurl::serve_platform_at (chars ("platform.iw4x"), 3074);
 
   assert (token_for (user, privacy_url) == S_OK);
   assert (token_for (user, social_url) == S_OK);

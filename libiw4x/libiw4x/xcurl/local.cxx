@@ -2,12 +2,16 @@
 
 #include <libiw4x/logger.hxx>
 
+#include <libiw4x/gdk/sync.hxx>
+
 using namespace std;
 
 namespace iw4x
 {
   namespace xcurl
   {
+    using namespace gdk;
+
     bool
     contains (chars h, chars n) noexcept
     {

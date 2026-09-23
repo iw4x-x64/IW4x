@@ -8,6 +8,8 @@ namespace iw4x
 {
   namespace xcurl
   {
+    using namespace gdk;
+
     namespace
     {
       struct pool

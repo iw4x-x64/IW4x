@@ -2,6 +2,8 @@
 
 #include <cstddef>
 
+#include <libiw4x/gdk/text.hxx>
+
 #include <libiw4x/xcurl/xcurl.hxx>
 
 namespace iw4x
@@ -14,39 +16,39 @@ namespace iw4x
 
     struct response
     {
-      long                 status = 0;
-      text<type_limit>     type;
-      text<body_limit>     body;
+      long                  status = 0;
+      gdk::text<type_limit> type;
+      gdk::text<body_limit> body;
     };
 
     struct destination
     {
-      text<host_limit> host;
-      int              port = 0;
+      gdk::text<host_limit> host;
+      int                   port = 0;
     };
 
     bool
-    answer (chars method, chars url, response&) noexcept;
+    answer (gdk::chars method, gdk::chars url, response&) noexcept;
 
     bool
-    answered (chars method, chars url) noexcept;
+    answered (gdk::chars method, gdk::chars url) noexcept;
 
     bool
-    platform (chars url, destination&) noexcept;
+    platform (gdk::chars url, destination&) noexcept;
 
     bool
-    served (chars method, chars url) noexcept;
+    served (gdk::chars method, gdk::chars url) noexcept;
 
     void
-    serve_platform_at (chars host, int port) noexcept;
+    serve_platform_at (gdk::chars host, int port) noexcept;
 
-    text<url_limit>
-    redirect (chars url, const destination&) noexcept;
+    gdk::text<url_limit>
+    redirect (gdk::chars url, const destination&) noexcept;
 
-    chars
-    parameter (chars url, chars name) noexcept;
+    gdk::chars
+    parameter (gdk::chars url, gdk::chars name) noexcept;
 
     bool
-    contains (chars haystack, chars needle) noexcept;
+    contains (gdk::chars haystack, gdk::chars needle) noexcept;
   }
 }

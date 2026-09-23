@@ -3,6 +3,8 @@
 #include <cstddef>
 #include <cstdint>
 
+#include <libiw4x/gdk/text.hxx>
+
 #include <libiw4x/xcurl/xcurl.hxx>
 #include <libiw4x/xcurl/local.hxx>
 
@@ -80,13 +82,13 @@ namespace iw4x
         return outcome_;
       }
 
-      chars
+      gdk::chars
       url () const noexcept
       {
         return url_;
       }
 
-      chars
+      gdk::chars
       method () const noexcept
       {
         return method_;
@@ -97,8 +99,8 @@ namespace iw4x
 
       CURL* easy_ = nullptr;
 
-      text<url_limit>    url_;
-      text<method_limit> method_ {"GET"};
+      gdk::text<url_limit>    url_;
+      gdk::text<method_limit> method_ {"GET"};
 
       curl_write_callback write_ = nullptr;
       curl_write_callback header_ = nullptr;

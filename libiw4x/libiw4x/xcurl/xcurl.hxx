@@ -9,20 +9,10 @@
 
 #include <libiw4x/export.hxx>
 
-#include <libiw4x/gdk/text.hxx>
-#include <libiw4x/gdk/sync.hxx>
-
 namespace iw4x
 {
   namespace xcurl
   {
-    using gdk::chars;
-    using gdk::text;
-    using gdk::text_writer;
-    using gdk::hex;
-    using gdk::mutex;
-    using gdk::scope_lock;
-
     enum class option: int
     {
       infilesize     = CURLOPT_INFILESIZE,

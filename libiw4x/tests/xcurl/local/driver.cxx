@@ -6,6 +6,7 @@
 #include <cassert>
 
 using namespace iw4x;
+using namespace iw4x::gdk;
 using namespace iw4x::xcurl;
 
 namespace

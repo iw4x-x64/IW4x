@@ -10,6 +10,8 @@ namespace iw4x
 {
   namespace xcurl
   {
+    using namespace gdk;
+
     bool multi::
     open () noexcept
     {

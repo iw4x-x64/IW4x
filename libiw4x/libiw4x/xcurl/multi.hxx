@@ -3,6 +3,8 @@
 #include <atomic>
 #include <cstdint>
 
+#include <libiw4x/gdk/sync.hxx>
+
 #include <libiw4x/xcurl/xcurl.hxx>
 #include <libiw4x/xcurl/transfer.hxx>
 
@@ -72,7 +74,7 @@ namespace iw4x
 
       CURLM* handle_ = nullptr;
 
-      mutable mutex mutex_;
+      mutable gdk::mutex mutex_;
 
       transfer*     local_[capacity] {};
       std::uint32_t locals_ = 0;

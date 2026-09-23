@@ -10,10 +10,12 @@ namespace iw4x
 {
   namespace xcurl
   {
+    using namespace gdk;
+
     void
     install () noexcept
     {
-      gdk::serve (&served);
+      serve (&served);
     }
   }
 }
