@@ -5,6 +5,8 @@
 #include <concepts>
 #include <type_traits>
 
+#include <libiw4x/contract.hxx>
+
 #include <libiw4x/gdk/sync.hxx>
 
 namespace iw4x
@@ -65,6 +67,8 @@ namespace iw4x
       std::size_t
       live (H* out, std::size_t n) const noexcept
       {
+        LIBIW4X_PRE (out != nullptr || n == 0);
+
         scope_lock l (mutex_);
 
         std::size_t k (0);
