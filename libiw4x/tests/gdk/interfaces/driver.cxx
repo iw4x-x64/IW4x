@@ -560,6 +560,17 @@ main ()
     assert (std::strcmp (bs[1].info.name, "two") == 0);
     assert (bs[1].info.size == 5 && bs[1].data[4] == 5);
 
+    const char* missing[] {"missing"};
+
+    async_block m {};
+    m.queue = queue;
+
+    assert (xgame_save::read_blob_data_async (nullptr, c, missing, 1, &m) ==
+            S_OK);
+    drain ();
+
+    assert (result_size (&m, &n) == blob_not_found);
+
     enumerated = 0;
 
     assert (xgame_save::enumerate_container_info (nullptr,
