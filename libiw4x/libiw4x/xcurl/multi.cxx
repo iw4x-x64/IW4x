@@ -4,6 +4,7 @@
 #include <algorithm>
 
 #include <libiw4x/logger.hxx>
+#include <libiw4x/contract.hxx>
 
 #include <libiw4x/xcurl/registry.hxx>
 
@@ -62,6 +63,9 @@ namespace iw4x
     CURLMcode multi::
     add (transfer& t) noexcept
     {
+      LIBIW4X_PRE (handle_ != nullptr);
+      LIBIW4X_PRE (t.ours ());
+
       if (!t.begin ())
         return CURLM_INTERNAL_ERROR;
 
@@ -88,6 +92,9 @@ namespace iw4x
     CURLMcode multi::
     remove (transfer& t) noexcept
     {
+      LIBIW4X_PRE (handle_ != nullptr);
+      LIBIW4X_PRE (t.ours ());
+
       if (!t.local ())
         return curl_multi_remove_handle (handle_, t.easy ());
 
@@ -169,6 +176,8 @@ namespace iw4x
     CURLMcode multi::
     perform (int* running) noexcept
     {
+      LIBIW4X_PRE (handle_ != nullptr);
+
       int n (0);
 
       CURLMcode r (curl_multi_perform (handle_, &n));
@@ -185,6 +194,8 @@ namespace iw4x
     CURLMsg* multi::
     read (int* left) noexcept
     {
+      LIBIW4X_PRE (handle_ != nullptr);
+
       scope_lock l (mutex_);
 
       if (count_ != 0)
@@ -229,6 +240,8 @@ namespace iw4x
           int timeout,
           int* ready) noexcept
     {
+      LIBIW4X_PRE (handle_ != nullptr);
+
       if (answered_.load (memory_order_acquire) != 0)
         timeout = 0;
 
