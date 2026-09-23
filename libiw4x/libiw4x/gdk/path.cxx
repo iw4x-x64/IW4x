@@ -193,7 +193,7 @@ namespace iw4x
     to_seconds (const FILETIME& t) noexcept
     {
       uint64_t v ((static_cast<uint64_t> (t.dwHighDateTime) << 32) |
-                       t.dwLowDateTime);
+                  t.dwLowDateTime);
 
       return static_cast<int64_t> (v / 10000000ULL) - 11644473600LL;
     }

@@ -205,9 +205,9 @@ namespace iw4x
       }
 
       size_t n (write_ (const_cast<char*> (answer_.body.c_str ()),
-                             1,
-                             answer_.body.size (),
-                             write_data_));
+                        1,
+                        answer_.body.size (),
+                        write_data_));
 
       if (n != answer_.body.size ())
         warn ("{}: the write callback took {} of {} bytes",
