@@ -1,0 +1,484 @@
+: encode
+:
+{{
+  test.arguments += 'encode'
+
+  : compact
+  : Test the default style over the lengths the encoder branches on
+  :
+  : The compact path processes four octets at a time and finishes the
+  : remainder one at a time, so the lengths on either side of a word
+  : boundary are the interesting ones.
+  :
+  {{
+    $* <:''          >''                   : empty
+    $* <:'A'         >'41'                 : one
+    $* <:'ABC'       >'414243'             : three
+    $* <:'ABCD'      >'41424344'           : four
+    $* <:'ABCDE'     >'4142434445'         : five
+    $* <:'ABCDEFG'   >'41424344454647'     : seven
+    $* <:'ABCDEFGH'  >'4142434445464748'   : eight
+    $* <:'ABCDEFGHI' >'414243444546474849' : nine
+  }}
+
+  : case
+  :
+  {{
+    $* <:'zz'    >'7a7a' : lower
+    $* -u <:'zz' >'7A7A' : upper
+  }}
+
+  : style
+  : Test the named styles
+  :
+  {{
+    $* -s compact  <:'ABC' >'414243'   : compact
+    $* -s spaced   <:'ABC' >'41 42 43' : spaced
+    $* -s colon    <:'ABC' >'41:42:43' : colon
+    $* -s dashed   <:'ABC' >'41-42-43' : dashed
+    $* -s prefixed <:'ABC' >'0x414243' : prefixed
+
+    : prefix-case
+    : The digits change case but the 0x prefix does not
+    :
+    $* -s prefixed -u <:'ABC' >'0x414243'
+  }}
+
+  : custom
+  : Test overriding the separator and the group size
+  :
+  {{
+    $* -c ':'         <:'ABC'   >'41:42:43'     : separator
+    $* -c ':' -g 2    <:'ABCDE' >'4142:4344:45' : group
+    $* -s colon -c '' <:'ABC'   >'414243'       : no-separator
+    $* -x             <:'AB'    >'0x4142'       : prefix
+
+    : prefix-and-group
+    :
+    $* -x -c ' ' -g 2 <:'ABCDE' >'0x4142 4344 45'
+  }}
+
+  : size
+  : Test the encoded size against what the encoder actually writes
+  :
+  : Note that this mode takes the octet count as an argument, so it
+  : replaces rather than extends the arguments set above.
+  :
+  {{
+    test.arguments = 'size'
+
+    $* 0             >'0'  : empty
+    $* 5             >'10' : compact
+    $* -s colon 4    >'11' : colon
+    $* -s colon 0    >'0'  : colon-empty
+    $* -s colon 1    >'2'  : colon-one
+    $* -s prefixed 4 >'10' : prefixed
+    $* -c ' ' -g 2 5 >'12' : group
+  }}
+
+  : invalid
+  :
+  {{
+    : unknown-style
+    :
+    $* -s base64 <:'' 2>"error: unknown style 'base64'" != 0
+
+    : zero-group
+    : A separator with no grouping has no meaning and is rejected
+    :
+    $* -c ':' -g 0 <:'' 2>'error: a separator requires a non-zero group size' != 0
+
+    : long-separator
+    :
+    $* -c '::' <:'' 2>'error: separator must be a single character' != 0
+
+    : unknown-option
+    :
+    $* -q <:'' 2>"error: unknown option '-q'" != 0
+  }}
+}}
+
+: decode
+:
+{{
+  test.arguments += 'decode'
+
+  : compact
+  :
+  {{
+    $* <''                   >:''          : empty
+    $* <'41'                 >:'A'         : one
+    $* <'414243'             >:'ABC'       : three
+    $* <'41424344'           >:'ABCD'      : four
+    $* <'414243444546474849' >:'ABCDEFGHI' : nine
+  }}
+
+  : case
+  : Either case is accepted, and the two must agree
+  :
+  {{
+    $* <'7a7a' >:'zz' : lower
+    $* <'7A7A' >:'zz' : upper
+    $* <'7a7A' >:'zz' : mixed
+  }}
+
+  : style
+  :
+  {{
+    $* -s spaced   <'41 42 43' >:'ABC' : spaced
+    $* -s colon    <'41:42:43' >:'ABC' : colon
+    $* -s dashed   <'41-42-43' >:'ABC' : dashed
+    $* -s prefixed <'0x414243' >:'ABC' : prefixed
+
+    : prefix-case
+    : The 0x prefix is accepted in either case
+    :
+    $* -s prefixed <'0X414243' >:'ABC'
+
+    : short-group
+    : A trailing group may be short
+    :
+    $* -c ':' -g 2 <'4142:4344:45' >:'ABCDE'
+  }}
+
+  : relaxed
+  : Test the decoder used on input a human typed
+  :
+  {{
+    $* -r <'deadbeef'    | $0 encode >'deadbeef' : compact
+    $* -r <'de ad be ef' | $0 encode >'deadbeef' : spaced
+    $* -r <'DE:AD:BE:EF' | $0 encode >'deadbeef' : colon-upper
+    $* -r <'de-ad_be ef' | $0 encode >'deadbeef' : mixed
+    $* -r <'0xdeadbeef'  | $0 encode >'deadbeef' : prefixed
+
+    : split-octet
+    : The two digits of an octet must still be adjacent
+    :
+    $* -r <'d e a d' 2>'error: invalid hexadecimal representation' != 0
+
+    : unknown-separator
+    :
+    $* -r <'de,ad' 2>'error: invalid hexadecimal representation' != 0
+  }}
+
+  : roundtrip
+  : Test that decoding inverts encoding for every named style
+  :
+  {{
+    $* -s compact  <'414243'   | $0 encode -s compact  >'414243'   : compact
+    $* -s spaced   <'41 42 43' | $0 encode -s spaced   >'41 42 43' : spaced
+    $* -s colon    <'41:42:43' | $0 encode -s colon    >'41:42:43' : colon
+    $* -s dashed   <'41-42-43' | $0 encode -s dashed   >'41-42-43' : dashed
+    $* -s prefixed <'0x414243' | $0 encode -s prefixed >'0x414243' : prefixed
+  }}
+
+  : invalid
+  :
+  {{
+    e = 'error: invalid hexadecimal representation'
+
+    $* <'41424'            2>"$e" != 0 : odd-length
+    $* <'4142434g'         2>"$e" != 0 : bad-digit
+    $* <'41 42'            2>"$e" != 0 : unexpected-separator
+    $* -s colon <'41-42'   2>"$e" != 0 : wrong-separator
+    $* -s colon <'41::42'  2>"$e" != 0 : double-separator
+    $* -s prefixed <'0y41' 2>"$e" != 0 : bad-prefix
+    $* -s prefixed <'41'   2>"$e" != 0 : missing-prefix
+
+    : trailing-input
+    : Unlike the from_chars() layer, a whole string must be consumed here
+    :
+    $* <'414243zz' 2>"$e" != 0
+  }}
+}}
+
+: integer
+:
+{{
+  test.arguments += 'integer'
+
+  : fixed
+  : Test the zero-padded form, whose lexicographic order matches the values
+  :
+  {{
+    : width
+    :
+    {{
+      $* -b 8  <'255' >'ff'               : bits-8
+      $* -b 16 <'255' >'00ff'             : bits-16
+      $* -b 32 <'255' >'000000ff'         : bits-32
+      $* -b 64 <'255' >'00000000000000ff' : bits-64
+    }}
+
+    : default-width
+    : The default is 64 bits
+    :
+    $* <'255' >'00000000000000ff'
+
+    : sortable
+    : Zero padding is what makes the text order the numeric order
+    :
+    $* -b 16 <<EOI >>EOO
+    1
+    2
+    16
+    255
+    4096
+    EOI
+    0001
+    0002
+    0010
+    00ff
+    1000
+    EOO
+
+    $* -b 32 -u <'0xdeadbeef' >'DEADBEEF' : upper
+  }}
+
+  : minimal
+  : Test the form with no leading zeros
+  :
+  {{
+    $* -m -b 32 <'0'          >'0'        : zero
+    $* -m -b 32 <'15'         >'f'        : one-digit
+    $* -m -b 32 <'256'        >'100'      : three-digits
+    $* -m -b 32 <'0xdeadbeef' >'deadbeef' : full-width
+  }}
+
+  : input
+  : Decimal and 0x-prefixed input are both accepted
+  :
+  {{
+    $* -b 32 <'3735928559' >'deadbeef' : decimal
+    $* -b 32 <'0xdeadbeef' >'deadbeef' : hexadecimal
+  }}
+
+  : decode
+  :
+  {{
+    $* -d -b 32 <'deadbeef'         >'3735928559'           : lower
+    $* -d -b 32 <'DEADBEEF'         >'3735928559'           : upper
+    $* -d -b 32 <'000000ff'         >'255'                  : padded
+    $* -d -b 64 <'ffffffffffffffff' >'18446744073709551615' : max
+
+    : roundtrip
+    :
+    $* -b 64 <<EOI | $0 integer -d -b 64 >>EOO
+    0
+    1
+    255
+    18446744073709551615
+    EOI
+    0
+    1
+    255
+    18446744073709551615
+    EOO
+  }}
+
+  : invalid
+  :
+  {{
+    : too-many-digits
+    : More digits than the width can hold is out of range, not a truncation
+    :
+    $* -d -b 16 <'12345' 2>'error: value does not fit in the selected width' != 0
+
+    : value-too-large
+    :
+    $* -b 8 <'256' 2>'error: value does not fit in the selected width' != 0
+
+    : no-digits
+    :
+    $* -d -b 32 <'zz' 2>"error: invalid hexadecimal number 'zz'" != 0
+
+    : trailing-input
+    :
+    $* -d -b 32 <'beefy' 2>"error: trailing characters in 'beefy'" != 0
+
+    : bad-width
+    :
+    $* -b 24 <'0' 2>'error: width must be 8, 16, 32 or 64' != 0
+  }}
+}}
+
+: dump
+:
+{{
+  test.arguments += 'dump'
+
+  : canonical
+  : Test the hexdump -C layout
+  :
+  {{
+    : lines
+    : A short last line is padded so that the printable column stays put
+    :
+    $* <:'abcdefghijklmnopqrst' >>EOO
+    00000000  61 62 63 64 65 66 67 68  69 6a 6b 6c 6d 6e 6f 70  |abcdefghijklmnop|
+    00000010  71 72 73 74                                       |qrst|
+    EOO
+
+    : unprintable
+    : Anything outside the ASCII printable range shows as a dot
+    :
+    $* <:'a b' >>EOO
+    00000000  61 20 62                                          |a b|
+    EOO
+
+    : offset
+    : The offset column reports where the slice really starts
+    :
+    $* -O 4096 <:'abcd' >>EOO
+    00001000  61 62 63 64                                       |abcd|
+    EOO
+
+    : columns
+    :
+    $* -w 4 <:'abcdefgh' >>EOO
+    00000000  61 62 63 64  |abcd|
+    00000004  65 66 67 68  |efgh|
+    EOO
+
+    : group
+    : The group break is what makes the eighth octet findable by eye
+    :
+    $* -w 8 -g 4 <:'abcdefgh' >>EOO
+    00000000  61 62 63 64  65 66 67 68  |abcdefgh|
+    EOO
+
+    : no-group
+    :
+    $* -w 4 -g 0 <:'abcd' >>EOO
+    00000000  61 62 63 64  |abcd|
+    EOO
+
+    : no-ascii
+    : Without the printable column a short line is not padded
+    :
+    $* -w 8 -A <:'abcdefghij' >>EOO
+    00000000  61 62 63 64 65 66 67 68
+    00000008  69 6a
+    EOO
+
+    : no-offsets
+    :
+    $* -w 4 -N <:'abcd' >>EOO
+    61 62 63 64  |abcd|
+    EOO
+
+    : upper
+    :
+    $* -w 4 -u -N -A <:'abcd' >'61 62 63 64'
+
+    : annotate
+    : The note is a function of the line offset, which is what makes
+    : dumping a structure with named fields possible
+    :
+    $* -w 4 -a <:'abcdefgh' >>EOO
+    00000000  61 62 63 64  |abcd|  ; first
+    00000004  65 66 67 68  |efgh|
+    EOO
+  }}
+
+  : plain
+  : Test the layout meant to be read back
+  :
+  {{
+    : wrapped
+    :
+    $* -l plain -w 4 <:'abcdefgh' >>EOO
+    61626364
+    65666768
+    EOO
+
+    $* -l plain -w 4 -u <:'abcd' >'61626364' : upper
+  }}
+
+  : c-array
+  : Test the generated C initializer
+  :
+  {{
+    : trailing-comma
+    : Every element gets one, which is what keeps the initializer stable
+    : under a later append
+    :
+    $* -l c_array -w 4 <:'abcdefgh' >>EOO
+      0x61, 0x62, 0x63, 0x64,
+      0x65, 0x66, 0x67, 0x68,
+    EOO
+  }}
+
+  : empty
+  : An empty buffer produces nothing rather than an empty line
+  :
+  {{
+    $* <:''            >:'' : canonical
+    $* -l plain <:''   >:'' : plain
+    $* -l c_array <:'' >:'' : c-array
+  }}
+
+  : invalid
+  :
+  {{
+    : unknown-layout
+    :
+    $* -l xxd <:'' 2>"error: unknown layout 'xxd'" != 0
+
+    : zero-columns
+    :
+    $* -w 0 <:'' 2>'error: a dump needs at least one column' != 0
+  }}
+}}
+
+: styles
+: Test the table the encoder, the decoder and the formatter all read
+:
+: The columns are the style name, its std::format() specifier letter, its
+: separator, its group size and its prefix.
+:
+{
+  test.arguments += 'styles'
+
+  $* >>EOO
+  compact n none 1 none
+  spaced s ' ' 1 none
+  colon c ':' 1 none
+  dashed d '-' 1 none
+  prefixed x none 1 0x
+  EOO
+}
+
+: format
+: Test the std::format() specifiers
+:
+: The letter selects the style and its case selects the case of the digits.
+: The last line is the empty specification, which keeps whatever style the
+: view was built with.
+:
+{
+  test.arguments += 'format'
+
+  $* <:'zz' >>EOO
+  n 7a7a
+  N 7A7A
+  s 7a 7a
+  S 7A 7A
+  c 7a:7a
+  C 7A:7A
+  d 7a-7a
+  D 7A-7A
+  x 0x7a7a
+  X 0x7A7A
+  . 7a7a
+  EOO
+}
+
+: verify
+: Run checks that are not expressible in this language
+:
+: The driver also carries the compile-time half of this, as static
+: assertions over the constexpr interface. Those are checked when it is
+: built, so there is nothing to run for them.
+:
+$* 'verify'
