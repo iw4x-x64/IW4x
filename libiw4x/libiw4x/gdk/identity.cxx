@@ -9,13 +9,15 @@
 #include <libiw4x/gdk/sync.hxx>
 #include <libiw4x/gdk/storage.hxx>
 
+using namespace std;
+
 namespace iw4x
 {
   namespace gdk
   {
     namespace
     {
-      constexpr std::uint64_t xuid_shape (0x0009000000000000ULL);
+      constexpr uint64_t xuid_shape (0x0009000000000000ULL);
 
       path
       identity_file ()
@@ -28,7 +30,7 @@ namespace iw4x
       }
 
       bool
-      read_identity (std::uint64_t& v) noexcept
+      read_identity (uint64_t& v) noexcept
       {
         file f;
 
@@ -37,7 +39,7 @@ namespace iw4x
 
         char b[32];
 
-        std::uint64_t n (0);
+        uint64_t n (0);
 
         if (!f.size (n) || n == 0)
           return false;
@@ -45,13 +47,13 @@ namespace iw4x
         if (n > sizeof (b) - 1)
           n = sizeof (b) - 1;
 
-        if (!f.read (b, static_cast<std::size_t> (n)))
+        if (!f.read (b, static_cast<size_t> (n)))
           return false;
 
         b[n] = '\0';
 
-        std::uint64_t r (0);
-        unsigned      d (0);
+        uint64_t r (0);
+        unsigned d (0);
 
         const char* p (b);
 
@@ -84,10 +86,10 @@ namespace iw4x
         return true;
       }
 
-      std::uint64_t
+      uint64_t
       random_identity ()
       {
-        std::uint64_t v (0);
+        uint64_t v (0);
 
         NTSTATUS s (BCryptGenRandom (nullptr,
                                      reinterpret_cast<PUCHAR> (&v),
@@ -96,15 +98,15 @@ namespace iw4x
 
         if (s < 0)
           raise (E_FAIL, "unable to draw a local user id, status {}",
-                 hex (static_cast<std::uint32_t> (s), 8));
+                 hex (static_cast<uint32_t> (s), 8));
 
         return xuid_shape | (v & 0x0000FFFFFFFFFFFFULL);
       }
 
-      std::uint64_t
+      uint64_t
       mint_identity ()
       {
-        std::uint64_t v (random_identity ());
+        uint64_t v (random_identity ());
 
         text<32> s ("{}", hex (v, 16));
 
@@ -117,8 +119,8 @@ namespace iw4x
         return v;
       }
 
-      std::size_t
-      bounded (const char* s, std::size_t n, std::size_t limit) noexcept
+      size_t
+      bounded (const char* s, size_t n, size_t limit) noexcept
       {
         if (n <= limit)
           return n;
@@ -132,9 +134,9 @@ namespace iw4x
 
       struct local_name
       {
-        mutex       mutex_;
-        char        value[gamertag_capacity];
-        std::size_t size = 0;
+        mutex  mutex_;
+        char   value[gamertag_capacity];
+        size_t size = 0;
       };
 
       local_name&
@@ -145,13 +147,13 @@ namespace iw4x
       }
     }
 
-    std::uint64_t
+    uint64_t
     xuid ()
     {
-      static const std::uint64_t v (
-        [] () -> std::uint64_t
+      static const uint64_t v (
+        [] () -> uint64_t
         {
-          std::uint64_t r (0);
+          uint64_t r (0);
 
           if (read_identity (r))
           {
@@ -168,8 +170,8 @@ namespace iw4x
       return v;
     }
 
-    std::size_t
-    gamertag (char* b, std::size_t size) noexcept
+    size_t
+    gamertag (char* b, size_t size) noexcept
     {
       if (b == nullptr || size == 0)
         return 0;
@@ -181,14 +183,14 @@ namespace iw4x
       {
         text<gamertag_capacity> d (
           "IW4x-{}",
-          hex (static_cast<std::uint32_t> (xuid () & 0xFFFFFFFFULL), 8));
+          hex (static_cast<uint32_t> (xuid () & 0xFFFFFFFFULL), 8));
 
         n.size = d.size ();
 
         __builtin_memcpy (n.value, d.c_str (), n.size);
       }
 
-      std::size_t k (bounded (n.value, n.size, size - 1));
+      size_t k (bounded (n.value, n.size, size - 1));
 
       __builtin_memcpy (b, n.value, k);
 
@@ -202,7 +204,7 @@ namespace iw4x
       local_name& n (name ());
       scope_lock  l (n.mutex_);
 
-      std::size_t k (bounded (v.data (), v.size (), gamertag_capacity - 1));
+      size_t k (bounded (v.data (), v.size (), gamertag_capacity - 1));
 
       if (k == n.size && __builtin_memcmp (n.value, v.data (), k) == 0)
         return;
@@ -216,7 +218,7 @@ namespace iw4x
     }
 
     bool
-    component_bound (gamertag_component c, std::size_t& n) noexcept
+    component_bound (gamertag_component c, size_t& n) noexcept
     {
       switch (c)
       {

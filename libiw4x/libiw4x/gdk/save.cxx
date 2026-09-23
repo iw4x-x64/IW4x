@@ -8,6 +8,8 @@
 #include <libiw4x/gdk/argument.hxx>
 #include <libiw4x/gdk/identity.hxx>
 
+using namespace std;
+
 namespace iw4x
 {
   namespace gdk
@@ -18,7 +20,7 @@ namespace iw4x
       if (n.empty () || n == chars (".") || n == chars (".."))
         return false;
 
-      for (std::size_t i (0); i != n.size (); ++i)
+      for (size_t i (0); i != n.size (); ++i)
       {
         switch (n.data ()[i])
         {
@@ -51,7 +53,7 @@ namespace iw4x
         return v;
       }
 
-      template <typename T, std::size_t N>
+      template <typename T, size_t N>
       class handle_pool
       {
       public:
@@ -60,7 +62,7 @@ namespace iw4x
         {
           scope_lock l (mutex_);
 
-          for (std::size_t i (0); i != N; ++i)
+          for (size_t i (0); i != N; ++i)
           {
             if (used_[i])
               continue;
@@ -79,7 +81,7 @@ namespace iw4x
         {
           scope_lock l (mutex_);
 
-          for (std::size_t i (0); i != N; ++i)
+          for (size_t i (0); i != N; ++i)
           {
             if (used_[i] && &items_[i] == h)
               return items_[i];
@@ -93,7 +95,7 @@ namespace iw4x
         {
           scope_lock l (mutex_);
 
-          for (std::size_t i (0); i != N; ++i)
+          for (size_t i (0); i != N; ++i)
           {
             if (!used_[i] || &items_[i] != h)
               continue;
@@ -149,7 +151,7 @@ namespace iw4x
       class initialize_operation: public operation
       {
       public:
-        std::size_t
+        size_t
         work () override
         {
           path r (storage_root ());
@@ -173,7 +175,7 @@ namespace iw4x
         }
 
         void
-        result (std::size_t size, void* buffer) override
+        result (size_t size, void* buffer) override
         {
           if (size < sizeof (save_provider*))
             raise_invalid ("no room for a provider handle");
@@ -191,20 +193,20 @@ namespace iw4x
       public:
         read_operation (const path& location,
                         const char* const* names,
-                        std::size_t count)
+                        size_t count)
             : location_ (location), count_ (count)
         {
-          for (std::size_t i (0); i != count_; ++i)
+          for (size_t i (0); i != count_; ++i)
             names_[i] = text<blob_name_capacity> ("{}",
                                                   storable_name (names[i]));
         }
 
-        std::size_t
+        size_t
         work () override
         {
-          std::size_t n (count_ * sizeof (save_blob));
+          size_t n (count_ * sizeof (save_blob));
 
-          for (std::size_t i (0); i != count_; ++i)
+          for (size_t i (0); i != count_; ++i)
           {
             path p (location_);
 
@@ -216,12 +218,12 @@ namespace iw4x
               raise (HRESULT_FROM_WIN32 (ERROR_FILE_NOT_FOUND),
                      "unable to read '{}'", names_[i].c_str ());
 
-            std::uint64_t s (0);
+            uint64_t s (0);
 
             if (!f.size (s))
               raise_win32 ("unable to size a game save blob");
 
-            if (!data_[i].resize (static_cast<std::size_t> (s)))
+            if (!data_[i].resize (static_cast<size_t> (s)))
               raise (E_OUTOFMEMORY, "no room for a {} byte blob", s);
 
             if (!data_[i].empty () &&
@@ -235,19 +237,19 @@ namespace iw4x
         }
 
         void
-        result (std::size_t size, void* buffer) override
+        result (size_t size, void* buffer) override
         {
           auto* b (&answer (static_cast<save_blob*> (buffer)));
-          auto* p (static_cast<std::uint8_t*> (buffer) +
+          auto* p (static_cast<uint8_t*> (buffer) +
                    count_ * sizeof (save_blob));
-          auto* e (static_cast<std::uint8_t*> (buffer) + size);
+          auto* e (static_cast<uint8_t*> (buffer) + size);
 
-          for (std::size_t i (0); i != count_; ++i)
+          for (size_t i (0); i != count_; ++i)
           {
             const text<blob_name_capacity>& n (names_[i]);
             const blob&                     d (data_[i]);
 
-            if (static_cast<std::size_t> (e - p) < n.size () + 1 + d.size ())
+            if (static_cast<size_t> (e - p) < n.size () + 1 + d.size ())
               raise (insufficient_buffer,
                      "no room for blob '{}'", n.c_str ());
 
@@ -258,13 +260,13 @@ namespace iw4x
 
             __builtin_memcpy (p, d.data (), d.size ());
 
-            b[i].info.size = static_cast<std::uint32_t> (d.size ());
+            b[i].info.size = static_cast<uint32_t> (d.size ());
             b[i].data = p;
             p += d.size ();
           }
         }
 
-        std::size_t
+        size_t
         count () const noexcept
         {
           return count_;
@@ -274,7 +276,7 @@ namespace iw4x
         path                     location_;
         text<blob_name_capacity> names_[max_blob_reads];
         blob                     data_[max_blob_reads];
-        std::size_t              count_;
+        size_t                   count_;
       };
 
       const operation_id submit_id {"XGameSaveSubmitUpdateAsync"};
@@ -284,20 +286,20 @@ namespace iw4x
       public:
         submit_operation (const path& location,
                           pending_write* writes,
-                          std::size_t count) noexcept
+                          size_t count) noexcept
             : location_ (location), count_ (count)
         {
-          for (std::size_t i (0); i != count_; ++i)
+          for (size_t i (0); i != count_; ++i)
           {
             writes_[i].name = writes[i].name;
             writes_[i].data = static_cast<blob&&> (writes[i].data);
           }
         }
 
-        std::size_t
+        size_t
         work () override
         {
-          for (std::size_t i (0); i != count_; ++i)
+          for (size_t i (0); i != count_; ++i)
           {
             const pending_write& w (writes_[i]);
 
@@ -338,7 +340,7 @@ namespace iw4x
       private:
         path          location_;
         pending_write writes_[max_blob_writes];
-        std::size_t   count_;
+        size_t        count_;
       };
     }
 
@@ -483,7 +485,7 @@ namespace iw4x
               ++i.blob_count;
               i.total_size += f.size ();
 
-              std::int64_t t (f.last_write_seconds ());
+              int64_t t (f.last_write_seconds ());
 
               if (t > i.last_modified)
                 i.last_modified = t;
@@ -507,7 +509,7 @@ namespace iw4x
     read_blob_data_async (void*,
                           save_container* c,
                           const char* const* names,
-                          std::uint32_t count,
+                          uint32_t count,
                           async_block* b) noexcept
     {
       return guard (read_id.name, [&] () -> HRESULT
@@ -520,7 +522,7 @@ namespace iw4x
         if (count > max_blob_reads)
           raise_invalid ("{} blobs is more than one read takes", count);
 
-        for (std::uint32_t i (0); i != count; ++i)
+        for (uint32_t i (0); i != count; ++i)
           l1 ("XGameSaveReadBlobDataAsync {}/{}",
               t.name.c_str (),
               storable_name (names[i]).data ());
@@ -533,9 +535,9 @@ namespace iw4x
     HRESULT WINAPI xgame_save::
     read_blob_data (void*,
                     async_block* b,
-                    std::size_t size,
+                    size_t size,
                     void* buffer,
-                    std::uint32_t* count) noexcept
+                    uint32_t* count) noexcept
     {
       return guard ("XGameSaveReadBlobData", [&] () -> HRESULT
       {
@@ -545,7 +547,7 @@ namespace iw4x
         if (o == nullptr)
           raise_invalid ("not a blob read operation of ours");
 
-        std::uint32_t n (static_cast<std::uint32_t> (o->count ()));
+        uint32_t n (static_cast<uint32_t> (o->count ()));
 
         HRESULT hr (result (b, read_id, size, buffer));
 
@@ -595,8 +597,8 @@ namespace iw4x
     submit_blob_write (void*,
                        save_update* u,
                        const char* name,
-                       const std::uint8_t* data,
-                       std::uint32_t size) noexcept
+                       const uint8_t* data,
+                       uint32_t size) noexcept
     {
       return guard ("XGameSaveSubmitBlobWrite", [&] () -> HRESULT
       {

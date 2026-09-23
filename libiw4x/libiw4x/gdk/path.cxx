@@ -2,12 +2,14 @@
 
 #include <new>
 
+using namespace std;
+
 namespace iw4x
 {
   namespace gdk
   {
     bool path::
-    extend (const wchar_t* p, std::size_t n) noexcept
+    extend (const wchar_t* p, size_t n) noexcept
     {
       if (p == nullptr || n == 0)
         return whole ();
@@ -32,7 +34,7 @@ namespace iw4x
       if (p == nullptr)
         return whole ();
 
-      std::size_t n (0);
+      size_t n (0);
 
       for (; p[n] != L'\0'; ++n)
         ;
@@ -61,7 +63,7 @@ namespace iw4x
         return false;
       }
 
-      return extend (w, static_cast<std::size_t> (n));
+      return extend (w, static_cast<size_t> (n));
     }
 
     bool path::
@@ -95,7 +97,7 @@ namespace iw4x
     }
 
     chars path::
-    narrow (char* b, std::size_t n) const noexcept
+    narrow (char* b, size_t n) const noexcept
     {
       if (n == 0)
         return chars ();
@@ -114,11 +116,11 @@ namespace iw4x
 
       b[r] = '\0';
 
-      return chars (b, static_cast<std::size_t> (r));
+      return chars (b, static_cast<size_t> (r));
     }
 
     chars
-    narrow (const wchar_t* w, char* b, std::size_t n) noexcept
+    narrow (const wchar_t* w, char* b, size_t n) noexcept
     {
       if (n == 0)
         return chars ();
@@ -138,7 +140,7 @@ namespace iw4x
         return chars ();
       }
 
-      return chars (b, static_cast<std::size_t> (r) - 1);
+      return chars (b, static_cast<size_t> (r) - 1);
     }
 
     namespace
@@ -175,7 +177,7 @@ namespace iw4x
 
       const wchar_t* s (p.c_str ());
 
-      for (std::size_t i (1); i != p.size (); ++i)
+      for (size_t i (1); i != p.size (); ++i)
       {
         if (s[i] != L'\\' && s[i] != L'/')
           continue;
@@ -190,13 +192,13 @@ namespace iw4x
       return make_directory (p.c_str ());
     }
 
-    std::int64_t
+    int64_t
     to_seconds (const FILETIME& t) noexcept
     {
-      std::uint64_t v ((static_cast<std::uint64_t> (t.dwHighDateTime) << 32) |
+      uint64_t v ((static_cast<uint64_t> (t.dwHighDateTime) << 32) |
                        t.dwLowDateTime);
 
-      return static_cast<std::int64_t> (v / 10000000ULL) - 11644473600LL;
+      return static_cast<int64_t> (v / 10000000ULL) - 11644473600LL;
     }
 
     void blob::
@@ -209,7 +211,7 @@ namespace iw4x
     }
 
     bool blob::
-    resize (std::size_t n) noexcept
+    resize (size_t n) noexcept
     {
       if (n == size_)
         return true;
@@ -219,7 +221,7 @@ namespace iw4x
       if (n == 0)
         return true;
 
-      data_ = new (std::nothrow) std::uint8_t[n];
+      data_ = new (nothrow) uint8_t[n];
 
       if (data_ == nullptr)
         return false;
@@ -270,18 +272,18 @@ namespace iw4x
     }
 
     bool file::
-    size (std::uint64_t& n) const noexcept
+    size (uint64_t& n) const noexcept
     {
       LARGE_INTEGER v;
 
       if (!GetFileSizeEx (handle_, &v))
         return false;
 
-      n = static_cast<std::uint64_t> (v.QuadPart);
+      n = static_cast<uint64_t> (v.QuadPart);
       return true;
     }
 
-    std::int64_t file::
+    int64_t file::
     last_write_seconds () const noexcept
     {
       FILETIME t;
@@ -293,9 +295,9 @@ namespace iw4x
     }
 
     bool file::
-    read (void* b, std::size_t n) noexcept
+    read (void* b, size_t n) noexcept
     {
-      auto* p (static_cast<std::uint8_t*> (b));
+      auto* p (static_cast<uint8_t*> (b));
 
       while (n != 0)
       {
@@ -313,9 +315,9 @@ namespace iw4x
     }
 
     bool file::
-    write (const void* b, std::size_t n) noexcept
+    write (const void* b, size_t n) noexcept
     {
-      auto* p (static_cast<const std::uint8_t*> (b));
+      auto* p (static_cast<const uint8_t*> (b));
 
       while (n != 0)
       {
@@ -383,7 +385,7 @@ namespace iw4x
       }
     }
 
-    std::int64_t directory::
+    int64_t directory::
     last_write_seconds () const noexcept
     {
       return to_seconds (entry_.ftLastWriteTime);

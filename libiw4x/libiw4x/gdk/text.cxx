@@ -1,15 +1,17 @@
 #include <libiw4x/gdk/text.hxx>
 
+using namespace std;
+
 namespace iw4x
 {
   namespace gdk
   {
-    static constexpr std::size_t digits (21);
+    static constexpr size_t digits (21);
 
     void text_writer::
     write (chars v) noexcept
     {
-      std::size_t n (v.size ());
+      size_t n (v.size ());
 
       if (n > c_ - n_ - 1)
       {
@@ -44,7 +46,7 @@ namespace iw4x
     void text_writer::
     write (const void* v) noexcept
     {
-      write (hex (reinterpret_cast<std::uintptr_t> (v)));
+      write (hex (reinterpret_cast<uintptr_t> (v)));
     }
 
     void text_writer::
@@ -55,8 +57,8 @@ namespace iw4x
       char  s[16];
       char* p (s + sizeof (s));
 
-      std::uint64_t r (v.value);
-      unsigned      w (v.width);
+      uint64_t r (v.value);
+      unsigned w (v.width);
 
       do
       {
@@ -72,11 +74,11 @@ namespace iw4x
         *--p = '0';
 
       write (chars ("0x"));
-      write (chars (p, static_cast<std::size_t> (s + sizeof (s) - p)));
+      write (chars (p, static_cast<size_t> (s + sizeof (s) - p)));
     }
 
     void text_writer::
-    write_unsigned (std::uint64_t v) noexcept
+    write_unsigned (uint64_t v) noexcept
     {
       char  s[digits];
       char* p (s + sizeof (s));
@@ -88,20 +90,20 @@ namespace iw4x
       }
       while (v != 0);
 
-      write (chars (p, static_cast<std::size_t> (s + sizeof (s) - p)));
+      write (chars (p, static_cast<size_t> (s + sizeof (s) - p)));
     }
 
     void text_writer::
-    write_signed (std::int64_t v) noexcept
+    write_signed (int64_t v) noexcept
     {
       if (v < 0)
       {
         write (chars ("-"));
-        write_unsigned (~static_cast<std::uint64_t> (v) + 1);
+        write_unsigned (~static_cast<uint64_t> (v) + 1);
         return;
       }
 
-      write_unsigned (static_cast<std::uint64_t> (v));
+      write_unsigned (static_cast<uint64_t> (v));
     }
 
     const char*
@@ -113,12 +115,12 @@ namespace iw4x
       {
         if (p[0] == '{' && p[1] == '}')
         {
-          w.write (chars (f, static_cast<std::size_t> (p - f)));
+          w.write (chars (f, static_cast<size_t> (p - f)));
           return p + 2;
         }
       }
 
-      w.write (chars (f, static_cast<std::size_t> (p - f)));
+      w.write (chars (f, static_cast<size_t> (p - f)));
       return p;
     }
 

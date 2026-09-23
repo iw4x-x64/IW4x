@@ -7,13 +7,15 @@
 #include <libiw4x/gdk/error.hxx>
 #include <libiw4x/gdk/argument.hxx>
 
+using namespace std;
+
 namespace iw4x
 {
   namespace gdk
   {
     namespace
     {
-      inline constexpr std::size_t prompt_capacity (256);
+      inline constexpr size_t prompt_capacity (256);
 
       struct picker
       {
@@ -34,15 +36,15 @@ namespace iw4x
       {
       public:
         pick_operation (chars prompt,
-                        const std::uint64_t* candidates,
-                        std::size_t count,
-                        std::size_t maximum)
+                        const uint64_t* candidates,
+                        size_t count,
+                        size_t maximum)
             : prompt_ ("{}", prompt), count_ (count), maximum_ (maximum)
         {
           if (count_ == 0)
             return;
 
-          if (!candidates_.resize (count_ * sizeof (std::uint64_t)))
+          if (!candidates_.resize (count_ * sizeof (uint64_t)))
             raise (E_OUTOFMEMORY, "no room for {} candidates", count_);
 
           __builtin_memcpy (candidates_.data (),
@@ -50,7 +52,7 @@ namespace iw4x
                             candidates_.size ());
         }
 
-        std::size_t
+        size_t
         work () override
         {
           player_picker choose (nullptr);
@@ -69,14 +71,14 @@ namespace iw4x
           }
 
           if (maximum_ != 0 &&
-              !chosen_.resize (maximum_ * sizeof (std::uint64_t)))
+              !chosen_.resize (maximum_ * sizeof (uint64_t)))
             raise (E_OUTOFMEMORY, "no room for {} choices", maximum_);
 
           chosen_count_ = choose (
             prompt_,
-            reinterpret_cast<const std::uint64_t*> (candidates_.data ()),
+            reinterpret_cast<const uint64_t*> (candidates_.data ()),
             count_,
-            reinterpret_cast<std::uint64_t*> (chosen_.data ()),
+            reinterpret_cast<uint64_t*> (chosen_.data ()),
             maximum_);
 
           if (chosen_count_ > maximum_)
@@ -84,13 +86,13 @@ namespace iw4x
 
           info ("the player chose {} of {}", chosen_count_, count_);
 
-          return chosen_count_ * sizeof (std::uint64_t);
+          return chosen_count_ * sizeof (uint64_t);
         }
 
         void
-        result (std::size_t size, void* buffer) override
+        result (size_t size, void* buffer) override
         {
-          std::size_t n (chosen_count_ * sizeof (std::uint64_t));
+          size_t n (chosen_count_ * sizeof (uint64_t));
 
           if (size < n)
             raise (insufficient_buffer,
@@ -99,12 +101,12 @@ namespace iw4x
                    n);
 
           if (n != 0)
-            __builtin_memcpy (&answer (static_cast<std::uint64_t*> (buffer)),
+            __builtin_memcpy (&answer (static_cast<uint64_t*> (buffer)),
                               chosen_.data (),
                               n);
         }
 
-        std::size_t
+        size_t
         count () const noexcept
         {
           return chosen_count_;
@@ -113,10 +115,10 @@ namespace iw4x
       private:
         text<prompt_capacity> prompt_;
         blob                  candidates_;
-        std::size_t           count_;
-        std::size_t           maximum_;
+        size_t                count_;
+        size_t                maximum_;
         blob                  chosen_;
-        std::size_t           chosen_count_ = 0;
+        size_t                chosen_count_ = 0;
       };
     }
 
@@ -134,12 +136,12 @@ namespace iw4x
                               async_block* b,
                               void* user,
                               const char* prompt,
-                              std::uint32_t count,
-                              const std::uint64_t* xuids,
-                              std::uint32_t,
+                              uint32_t count,
+                              const uint64_t* xuids,
+                              uint32_t,
                               const void*,
-                              std::uint32_t,
-                              std::uint32_t maximum) noexcept
+                              uint32_t,
+                              uint32_t maximum) noexcept
     {
       return guard (pick_id.name, [&] () -> HRESULT
       {
@@ -169,9 +171,9 @@ namespace iw4x
     HRESULT WINAPI xgame_ui::
     show_player_picker_result (void*,
                                async_block* b,
-                               std::uint32_t maximum,
-                               std::uint64_t* out,
-                               std::uint32_t* count) noexcept
+                               uint32_t maximum,
+                               uint64_t* out,
+                               uint32_t* count) noexcept
     {
       return guard ("XGameUiShowPlayerPickerResult", [&] () -> HRESULT
       {
@@ -181,15 +183,15 @@ namespace iw4x
         if (o == nullptr)
           raise_invalid ("not a player picker operation of ours");
 
-        std::size_t n (o->count ());
+        size_t n (o->count ());
 
         if (n > maximum)
           n = maximum;
 
-        HRESULT hr (result (b, pick_id, n * sizeof (std::uint64_t), out));
+        HRESULT hr (result (b, pick_id, n * sizeof (uint64_t), out));
 
         if (SUCCEEDED (hr))
-          answer (count) = static_cast<std::uint32_t> (n);
+          answer (count) = static_cast<uint32_t> (n);
 
         return hr;
       });

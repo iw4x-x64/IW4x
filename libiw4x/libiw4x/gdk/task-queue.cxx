@@ -8,13 +8,15 @@
 
 #include <libiw4x/gdk/error.hxx>
 
+using namespace std;
+
 namespace iw4x
 {
   namespace gdk
   {
     namespace
     {
-      std::uint32_t
+      uint32_t
       worker_count (dispatch_mode m) noexcept
       {
         switch (m)
@@ -48,12 +50,12 @@ namespace iw4x
         terminated_ = false;
         canceled_   = false;
 
-        queued_.store (0, std::memory_order_release);
+        queued_.store (0, memory_order_release);
       }
 
-      std::uint32_t n (worker_count (m));
+      uint32_t n (worker_count (m));
 
-      for (std::uint32_t i (0); i != n; ++i)
+      for (uint32_t i (0); i != n; ++i)
       {
         if (!workers_[i].start (&task_port::work, this))
         {
@@ -75,7 +77,7 @@ namespace iw4x
     }
 
     bool task_port::
-    submit (std::uint32_t delay, task run, void* context) noexcept
+    submit (uint32_t delay, task run, void* context) noexcept
     {
       if (mode_ == dispatch_mode::immediate)
       {
@@ -99,14 +101,14 @@ namespace iw4x
 
         ++count_;
 
-        queued_.store (count_, std::memory_order_release);
+        queued_.store (count_, memory_order_release);
       }
 
       ready_.wake_one ();
       return true;
     }
 
-    std::int32_t task_port::
+    int32_t task_port::
     due () noexcept
     {
       if (count_ == 0)
@@ -115,9 +117,9 @@ namespace iw4x
       if (terminated_)
         return 0;
 
-      std::uint64_t t (now ());
+      uint64_t t (now ());
 
-      for (std::uint32_t i (0); i != count_; ++i)
+      for (uint32_t i (0); i != count_; ++i)
       {
         if (items_[(head_ + i) & mask].due > t)
           continue;
@@ -136,14 +138,14 @@ namespace iw4x
       return -1;
     }
 
-    std::uint64_t task_port::
+    uint64_t task_port::
     earliest () const noexcept
     {
-      std::uint64_t r (items_[head_].due);
+      uint64_t r (items_[head_].due);
 
-      for (std::uint32_t i (1); i != count_; ++i)
+      for (uint32_t i (1); i != count_; ++i)
       {
-        std::uint64_t d (items_[(head_ + i) & mask].due);
+        uint64_t d (items_[(head_ + i) & mask].due);
 
         if (d < r)
           r = d;
@@ -153,16 +155,16 @@ namespace iw4x
     }
 
     bool task_port::
-    dispatch (std::uint32_t timeout) noexcept
+    dispatch (uint32_t timeout) noexcept
     {
       const bool infinite (timeout == INFINITE);
 
-      if (timeout == 0 && queued_.load (std::memory_order_acquire) == 0)
+      if (timeout == 0 && queued_.load (memory_order_acquire) == 0)
         return false;
 
       scope_lock l (mutex_);
 
-      const std::uint64_t deadline (now () + (infinite ? 0 : timeout));
+      const uint64_t deadline (now () + (infinite ? 0 : timeout));
 
       for (;;)
       {
@@ -174,7 +176,7 @@ namespace iw4x
           head_ = (head_ + 1) & mask;
           --count_;
 
-          queued_.store (count_, std::memory_order_release);
+          queued_.store (count_, memory_order_release);
 
           l.release ();
 
@@ -185,7 +187,7 @@ namespace iw4x
         if (terminated_)
           return false;
 
-        std::uint64_t t (now ());
+        uint64_t t (now ());
 
         if (!infinite && t >= deadline)
           return false;
@@ -196,7 +198,7 @@ namespace iw4x
 
         if (count_ != 0)
         {
-          std::uint64_t e (earliest ());
+          uint64_t e (earliest ());
 
           if (e > t)
           {
@@ -240,7 +242,7 @@ namespace iw4x
 
       ready_.wake_all ();
 
-      for (std::uint32_t i (0); i != worker_count_; ++i)
+      for (uint32_t i (0); i != worker_count_; ++i)
         workers_[i].join ();
 
       worker_count_ = 0;
@@ -259,8 +261,8 @@ namespace iw4x
 
     namespace
     {
-      constexpr std::uint32_t max_queues = 64;
-      constexpr std::uint32_t max_ports  = 32;
+      constexpr uint32_t max_queues = 64;
+      constexpr uint32_t max_ports  = 32;
 
       struct queue_pool
       {
@@ -272,40 +274,40 @@ namespace iw4x
         void
         stop () noexcept
         {
-          task_port*    ps[max_ports];
-          std::uint32_t n (0);
+          task_port* ps[max_ports];
+          uint32_t   n (0);
 
           {
             scope_lock l (mutex_);
 
-            for (std::uint32_t i (0); i != max_ports; ++i)
+            for (uint32_t i (0); i != max_ports; ++i)
             {
               if (port_used[i])
                 ps[n++] = &owned[i];
             }
           }
 
-          for (std::uint32_t i (0); i != n; ++i)
+          for (uint32_t i (0); i != n; ++i)
             ps[i]->stop ();
         }
 
         struct held_ports
         {
-          std::uint32_t work       = max_ports;
-          std::uint32_t completion = max_ports;
+          uint32_t work       = max_ports;
+          uint32_t completion = max_ports;
         };
 
-        mutex         mutex_;
-        task_port     owned[max_ports];
-        task_queue    made[max_queues];
-        bool          made_used[max_queues] {};
-        bool          made_owns[max_queues] {};
-        held_ports    made_ports[max_queues];
-        bool          port_used[max_ports] {};
-        bool          port_owned[max_ports] {};
-        std::uint32_t port_borrows[max_ports] {};
-        std::uint32_t ports  = 0;
-        std::uint32_t queues = 0;
+        mutex      mutex_;
+        task_port  owned[max_ports];
+        task_queue made[max_queues];
+        bool       made_used[max_queues] {};
+        bool       made_owns[max_queues] {};
+        held_ports made_ports[max_queues];
+        bool       port_used[max_ports] {};
+        bool       port_owned[max_ports] {};
+        uint32_t   port_borrows[max_ports] {};
+        uint32_t   ports  = 0;
+        uint32_t   queues = 0;
       };
 
       queue_pool&
@@ -315,12 +317,12 @@ namespace iw4x
         return p;
       }
 
-      std::atomic<task_queue*> current_process_queue {nullptr};
+      atomic<task_queue*> current_process_queue {nullptr};
 
       task_queue*
       take_queue (queue_pool& p) noexcept
       {
-        for (std::uint32_t i (0); i != max_queues; ++i)
+        for (uint32_t i (0); i != max_queues; ++i)
         {
           if (p.made_used[i])
             continue;
@@ -335,10 +337,10 @@ namespace iw4x
         return nullptr;
       }
 
-      std::uint32_t
+      uint32_t
       take_port (queue_pool& p) noexcept
       {
-        for (std::uint32_t i (0); i != max_ports; ++i)
+        for (uint32_t i (0); i != max_ports; ++i)
         {
           if (p.port_used[i])
             continue;
@@ -353,7 +355,7 @@ namespace iw4x
       }
 
       void
-      give_port (queue_pool& p, std::uint32_t i) noexcept
+      give_port (queue_pool& p, uint32_t i) noexcept
       {
         if (i == max_ports)
           return;
@@ -362,17 +364,17 @@ namespace iw4x
         --p.ports;
       }
 
-      std::uint32_t
+      uint32_t
       port_index (queue_pool& p, task_port& t) noexcept
       {
         if (&t < p.owned || &t >= p.owned + max_ports)
           return max_ports;
 
-        return static_cast<std::uint32_t> (&t - p.owned);
+        return static_cast<uint32_t> (&t - p.owned);
       }
 
       bool
-      spent (queue_pool& p, std::uint32_t i) noexcept
+      spent (queue_pool& p, uint32_t i) noexcept
       {
         return i != max_ports &&
                p.port_used[i] &&
@@ -386,23 +388,23 @@ namespace iw4x
     {
       queue_pool& p (pool ());
 
-      std::uint32_t done[2] {max_ports, max_ports};
+      uint32_t done[2] {max_ports, max_ports};
 
       {
         scope_lock l (p.mutex_);
 
-        for (std::uint32_t i (0); i != max_queues; ++i)
+        for (uint32_t i (0); i != max_queues; ++i)
         {
           if (&p.made[i] != &q || !p.made_used[i])
             continue;
 
           queue_pool::held_ports h (p.made_ports[i]);
 
-          std::uint32_t is[2] {h.work, h.completion};
+          uint32_t is[2] {h.work, h.completion};
 
-          for (std::uint32_t k (0); k != 2; ++k)
+          for (uint32_t k (0); k != 2; ++k)
           {
-            std::uint32_t j (is[k]);
+            uint32_t j (is[k]);
 
             if (j == max_ports)
               continue;
@@ -425,7 +427,7 @@ namespace iw4x
         }
       }
 
-      for (std::uint32_t j: done)
+      for (uint32_t j: done)
       {
         if (j != max_ports)
           p.owned[j].stop ();
@@ -436,7 +438,7 @@ namespace iw4x
 
       scope_lock l (p.mutex_);
 
-      for (std::uint32_t j: done)
+      for (uint32_t j: done)
         give_port (p, j);
     }
 
@@ -455,8 +457,8 @@ namespace iw4x
       queue_pool& p (pool ());
       scope_lock  l (p.mutex_);
 
-      std::uint32_t wi (take_port (p));
-      std::uint32_t ci (take_port (p));
+      uint32_t wi (take_port (p));
+      uint32_t ci (take_port (p));
 
       task_queue* q (wi != max_ports && ci != max_ports ? take_queue (p)
                                                         : nullptr);
@@ -473,7 +475,7 @@ namespace iw4x
         return nullptr;
       }
 
-      std::uint32_t i (static_cast<std::uint32_t> (q - p.made));
+      uint32_t i (static_cast<uint32_t> (q - p.made));
 
       p.made_ports[i] = queue_pool::held_ports {wi, ci};
       p.made_owns[i]  = true;
@@ -503,9 +505,9 @@ namespace iw4x
       if (q == nullptr)
         return nullptr;
 
-      std::uint32_t i (static_cast<std::uint32_t> (q - p.made));
-      std::uint32_t wi (port_index (p, w));
-      std::uint32_t ci (port_index (p, c));
+      uint32_t i (static_cast<uint32_t> (q - p.made));
+      uint32_t wi (port_index (p, w));
+      uint32_t ci (port_index (p, c));
 
       p.made_ports[i] = queue_pool::held_ports {wi, ci};
       p.made_owns[i]  = false;
@@ -525,7 +527,7 @@ namespace iw4x
     process_queue () noexcept
     {
       if (task_queue* q =
-            current_process_queue.load (std::memory_order_acquire))
+            current_process_queue.load (memory_order_acquire))
         return *q;
 
       static task_queue* fallback (
@@ -546,16 +548,16 @@ namespace iw4x
       current_process_queue.compare_exchange_strong (
         none,
         fallback,
-        std::memory_order_acq_rel,
-        std::memory_order_acquire);
+        memory_order_acq_rel,
+        memory_order_acquire);
 
-      return *current_process_queue.load (std::memory_order_acquire);
+      return *current_process_queue.load (memory_order_acquire);
     }
 
     void
     set_process_queue (task_queue* q) noexcept
     {
-      current_process_queue.store (q, std::memory_order_release);
+      current_process_queue.store (q, memory_order_release);
 
       info ("process task queue {}", q != nullptr ? "set" : "cleared");
     }
@@ -607,11 +609,11 @@ namespace iw4x
 
       bool
       submit_adapted (task_port& p,
-                      std::uint32_t delay,
+                      uint32_t delay,
                       void* context,
                       void (*f) (void*, bool)) noexcept
       {
-        auto* a (new (std::nothrow) adapted {f, context});
+        auto* a (new (nothrow) adapted {f, context});
 
         if (a == nullptr)
           return false;
@@ -641,8 +643,8 @@ namespace iw4x
           raise (E_OUTOFMEMORY, "no room for another task queue");
 
         info ("task queue created, work {} completion {}",
-              static_cast<std::uint32_t> (w),
-              static_cast<std::uint32_t> (c));
+              static_cast<uint32_t> (w),
+              static_cast<uint32_t> (c));
 
         *out = q;
         return S_OK;
@@ -675,7 +677,7 @@ namespace iw4x
     {
       return guard ("XTaskQueueGetPort", [&] () -> HRESULT
       {
-        l2 ("XTaskQueueGetPort ({})", static_cast<std::uint32_t> (p));
+        l2 ("XTaskQueueGetPort ({})", static_cast<uint32_t> (p));
 
         if (out == nullptr)
           raise (E_POINTER, "no result pointer");
@@ -701,7 +703,7 @@ namespace iw4x
     }
 
     bool WINAPI xasync::
-    queue_dispatch (void*, task_queue* q, port p, std::uint32_t t) noexcept
+    queue_dispatch (void*, task_queue* q, port p, uint32_t t) noexcept
     {
       return guard ("XTaskQueueDispatch", false, [&] () -> bool
       {
@@ -712,7 +714,7 @@ namespace iw4x
 
         if (r)
           l1 ("XTaskQueueDispatch ({}) ran a callback",
-              static_cast<std::uint32_t> (p));
+              static_cast<uint32_t> (p));
 
         return r;
       });
@@ -749,7 +751,7 @@ namespace iw4x
         if (q == nullptr || f == nullptr)
           raise_invalid ("no queue or no callback");
 
-        l2 ("XTaskQueueSubmitCallback ({})", static_cast<std::uint32_t> (p));
+        l2 ("XTaskQueueSubmitCallback ({})", static_cast<uint32_t> (p));
 
         return submit_adapted ((*q)[p], 0, context, f) ? S_OK : E_ABORT;
       });
@@ -759,7 +761,7 @@ namespace iw4x
     queue_submit_delayed_callback (void*,
                                    task_queue* q,
                                    port p,
-                                   std::uint32_t delay,
+                                   uint32_t delay,
                                    void* context,
                                    void (*f) (void*, bool)) noexcept
     {
@@ -769,7 +771,7 @@ namespace iw4x
           raise_invalid ("no queue or no callback");
 
         l2 ("XTaskQueueSubmitDelayedCallback ({}, {} ms)",
-            static_cast<std::uint32_t> (p),
+            static_cast<uint32_t> (p),
             delay);
 
         return submit_adapted ((*q)[p], delay, context, f) ? S_OK : E_ABORT;
@@ -797,7 +799,7 @@ namespace iw4x
 
         if (f != nullptr)
         {
-          auto* c (new (std::nothrow) completion {f, context});
+          auto* c (new (nothrow) completion {f, context});
 
           if (c == nullptr ||
               !(*q)[port::completion].submit (0, &run_completion, c))

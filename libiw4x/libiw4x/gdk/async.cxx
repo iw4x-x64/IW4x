@@ -8,6 +8,8 @@
 #include <libiw4x/gdk/error.hxx>
 #include <libiw4x/gdk/argument.hxx>
 
+using namespace std;
+
 namespace iw4x
 {
   namespace gdk
@@ -16,7 +18,7 @@ namespace iw4x
     ~operation () = default;
 
     void operation::
-    result (std::size_t, void*)
+    result (size_t, void*)
     {
     }
 
@@ -25,39 +27,39 @@ namespace iw4x
 
     namespace
     {
-      constexpr std::uintptr_t signature (0x4957345800000001ULL);
+      constexpr uintptr_t signature (0x4957345800000001ULL);
 
-      constexpr unsigned      hold_bits (16);
-      constexpr std::uint64_t hold_mask ((std::uint64_t (1) << hold_bits) - 1);
+      constexpr unsigned hold_bits (16);
+      constexpr uint64_t hold_mask ((uint64_t (1) << hold_bits) - 1);
 
-      constexpr std::uintptr_t
-      token_of (std::uint64_t s) noexcept
+      constexpr uintptr_t
+      token_of (uint64_t s) noexcept
       {
-        return static_cast<std::uintptr_t> (s >> hold_bits);
+        return static_cast<uintptr_t> (s >> hold_bits);
       }
 
       constexpr unsigned
-      holds_of (std::uint64_t s) noexcept
+      holds_of (uint64_t s) noexcept
       {
         return static_cast<unsigned> (s & hold_mask);
       }
 
-      constexpr std::uint64_t
-      slot_state (std::uintptr_t t, unsigned h) noexcept
+      constexpr uint64_t
+      slot_state (uintptr_t t, unsigned h) noexcept
       {
-        return (static_cast<std::uint64_t> (t) << hold_bits) | h;
+        return (static_cast<uint64_t> (t) << hold_bits) | h;
       }
 
-      constexpr std::size_t   cache_line (64);
-      constexpr std::uint32_t max_operations (128);
+      constexpr size_t   cache_line (64);
+      constexpr uint32_t max_operations (128);
 
       struct alignas (cache_line) async_state
       {
-        std::atomic<std::uint64_t> state {0};
-        std::atomic<bool>          completed {false};
+        atomic<uint64_t> state {0};
+        atomic<bool>     completed {false};
 
-        HRESULT     status = pending;
-        std::size_t size = 0;
+        HRESULT status = pending;
+        size_t  size = 0;
 
         alignas (cache_line) mutex mutex_;
 
@@ -71,24 +73,24 @@ namespace iw4x
 
         operation_ptr local;
 
-        HRESULT (*provider) (std::uint32_t, const void*) = nullptr;
+        HRESULT (*provider) (uint32_t, const void*) = nullptr;
         void*     provider_context = nullptr;
       };
 
-      static_assert (sizeof (std::atomic<std::uint64_t>) +
-                     sizeof (std::atomic<bool>) +
+      static_assert (sizeof (atomic<uint64_t>) +
+                     sizeof (atomic<bool>) +
                      sizeof (HRESULT) +
-                     sizeof (std::size_t) <= cache_line,
+                     sizeof (size_t) <= cache_line,
                      "everything the poll path reads fits on one line");
 
       struct state_pool
       {
-        mutex          mutex_;
-        async_state    slots[max_operations];
-        std::uint32_t  free[max_operations];
-        std::uint32_t  freed = 0;
-        std::uint32_t  used = 0;
-        std::uintptr_t next = 1;
+        mutex       mutex_;
+        async_state slots[max_operations];
+        uint32_t    free[max_operations];
+        uint32_t    freed = 0;
+        uint32_t    used = 0;
+        uintptr_t   next = 1;
       };
 
       state_pool&
@@ -114,7 +116,7 @@ namespace iw4x
 
         async_state* r (nullptr);
 
-        std::uintptr_t t (0);
+        uintptr_t t (0);
 
         {
           scope_lock l (s.mutex_);
@@ -134,7 +136,7 @@ namespace iw4x
         {
           scope_lock l (r->mutex_);
 
-          r->completed.store (false, std::memory_order_relaxed);
+          r->completed.store (false, memory_order_relaxed);
           r->retired = false;
           r->block = a;
           r->status = pending;
@@ -147,7 +149,7 @@ namespace iw4x
           a->internal[2] = reinterpret_cast<void*> (t);
           a->internal[3] = nullptr;
 
-          r->state.store (slot_state (t, 1), std::memory_order_release);
+          r->state.store (slot_state (t, 1), memory_order_release);
         }
 
         return r;
@@ -205,12 +207,12 @@ namespace iw4x
           if (r == nullptr)
             return nullptr;
 
-          std::uintptr_t t (reinterpret_cast<std::uintptr_t> (a->internal[2]));
+          uintptr_t t (reinterpret_cast<uintptr_t> (a->internal[2]));
 
           if (t == 0)
             return nullptr;
 
-          std::uint64_t s (r->state.load (std::memory_order_acquire));
+          uint64_t s (r->state.load (memory_order_acquire));
 
           for (;;)
           {
@@ -219,8 +221,8 @@ namespace iw4x
 
             if (r->state.compare_exchange_weak (s,
                                                 s + 1,
-                                                std::memory_order_acq_rel,
-                                                std::memory_order_acquire))
+                                                memory_order_acq_rel,
+                                                memory_order_acquire))
               return r;
           }
         }
@@ -231,11 +233,11 @@ namespace iw4x
       void
       release (async_state* r) noexcept
       {
-        if (holds_of (r->state.fetch_sub (1, std::memory_order_acq_rel)) == 1)
+        if (holds_of (r->state.fetch_sub (1, memory_order_acq_rel)) == 1)
           dispose (r);
       }
 
-      enum class provider_op: std::uint32_t
+      enum class provider_op: uint32_t
       {
         begin      = 0,
         do_work    = 1,
@@ -247,7 +249,7 @@ namespace iw4x
       struct provider_data
       {
         async_block* async;
-        std::size_t  buffer_size;
+        size_t       buffer_size;
         void*        buffer;
         void*        context;
       };
@@ -255,18 +257,18 @@ namespace iw4x
       HRESULT
       call_provider (async_state* r,
                      provider_op op,
-                     std::size_t size,
+                     size_t size,
                      void* buffer) noexcept
       {
         provider_data d {r->block, size, buffer, r->provider_context};
 
-        return r->provider (static_cast<std::uint32_t> (op), &d);
+        return r->provider (static_cast<uint32_t> (op), &d);
       }
 
       void
       dispose (async_state* r) noexcept
       {
-        HRESULT (*p) (std::uint32_t, const void*) (nullptr);
+        HRESULT (*p) (uint32_t, const void*) (nullptr);
 
         void*         c (nullptr);
         operation_ptr o;
@@ -288,15 +290,15 @@ namespace iw4x
         {
           provider_data d {nullptr, 0, nullptr, c};
 
-          p (static_cast<std::uint32_t> (provider_op::cleanup), &d);
+          p (static_cast<uint32_t> (provider_op::cleanup), &d);
         }
 
         state_pool& s (states ());
         scope_lock  l (s.mutex_);
 
-        r->state.store (0, std::memory_order_release);
+        r->state.store (0, memory_order_release);
 
-        s.free[s.freed++] = static_cast<std::uint32_t> (r - s.slots);
+        s.free[s.freed++] = static_cast<uint32_t> (r - s.slots);
       }
 
       void
@@ -347,12 +349,12 @@ namespace iw4x
       bool
       submit (async_state* r,
               task_port& p,
-              std::uint32_t delay,
+              uint32_t delay,
               void (*f) (async_state*, bool)) noexcept
       {
-        r->state.fetch_add (1, std::memory_order_acq_rel);
+        r->state.fetch_add (1, memory_order_acq_rel);
 
-        auto* t (new (std::nothrow) held_task {r, f});
+        auto* t (new (nothrow) held_task {r, f});
 
         if (t != nullptr && p.submit (delay, &run_held, t))
           return true;
@@ -381,25 +383,25 @@ namespace iw4x
       }
 
       void
-      finish (async_state* r, HRESULT hr, std::size_t size) noexcept
+      finish (async_state* r, HRESULT hr, size_t size) noexcept
       {
         async_block* a;
 
         {
           scope_lock l (r->mutex_);
 
-          if (r->completed.load (std::memory_order_relaxed))
+          if (r->completed.load (memory_order_relaxed))
             return;
 
           r->status = hr;
           r->size = size;
 
-          r->completed.store (true, std::memory_order_release);
+          r->completed.store (true, memory_order_release);
 
           a = r->block;
         }
 
-        l1 ("{} completed {:#010x}", r->name, static_cast<std::uint32_t> (hr));
+        l1 ("{} completed {:#010x}", r->name, static_cast<uint32_t> (hr));
 
         r->done.wake_all ();
 
@@ -422,8 +424,8 @@ namespace iw4x
           return;
         }
 
-        HRESULT     hr (S_OK);
-        std::size_t size (0);
+        HRESULT hr (S_OK);
+        size_t  size (0);
 
         try
         {
@@ -456,16 +458,16 @@ namespace iw4x
       HRESULT
       take_result (async_block* a,
                    const void* id,
-                   std::size_t size,
+                   size_t size,
                    void* buffer,
-                   std::size_t* used) noexcept
+                   size_t* used) noexcept
       {
         held_state r (a);
 
         if (!r)
           return E_INVALIDARG;
 
-        if (!r->completed.load (std::memory_order_acquire))
+        if (!r->completed.load (memory_order_acquire))
           return pending;
 
         HRESULT hr (r->status);
@@ -555,21 +557,21 @@ namespace iw4x
     HRESULT
     result (async_block* a,
             const operation_id& id,
-            std::size_t size,
+            size_t size,
             void* buffer) noexcept
     {
       return take_result (a, id.token (), size, buffer, nullptr);
     }
 
     HRESULT
-    result_size (async_block* a, std::size_t* out) noexcept
+    result_size (async_block* a, size_t* out) noexcept
     {
       held_state r (a);
 
       if (!r || out == nullptr)
         return E_INVALIDARG;
 
-      if (!r->completed.load (std::memory_order_acquire))
+      if (!r->completed.load (memory_order_acquire))
         return pending;
 
       *out = r->size;
@@ -595,7 +597,7 @@ namespace iw4x
 
       task_queue& t (q != nullptr ? *q : process_queue ());
 
-      auto* p (new (std::nothrow) posted {static_cast<event_ptr&&> (e)});
+      auto* p (new (nothrow) posted {static_cast<event_ptr&&> (e)});
 
       if (p == nullptr)
         return false;
@@ -620,12 +622,12 @@ namespace iw4x
           raise_invalid ("not an operation of ours");
 
         if (!wait)
-          return r->completed.load (std::memory_order_acquire) ? r->status
+          return r->completed.load (memory_order_acquire) ? r->status
                                                                : pending;
 
         scope_lock l (r->mutex_);
 
-        while (!r->completed.load (std::memory_order_relaxed))
+        while (!r->completed.load (memory_order_relaxed))
           r->done.wait (l, INFINITE);
 
         return r->status;
@@ -633,7 +635,7 @@ namespace iw4x
     }
 
     HRESULT WINAPI xasync::
-    get_result_size (void*, async_block* a, std::size_t* out) noexcept
+    get_result_size (void*, async_block* a, size_t* out) noexcept
     {
       return guard ("XAsyncGetResultSize", [&] () -> HRESULT
       {
@@ -647,9 +649,9 @@ namespace iw4x
     get_result (void*,
                 async_block* a,
                 const void* id,
-                std::size_t size,
+                size_t size,
                 void* buffer,
-                std::size_t* used) noexcept
+                size_t* used) noexcept
     {
       return guard ("XAsyncGetResult", [&] () -> HRESULT
       {
@@ -675,7 +677,7 @@ namespace iw4x
         if (!r)
           return S_OK;
 
-        if (!r->completed.load (std::memory_order_acquire))
+        if (!r->completed.load (memory_order_acquire))
           finish (r.get (), E_ABORT, 0);
 
         retire (r.get ());
@@ -689,7 +691,7 @@ namespace iw4x
                     void* context,
                     const void* id,
                     const char* n,
-                    HRESULT (*provider) (std::uint32_t,
+                    HRESULT (*provider) (uint32_t,
                                          const void*)) noexcept
     {
       return guard ("XAsyncBegin", [&] () -> HRESULT
@@ -720,7 +722,7 @@ namespace iw4x
     }
 
     HRESULT WINAPI xasync::
-    schedule (void*, async_block* a, std::uint32_t delay) noexcept
+    schedule (void*, async_block* a, uint32_t delay) noexcept
     {
       return guard ("XAsyncSchedule", [&] () -> HRESULT
       {
@@ -738,12 +740,12 @@ namespace iw4x
     }
 
     HRESULT WINAPI xasync::
-    complete (void*, async_block* a, HRESULT hr, std::size_t size) noexcept
+    complete (void*, async_block* a, HRESULT hr, size_t size) noexcept
     {
       return guard ("XAsyncComplete", [&] () -> HRESULT
       {
         l1 ("XAsyncComplete ({:#010x}, {} bytes)",
-            static_cast<std::uint32_t> (hr),
+            static_cast<uint32_t> (hr),
             size);
 
         held_state r (a);

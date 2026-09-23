@@ -6,19 +6,21 @@
 #include <libiw4x/gdk/handler.hxx>
 #include <libiw4x/gdk/argument.hxx>
 
+using namespace std;
+
 namespace iw4x
 {
   namespace gdk
   {
     namespace
     {
-      constexpr std::uint32_t ethernet (6);
+      constexpr uint32_t ethernet (6);
 
       constexpr connectivity_hint hint
       {
-        static_cast<std::uint32_t> (connectivity_level::internet_access),
+        static_cast<uint32_t> (connectivity_level::internet_access),
         ethernet,
-        static_cast<std::uint32_t> (connectivity_cost::unrestricted),
+        static_cast<uint32_t> (connectivity_cost::unrestricted),
         true,
         false,
         false,
@@ -57,7 +59,7 @@ namespace iw4x
       class security_operation: public operation
       {
       public:
-        std::size_t
+        size_t
         work () override
         {
           return 0;
@@ -87,7 +89,7 @@ namespace iw4x
     HRESULT WINAPI xnetworking::
     query_security_information_result_size (void*,
                                             async_block* b,
-                                            std::size_t* out) noexcept
+                                            size_t* out) noexcept
     {
       return guard ("XNetworkingQuerySecurityInformationForUrlResultSize",
                     [&] () -> HRESULT
@@ -99,8 +101,8 @@ namespace iw4x
     HRESULT WINAPI xnetworking::
     query_security_information_result (void*,
                                        async_block* b,
-                                       std::size_t size,
-                                       std::size_t* used,
+                                       size_t size,
+                                       size_t* used,
                                        void*,
                                        void** out) noexcept
     {
@@ -153,7 +155,7 @@ namespace iw4x
       void*,
       void* context,
       void (*callback) (void*, const connectivity_hint*),
-      std::uint64_t* token) noexcept
+      uint64_t* token) noexcept
     {
       return guard ("XNetworkingRegisterConnectivityHintChanged",
                     [&] () -> HRESULT
@@ -163,7 +165,7 @@ namespace iw4x
 
         connectivity_handler h {context, callback};
 
-        std::uint64_t t (connectivity_handlers ().add (h));
+        uint64_t t (connectivity_handlers ().add (h));
 
         if (t == 0)
           raise (E_OUTOFMEMORY, "no room for another connectivity handler");
@@ -181,7 +183,7 @@ namespace iw4x
 
     HRESULT WINAPI xnetworking::
     unregister_connectivity_changed (void*,
-                                     std::uint64_t token,
+                                     uint64_t token,
                                      bool) noexcept
     {
       return guard ("XNetworkingUnregisterConnectivityHintChanged",

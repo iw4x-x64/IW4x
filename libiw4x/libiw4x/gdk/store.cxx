@@ -5,6 +5,8 @@
 #include <libiw4x/gdk/error.hxx>
 #include <libiw4x/gdk/argument.hxx>
 
+using namespace std;
+
 namespace iw4x
 {
   namespace gdk
@@ -23,14 +25,14 @@ namespace iw4x
       class license_operation: public operation
       {
       public:
-        std::size_t
+        size_t
         work () override
         {
           return sizeof (game_license);
         }
 
         void
-        result (std::size_t size, void* buffer) override
+        result (size_t size, void* buffer) override
         {
           if (size < sizeof (game_license))
             raise_invalid ("no room for a game licence");

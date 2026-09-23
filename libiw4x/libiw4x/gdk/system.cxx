@@ -5,15 +5,17 @@
 #include <libiw4x/gdk/error.hxx>
 #include <libiw4x/gdk/argument.hxx>
 
+using namespace std;
+
 namespace iw4x
 {
   namespace gdk
   {
     HRESULT WINAPI xsystem::
     get_xbox_live_sandbox_id (void*,
-                              std::size_t size,
+                              size_t size,
                               char* buffer,
-                              std::size_t* used) noexcept
+                              size_t* used) noexcept
     {
       return guard ("XSystemGetXboxLiveSandboxId", [&] () -> HRESULT
       {

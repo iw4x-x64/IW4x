@@ -10,16 +10,18 @@
 #include <libiw4x/gdk/registry.hxx>
 #include <libiw4x/gdk/task-queue.hxx>
 
+using namespace std;
+
 namespace iw4x
 {
   namespace gdk
   {
     namespace
     {
-      std::atomic<bool> up (false);
+      atomic<bool> up (false);
 
-      constexpr std::uint64_t expected_version (0x0000633600002711ULL);
-      constexpr std::uint64_t expected_api     (0x0000633600000C6DULL);
+      constexpr uint64_t expected_version (0x0000633600002711ULL);
+      constexpr uint64_t expected_api     (0x0000633600000C6DULL);
 
       constexpr char runtime_module[] = "xgameruntime.dll";
 
@@ -66,15 +68,15 @@ namespace iw4x
     bool
     initialized () noexcept
     {
-      return up.load (std::memory_order_acquire);
+      return up.load (memory_order_acquire);
     }
 
     void
     install () noexcept
     {
-      static std::atomic<bool> installed (false);
+      static atomic<bool> installed (false);
 
-      if (installed.exchange (true, std::memory_order_acq_rel))
+      if (installed.exchange (true, memory_order_acq_rel))
         return;
 
       try
@@ -103,7 +105,7 @@ namespace iw4x
       {
         text<description_size> m ("unable to install the gaming runtime: "
                                   "{}",
-                                  hex (static_cast<std::uint32_t> (
+                                  hex (static_cast<uint32_t> (
                                          report ("install")),
                                        8));
 
@@ -114,9 +116,9 @@ namespace iw4x
     extern "C"
     {
       HRESULT WINAPI
-      InitializeApiImplEx (std::uint64_t v,
-                           std::uint64_t a,
-                           std::uint32_t f) noexcept
+      InitializeApiImplEx (uint64_t v,
+                           uint64_t a,
+                           uint32_t f) noexcept
       {
         return guard ("InitializeApiImplEx", [&] () -> HRESULT
         {
@@ -127,13 +129,13 @@ namespace iw4x
 
           info ("gaming runtime up, flags {:#x}", f);
 
-          up.store (true, std::memory_order_release);
+          up.store (true, memory_order_release);
           return S_OK;
         });
       }
 
       HRESULT WINAPI
-      InitializeApiImpl (std::uint64_t v, std::uint64_t a) noexcept
+      InitializeApiImpl (uint64_t v, uint64_t a) noexcept
       {
         return InitializeApiImplEx ((v << 32) | a, (v << 32) | 0xC6D, 0);
       }
@@ -164,7 +166,7 @@ namespace iw4x
       }
 
       void WINAPI
-      XErrorReport (std::uint32_t c, const char* m) noexcept
+      XErrorReport (uint32_t c, const char* m) noexcept
       {
         guard ("XErrorReport", [&] () -> void
         {
@@ -181,7 +183,7 @@ namespace iw4x
         {
           info ("gaming runtime down");
 
-          up.store (false, std::memory_order_release);
+          up.store (false, memory_order_release);
 
           stop_queues ();
 

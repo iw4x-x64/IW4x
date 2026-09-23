@@ -9,6 +9,8 @@
 #include <libiw4x/gdk/handler.hxx>
 #include <libiw4x/gdk/argument.hxx>
 
+using namespace std;
+
 namespace iw4x
 {
   namespace gdk
@@ -17,7 +19,7 @@ namespace iw4x
     {
       struct local_user
       {
-        std::atomic<unsigned> references {1};
+        atomic<unsigned> references {1};
       };
 
       local_user&
@@ -42,12 +44,12 @@ namespace iw4x
       {
       public:
         explicit
-        add_operation (std::uint32_t options) noexcept: options_ (options) {}
+        add_operation (uint32_t options) noexcept: options_ (options) {}
 
-        std::size_t
+        size_t
         work () override
         {
-          the_user ().references.fetch_add (1, std::memory_order_relaxed);
+          the_user ().references.fetch_add (1, memory_order_relaxed);
 
           info ("user added, options {:#x}", options_);
 
@@ -55,7 +57,7 @@ namespace iw4x
         }
 
         void
-        result (std::size_t size, void* buffer) override
+        result (size_t size, void* buffer) override
         {
           if (size < sizeof (local_user*))
             raise_invalid ("no room for a user handle");
@@ -64,7 +66,7 @@ namespace iw4x
         }
 
       private:
-        std::uint32_t options_;
+        uint32_t options_;
       };
 
       const operation_id resolve_id {"XUserResolvePrivilegeWithUiAsync"};
@@ -72,7 +74,7 @@ namespace iw4x
       class resolve_operation: public operation
       {
       public:
-        std::size_t
+        size_t
         work () override
         {
           return 0;
@@ -108,19 +110,19 @@ namespace iw4x
         return false;
       }
 
-      inline constexpr std::size_t token_capacity (256);
+      inline constexpr size_t token_capacity (256);
 
       const operation_id token_id {"XUserGetTokenAndSignatureAsync"};
 
       class token_operation: public operation
       {
       public:
-        std::size_t
+        size_t
         work () override
         {
           char n[gamertag_capacity];
 
-          std::size_t k (gamertag (n, sizeof (n)));
+          size_t k (gamertag (n, sizeof (n)));
 
           token_ = text<token_capacity> ("IW4x1.0 xuid={} gamertag={}",
                                          hex (xuid (), 16),
@@ -130,9 +132,9 @@ namespace iw4x
         }
 
         void
-        result (std::size_t size, void* buffer) override
+        result (size_t size, void* buffer) override
         {
-          std::size_t n (sizeof (token_and_signature) + token_.size () + 1);
+          size_t n (sizeof (token_and_signature) + token_.size () + 1);
 
           if (buffer == nullptr)
             raise (E_POINTER, "no buffer");
@@ -162,7 +164,7 @@ namespace iw4x
       struct change_handler
       {
         void* context;
-        void (*callback) (void*, std::uint64_t, std::uint32_t);
+        void (*callback) (void*, uint64_t, uint32_t);
       };
 
       handler_table<change_handler>&
@@ -216,7 +218,7 @@ namespace iw4x
         local_user& r (user_of (u));
 
         l1 ("user handle duplicated, {} outstanding",
-            r.references.fetch_add (1, std::memory_order_relaxed) + 1);
+            r.references.fetch_add (1, memory_order_relaxed) + 1);
 
         answer (out) = &r;
         return S_OK;
@@ -229,14 +231,14 @@ namespace iw4x
       return guard ("XUserCloseHandle", [&] () -> HRESULT
       {
         l1 ("user handle closed, {} outstanding",
-            user_of (u).references.fetch_sub (1, std::memory_order_acq_rel) -
+            user_of (u).references.fetch_sub (1, memory_order_acq_rel) -
               1);
 
         return S_OK;
       });
     }
 
-    std::int32_t WINAPI xuser::
+    int32_t WINAPI xuser::
     compare (void*, void* a, void* b) noexcept
     {
       if (a == b)
@@ -246,7 +248,7 @@ namespace iw4x
     }
 
     HRESULT WINAPI xuser::
-    add_async (void*, std::uint32_t options, async_block* b) noexcept
+    add_async (void*, uint32_t options, async_block* b) noexcept
     {
       return guard (add_id.name, [&] () -> HRESULT
       {
@@ -267,7 +269,7 @@ namespace iw4x
     }
 
     HRESULT WINAPI xuser::
-    get_id (void*, void* u, std::uint64_t* out) noexcept
+    get_id (void*, void* u, uint64_t* out) noexcept
     {
       return guard ("XUserGetId", [&] () -> HRESULT
       {
@@ -281,7 +283,7 @@ namespace iw4x
     }
 
     HRESULT WINAPI xuser::
-    get_local_id (void*, void* u, std::uint64_t* out) noexcept
+    get_local_id (void*, void* u, uint64_t* out) noexcept
     {
       return guard ("XUserGetLocalId", [&] () -> HRESULT
       {
@@ -331,8 +333,8 @@ namespace iw4x
     HRESULT WINAPI xuser::
     check_privilege (void*,
                      void* u,
-                     std::uint32_t options,
-                     std::uint32_t privilege,
+                     uint32_t options,
+                     uint32_t privilege,
                      bool* r,
                      deny_reason* reason) noexcept
     {
@@ -356,8 +358,8 @@ namespace iw4x
     HRESULT WINAPI xuser::
     resolve_privilege_async (void*,
                              void* u,
-                             std::uint32_t options,
-                             std::uint32_t privilege,
+                             uint32_t options,
+                             uint32_t privilege,
                              async_block* b) noexcept
     {
       return guard (resolve_id.name, [&] () -> HRESULT
@@ -386,12 +388,12 @@ namespace iw4x
     HRESULT WINAPI xuser::
     get_token_and_signature_async (void*,
                                    void* u,
-                                   std::uint32_t options,
+                                   uint32_t options,
                                    const char* method,
                                    const char* url,
-                                   std::size_t,
+                                   size_t,
                                    const void*,
-                                   std::size_t,
+                                   size_t,
                                    const void*,
                                    async_block* b) noexcept
     {
@@ -421,7 +423,7 @@ namespace iw4x
     HRESULT WINAPI xuser::
     get_token_and_signature_result_size (void*,
                                          async_block* b,
-                                         std::size_t* out) noexcept
+                                         size_t* out) noexcept
     {
       return guard ("XUserGetTokenAndSignatureResultSize", [&] () -> HRESULT
       {
@@ -432,10 +434,10 @@ namespace iw4x
     HRESULT WINAPI xuser::
     get_token_and_signature_result (void*,
                                     async_block* b,
-                                    std::size_t size,
+                                    size_t size,
                                     void* buffer,
                                     void** out,
-                                    std::size_t* used) noexcept
+                                    size_t* used) noexcept
     {
       return guard ("XUserGetTokenAndSignatureResult", [&] () -> HRESULT
       {
@@ -464,16 +466,16 @@ namespace iw4x
                          void*,
                          void* context,
                          void (*callback) (void*,
-                                           std::uint64_t,
-                                           std::uint32_t),
-                         std::uint64_t* token) noexcept
+                                           uint64_t,
+                                           uint32_t),
+                         uint64_t* token) noexcept
     {
       return guard ("XUserRegisterForChangeEvent", [&] () -> HRESULT
       {
         if (callback == nullptr)
           raise_invalid ("no callback");
 
-        std::uint64_t t (
+        uint64_t t (
           change_handlers ().add (change_handler {context, callback}));
 
         if (t == 0)
@@ -487,7 +489,7 @@ namespace iw4x
     }
 
     HRESULT WINAPI xuser::
-    unregister_for_change (void*, std::uint64_t token, bool) noexcept
+    unregister_for_change (void*, uint64_t token, bool) noexcept
     {
       return guard ("XUserUnregisterForChangeEvent", [&] () -> HRESULT
       {
@@ -503,27 +505,27 @@ namespace iw4x
     get_gamertag (void*,
                   void* u,
                   gamertag_component c,
-                  std::size_t size,
+                  size_t size,
                   char* buffer,
-                  std::size_t* used) noexcept
+                  size_t* used) noexcept
     {
       return guard ("XUserGetGamertag", [&] () -> HRESULT
       {
         l1 ("XUserGetGamertag (component {}, size {})",
-            static_cast<std::uint32_t> (c),
+            static_cast<uint32_t> (c),
             size);
 
         user_of (u);
 
-        std::size_t bound (0);
+        size_t bound (0);
 
         if (!component_bound (c, bound))
           raise_invalid ("unrecovered gamertag component {}",
-                         static_cast<std::uint32_t> (c));
+                         static_cast<uint32_t> (c));
 
         char n[gamertag_capacity];
 
-        std::size_t k (bound != 0 ? gamertag (n, bound + 1) : 0);
+        size_t k (bound != 0 ? gamertag (n, bound + 1) : 0);
 
         copy_out (chars (n, k), size, buffer, used);
         return S_OK;

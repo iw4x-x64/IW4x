@@ -1,5 +1,7 @@
 #include <libiw4x/gdk/types.hxx>
 
+using namespace std;
+
 namespace iw4x
 {
   namespace gdk

@@ -8,6 +8,8 @@
 #include <libiw4x/gdk/runtime.hxx>
 #include <libiw4x/gdk/argument.hxx>
 
+using namespace std;
+
 namespace iw4x
 {
   namespace gdk
@@ -57,7 +59,7 @@ namespace iw4x
       char        b[activation_capacity];
       text_writer w (b, sizeof (b));
 
-      for (std::size_t i (0); i != c.size (); ++i)
+      for (size_t i (0); i != c.size (); ++i)
       {
         unsigned char x (static_cast<unsigned char> (c.data ()[i]));
 
@@ -95,9 +97,9 @@ namespace iw4x
 
       invite_handler hs[handler_table<invite_handler>::capacity];
 
-      std::size_t n (invite_handlers ().live (hs, sizeof (hs) / sizeof (*hs)));
+      size_t n (invite_handlers ().live (hs, sizeof (hs) / sizeof (*hs)));
 
-      for (std::size_t i (0); i != n; ++i)
+      for (size_t i (0); i != n; ++i)
       {
         if (!post (nullptr, make<invitation> (hs[i], u)))
           warn ("no queue for an invitation, which was dropped");
@@ -109,14 +111,14 @@ namespace iw4x
                         void*,
                         void* context,
                         void (*callback) (void*, const char*),
-                        std::uint64_t* token) noexcept
+                        uint64_t* token) noexcept
     {
       return guard ("XGameInviteRegisterForEvent", [&] () -> HRESULT
       {
         if (callback == nullptr)
           raise_invalid ("no callback");
 
-        std::uint64_t t (
+        uint64_t t (
           invite_handlers ().add (invite_handler {context, callback}));
 
         if (t == 0)
@@ -130,7 +132,7 @@ namespace iw4x
     }
 
     char WINAPI xgame_invite::
-    unregister_for_event (void*, std::uint64_t token, bool) noexcept
+    unregister_for_event (void*, uint64_t token, bool) noexcept
     {
       return guard ("XGameInviteUnregisterForEvent", char (0), [&] () -> char
       {

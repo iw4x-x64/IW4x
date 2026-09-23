@@ -5,6 +5,8 @@
 
 #include <libiw4x/logger.hxx>
 
+using namespace std;
+
 namespace iw4x
 {
   namespace gdk
@@ -43,14 +45,14 @@ namespace iw4x
     void
     fatal (chars what) noexcept
     {
-      fail ("{}", std::string_view (what.data (), what.size ()));
+      fail ("{}", string_view (what.data (), what.size ()));
 
       logger::stop ();
 
       text<description_size> m ("{}", what);
 
-      std::fprintf (stderr, "iw4x: %s\n", m.c_str ());
-      std::fflush (stderr);
+      fprintf (stderr, "iw4x: %s\n", m.c_str ());
+      fflush (stderr);
 
       if (GetConsoleWindow () == nullptr)
         MessageBoxA (nullptr,
@@ -110,12 +112,12 @@ namespace iw4x
           l1 ("{}: {} ({:#010x})",
               p,
               e.what (),
-              static_cast<std::uint32_t> (c));
+              static_cast<uint32_t> (c));
         else
           fail ("{}: {} ({:#010x})",
                 p,
                 e.what (),
-                static_cast<std::uint32_t> (c));
+                static_cast<uint32_t> (c));
 
         note_failure (p, c);
         return c;

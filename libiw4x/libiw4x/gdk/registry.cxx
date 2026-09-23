@@ -15,6 +15,8 @@
 #include <libiw4x/gdk/networking.hxx>
 #include <libiw4x/gdk/unmodelled.hxx>
 
+using namespace std;
+
 namespace iw4x
 {
   namespace gdk
@@ -48,7 +50,7 @@ namespace iw4x
       return runtime::provides (f);
     }
 
-    std::size_t
+    size_t
     interface_count () noexcept
     {
       return runtime::size;
@@ -57,7 +59,7 @@ namespace iw4x
     unsigned
     family_count () noexcept
     {
-      return static_cast<unsigned> (std::popcount (runtime::families));
+      return static_cast<unsigned> (popcount (runtime::families));
     }
 
     void

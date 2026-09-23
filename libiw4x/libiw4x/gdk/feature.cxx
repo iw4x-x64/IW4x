@@ -5,12 +5,14 @@
 #include <libiw4x/gdk/error.hxx>
 #include <libiw4x/gdk/registry.hxx>
 
+using namespace std;
+
 namespace iw4x
 {
   namespace gdk
   {
     char WINAPI xruntime_feature::
-    is_feature_available (void*, std::uint32_t f) noexcept
+    is_feature_available (void*, uint32_t f) noexcept
     {
       return guard ("XGameRuntimeIsFeatureAvailable", char (0), [&] () -> char
       {

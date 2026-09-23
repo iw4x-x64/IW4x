@@ -2,6 +2,8 @@
 
 #include <libiw4x/logger.hxx>
 
+using namespace std;
+
 namespace iw4x
 {
   namespace gdk
@@ -43,7 +45,7 @@ namespace iw4x
     }
 
     HRESULT
-    report_unrecovered (void* self, std::size_t o) noexcept
+    report_unrecovered (void* self, size_t o) noexcept
     {
       warn ("{}: call into unrecovered slot {:#x}", interface_name (self), o);
 
@@ -51,7 +53,7 @@ namespace iw4x
     }
 
     HRESULT
-    report_declined (void* self, std::size_t o) noexcept
+    report_declined (void* self, size_t o) noexcept
     {
       l1 ("{}: slot {:#x} is not provided", interface_name (self), o);
 
@@ -59,7 +61,7 @@ namespace iw4x
     }
 
     char
-    report_declined_false (void* self, std::size_t o) noexcept
+    report_declined_false (void* self, size_t o) noexcept
     {
       l1 ("{}: slot {:#x} is not provided, answering false",
           interface_name (self),
