@@ -1,5 +1,7 @@
 #include <libiw4x/xcurl/local.hxx>
 
+#include <algorithm>
+
 #include <libiw4x/logger.hxx>
 
 #include <libiw4x/gdk/sync.hxx>
@@ -12,50 +14,36 @@ namespace iw4x
   {
     using namespace gdk;
 
-    bool
-    contains (string_view h, string_view n) noexcept
-    {
-      if (n.size () > h.size ())
-        return false;
-
-      for (size_t i (0); i + n.size () <= h.size (); ++i)
-      {
-        if (__builtin_memcmp (h.data () + i, n.data (), n.size ()) == 0)
-          return true;
-      }
-
-      return false;
-    }
-
     string_view
     parameter (string_view url, string_view name) noexcept
     {
-      size_t q (0);
+      size_t q (url.find ('?'));
 
-      for (; q != url.size () && url.data ()[q] != '?'; ++q)
-        ;
-
-      if (q == url.size ())
-        return string_view ();
-
-      for (size_t i (q + 1); i < url.size ();)
+      if (q == string_view::npos)
       {
-        size_t e (i);
+        return string_view ();
+      }
 
-        for (; e != url.size () && url.data ()[e] != '&'; ++e)
-          ;
+      url.remove_prefix (q + 1);
 
-        size_t v (i);
+      while (!url.empty ())
+      {
+        size_t e (url.find ('&'));
+        string_view p (url.substr (0, e));
+        size_t v (p.find ('='));
 
-        for (; v != e && url.data ()[v] != '='; ++v)
-          ;
+        if (v != string_view::npos && p.substr (0, v) == name)
+        {
+          p.remove_prefix (v + 1);
+          return p;
+        }
 
-        if (v != e &&
-            v - i == name.size () &&
-            __builtin_memcmp (url.data () + i, name.data (), name.size ()) == 0)
-          return string_view (url.data () + v + 1, e - v - 1);
+        if (e == string_view::npos)
+        {
+          break;
+        }
 
-        i = e + 1;
+        url.remove_prefix (e + 1);
       }
 
       return string_view ();
@@ -64,32 +52,22 @@ namespace iw4x
     text<url_limit>
     redirect (string_view url, const destination& d) noexcept
     {
-      size_t a (0);
+      size_t a (url.find ("://"));
 
-      for (; a + 3 <= url.size (); ++a)
+      if (a != string_view::npos)
       {
-        if (__builtin_memcmp (url.data () + a, "://", 3) == 0)
-        {
-          break;
-        }
+        url.remove_prefix (a + 3);
       }
 
-      a = a + 3 <= url.size () ? a + 3 : 0;
-
-      size_t p (a);
-
-      for (; p != url.size (); ++p)
+      auto p (ranges::find_if (url, [] (char c)
       {
-        char c (url.data ()[p]);
-
-        if (c == '/' || c == '?' || c == '#')
-          break;
-      }
+        return c == '/' || c == '?' || c == '#';
+      }));
 
       return text<url_limit> ("http://{}:{}{}",
                               d.host,
                               d.port,
-                              string_view (url.data () + p, url.size () - p));
+                              string_view (p, url.end ()));
     }
 
     namespace
@@ -132,8 +110,8 @@ namespace iw4x
         for (const endpoint& e: endpoints)
         {
           if (method == e.method &&
-              contains (url, e.host) &&
-              contains (url, e.path))
+              url.contains (e.host) &&
+              url.contains (e.path))
             return &e;
         }
 
@@ -157,11 +135,11 @@ namespace iw4x
       bool
       redirected (string_view url) noexcept
       {
-        if (contains (url, "social.xboxlive.com") &&
-            contains (url, "/people"))
+        if (url.contains ("social.xboxlive.com") &&
+            url.contains ("/people"))
           return true;
 
-        return contains (url, "multiplayeractivity.xboxlive.com");
+        return url.contains ("multiplayeractivity.xboxlive.com");
       }
     }
 

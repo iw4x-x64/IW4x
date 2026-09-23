@@ -19,15 +19,6 @@ namespace
 int
 main ()
 {
-  assert (contains ("abcdef", "abc"));
-  assert (contains ("abcdef", "cde"));
-  assert (contains ("abcdef", "def"));
-  assert (contains ("abcdef", ""));
-
-  assert (!contains ("abcdef", "xyz"));
-  assert (!contains ("abc", "abcd"));
-  assert (!contains ("", "a"));
-
   auto value = [] (const char* u, const char* n)
   {
     return parameter (u, n);
@@ -42,6 +33,10 @@ main ()
   assert (value ("http://h/p?a=1&b=2", "b") == "2");
   assert (value ("http://h/p?ab=1", "a").empty ());
   assert (value ("http://h/p?a", "a").empty ());
+  assert (value ("http://h/p?x&a=2", "a") == "2");
+  assert (value ("http://h/p?a=1&&b=2", "b") == "2");
+  assert (value ("http://h/p?a=&b=2", "a").empty ());
+  assert (value ("http://h/p?", "a").empty ());
 
   auto to = [] (const char* u, const char* e)
   {

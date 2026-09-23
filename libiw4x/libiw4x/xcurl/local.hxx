@@ -48,8 +48,5 @@ namespace iw4x
 
     std::string_view
     parameter (std::string_view url, std::string_view name) noexcept;
-
-    bool
-    contains (std::string_view haystack, std::string_view needle) noexcept;
   }
 }
