@@ -164,6 +164,22 @@ main ()
   }
 
   {
+    async_block b {};
+    b.queue = q;
+
+    begin (&b, counted, std::make_unique<counting> (3u));
+
+    assert (xasync::schedule (nullptr, &b, 0) == E_INVALIDARG);
+
+    assert ((*q)[port::work].dispatch (0));
+    assert (!(*q)[port::work].dispatch (0));
+
+    std::uint32_t v (0);
+    assert (result (&b, counted, sizeof (v), &v) == S_OK);
+    assert (v == 3);
+  }
+
+  {
     announced = 0;
 
     async_block b {};
