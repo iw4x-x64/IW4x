@@ -5,6 +5,7 @@
 #include <utility>
 
 #include <libiw4x/logger.hxx>
+#include <libiw4x/contract.hxx>
 
 #include <libiw4x/gdk/error.hxx>
 #include <libiw4x/gdk/argument.hxx>
@@ -48,6 +49,8 @@ namespace iw4x
       constexpr uint64_t
       slot_state (uintptr_t t, unsigned h) noexcept
       {
+        LIBIW4X_PRE (h <= hold_mask);
+
         return (static_cast<uint64_t> (t) << hold_bits) | h;
       }
 
@@ -113,6 +116,8 @@ namespace iw4x
       async_state*
       acquire (async_block* a)
       {
+        LIBIW4X_PRE (a != nullptr);
+
         state_pool& s (states ());
 
         async_state* r (nullptr);
@@ -180,12 +185,16 @@ namespace iw4x
         async_state*
         operator-> () const noexcept
         {
+          LIBIW4X_PRE (state_ != nullptr);
+
           return state_;
         }
 
         async_state&
         operator* () const noexcept
         {
+          LIBIW4X_PRE (state_ != nullptr);
+
           return *state_;
         }
 
@@ -234,7 +243,11 @@ namespace iw4x
       void
       release (async_state* r) noexcept
       {
-        if (holds_of (r->state.fetch_sub (1, memory_order_acq_rel)) == 1)
+        const uint64_t s (r->state.fetch_sub (1, memory_order_acq_rel));
+
+        LIBIW4X_ASSERT (holds_of (s) != 0);
+
+        if (holds_of (s) == 1)
           dispose (r);
       }
 
@@ -261,6 +274,8 @@ namespace iw4x
                      size_t size,
                      void* buffer) noexcept
       {
+        LIBIW4X_PRE (r->provider != nullptr);
+
         provider_data d {r->block, size, buffer, r->provider_context};
 
         return r->provider (static_cast<uint32_t> (op), &d);
@@ -296,6 +311,9 @@ namespace iw4x
 
         state_pool& s (states ());
         scope_lock  l (s.mutex_);
+
+        LIBIW4X_ASSERT (r >= s.slots && r < s.slots + max_operations);
+        LIBIW4X_ASSERT (s.freed < max_operations);
 
         r->state.store (0, memory_order_release);
 
@@ -340,6 +358,8 @@ namespace iw4x
       {
         auto* t (static_cast<held_task*> (p));
 
+        LIBIW4X_PRE (t != nullptr);
+
         async_state* r (t->state);
 
         t->run (r, canceled);
@@ -353,7 +373,9 @@ namespace iw4x
               uint32_t delay,
               void (*f) (async_state*, bool)) noexcept
       {
-        r->state.fetch_add (1, memory_order_acq_rel);
+        const uint64_t s (r->state.fetch_add (1, memory_order_acq_rel));
+
+        LIBIW4X_ASSERT (holds_of (s) != 0 && holds_of (s) != hold_mask);
 
         auto* t (new (nothrow) held_task {r, f});
 
@@ -424,6 +446,8 @@ namespace iw4x
           finish (r, E_ABORT, 0);
           return;
         }
+
+        LIBIW4X_PRE (r->local != nullptr);
 
         HRESULT hr (S_OK);
         size_t  size (0);
@@ -511,6 +535,8 @@ namespace iw4x
       {
         auto* e (static_cast<posted*> (p));
 
+        LIBIW4X_PRE (e != nullptr && e->what != nullptr);
+
         if (!canceled)
         {
           try
@@ -533,8 +559,8 @@ namespace iw4x
       if (a == nullptr)
         raise (E_POINTER, "no async block");
 
-      if (!o)
-        raise_invalid ("no operation");
+      LIBIW4X_PRE (o != nullptr);
+      LIBIW4X_PRE (id.name != nullptr);
 
       task_queue& q (queue_of (a));
 
@@ -736,6 +762,8 @@ namespace iw4x
 
         if (r->provider == nullptr)
           raise_invalid ("not an operation with a provider");
+
+        LIBIW4X_ASSERT (r->queue != nullptr);
 
         return submit (r.get (), (*r->queue)[port::work], delay, &do_work)
                  ? S_OK
