@@ -1,6 +1,7 @@
 #include <libiw4x/gdk/user.hxx>
 
 #include <atomic>
+#include <cstring>
 
 #include <libiw4x/logger.hxx>
 
@@ -148,7 +149,7 @@ namespace iw4x
           auto* d (static_cast<token_and_signature*> (buffer));
           auto* p (reinterpret_cast<char*> (d + 1));
 
-          __builtin_memcpy (p, token_.c_str (), token_.size () + 1);
+          memcpy (p, token_.c_str (), token_.size () + 1);
 
           d->token_size = token_.size ();
           d->token = p;

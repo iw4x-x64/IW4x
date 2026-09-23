@@ -1,6 +1,7 @@
 #include <libiw4x/logger.hxx>
 
 #include <string_view>
+#include <cstring>
 
 #include <quill/Backend.h>
 #include <quill/Frontend.h>
@@ -90,7 +91,7 @@ namespace iw4x
 
           return std::string_view (a.string,
                                    a.size == argument::unmeasured
-                                     ? __builtin_strlen (a.string)
+                                     ? std::strlen (a.string)
                                      : a.size);
         }
       }
@@ -155,7 +156,7 @@ namespace iw4x
         catch (...)
         {
           b.clear ();
-          b.append (format, format + __builtin_strlen (format));
+          b.append (format, format + std::strlen (format));
         }
 
         // There is no tag associated with these messages for now, hence

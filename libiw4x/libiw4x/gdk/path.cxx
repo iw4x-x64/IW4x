@@ -2,6 +2,7 @@
 
 #include <new>
 #include <cwchar>
+#include <cstring>
 
 using namespace std;
 
@@ -21,7 +22,7 @@ namespace iw4x
         truncated_ = true;
       }
 
-      __builtin_memcpy (value_ + size_, p, n * sizeof (wchar_t));
+      memcpy (value_ + size_, p, n * sizeof (wchar_t));
 
       size_ += n;
       value_[size_] = L'\0';

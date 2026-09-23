@@ -1,5 +1,7 @@
 #include <libiw4x/gdk/ui.hxx>
 
+#include <cstring>
+
 #include <libiw4x/logger.hxx>
 
 #include <libiw4x/gdk/path.hxx>
@@ -47,9 +49,7 @@ namespace iw4x
           if (!candidates_.resize (count_ * sizeof (uint64_t)))
             raise (E_OUTOFMEMORY, "no room for {} candidates", count_);
 
-          __builtin_memcpy (candidates_.data (),
-                            candidates,
-                            candidates_.size ());
+          memcpy (candidates_.data (), candidates, candidates_.size ());
         }
 
         size_t
@@ -101,9 +101,9 @@ namespace iw4x
                    n);
 
           if (n != 0)
-            __builtin_memcpy (&answer (static_cast<uint64_t*> (buffer)),
-                              chosen_.data (),
-                              n);
+            memcpy (&answer (static_cast<uint64_t*> (buffer)),
+                    chosen_.data (),
+                    n);
         }
 
         size_t

@@ -1,6 +1,7 @@
 #include <libiw4x/gdk/identity.hxx>
 
 #include <charconv>
+#include <cstring>
 
 #include <windows.h>
 #include <bcrypt.h>
@@ -172,12 +173,12 @@ namespace iw4x
 
         n.size = d.size ();
 
-        __builtin_memcpy (n.value, d.c_str (), n.size);
+        memcpy (n.value, d.c_str (), n.size);
       }
 
       size_t k (bounded (n.value, n.size, size - 1));
 
-      __builtin_memcpy (b, n.value, k);
+      memcpy (b, n.value, k);
 
       b[k] = '\0';
       return k;

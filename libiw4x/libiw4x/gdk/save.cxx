@@ -1,6 +1,7 @@
 #include <libiw4x/gdk/save.hxx>
 
 #include <utility>
+#include <cstring>
 
 #include <libiw4x/logger.hxx>
 
@@ -255,14 +256,14 @@ namespace iw4x
               raise (insufficient_buffer,
                      "no room for blob '{}'", n.c_str ());
 
-            __builtin_memcpy (p, n.c_str (), n.size () + 1);
+            memcpy (p, n.c_str (), n.size () + 1);
 
             b[i].info.name = reinterpret_cast<const char*> (p);
             p += n.size () + 1;
 
             if (!d.empty ())
             {
-              __builtin_memcpy (p, d.data (), d.size ());
+              memcpy (p, d.data (), d.size ());
             }
 
             b[i].info.size = static_cast<uint32_t> (d.size ());
@@ -629,7 +630,7 @@ namespace iw4x
           raise (E_OUTOFMEMORY, "no room for a {} byte blob", size);
 
         if (size != 0)
-          __builtin_memcpy (w.data.data (), data, size);
+          memcpy (w.data.data (), data, size);
 
         ++t.count;
 
