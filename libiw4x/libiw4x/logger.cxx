@@ -97,7 +97,7 @@ namespace iw4x
 
       void
       log (level l,
-           const location& where,
+           const std::source_location& where,
            const char* format,
            const argument* args,
            std::size_t n) noexcept
@@ -168,7 +168,9 @@ namespace iw4x
           "",
           ql,
           "{}",
-          quill::SourceLocation (where.file, where.function, where.line),
+          quill::SourceLocation (where.file_name (),
+                                where.function_name (),
+                                where.line ()),
           std::string_view (b.data (), b.size ()));
       }
     }

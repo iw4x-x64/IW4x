@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <type_traits>
 #include <utility>
+#include <source_location>
 
 namespace iw4x
 {
@@ -19,21 +20,6 @@ namespace iw4x
         info    = 4,
         warning = 6,
         error   = 7
-      };
-
-      struct location
-      {
-        const char* file;
-        const char* function;
-        std::uint_least32_t line;
-
-        static constexpr location
-        current (const char* file = __builtin_FILE (),
-                 const char* function = __builtin_FUNCTION (),
-                 std::uint_least32_t line = __builtin_LINE ()) noexcept
-        {
-          return location {file, function, line};
-        }
       };
 
       struct argument
@@ -102,7 +88,7 @@ namespace iw4x
 
       void
       log (level,
-           const location&,
+           const std::source_location&,
            const char* format,
            const argument*,
            std::size_t) noexcept;
@@ -113,7 +99,7 @@ namespace iw4x
         statement (
           const char* format,
           A&&... args,
-          location where = location::current ())
+          std::source_location where = std::source_location::current ())
         {
           // So what we are doing here is using construction as the
           // logging statement. In other words, given
@@ -139,7 +125,7 @@ namespace iw4x
           // and not the location of log() below. For that to work the
           // default argument has to be evaluated while constructing the
           // public statement and then carried with us into this common
-          // implementation. Moving location::current() into the body
+          // implementation. Moving source_location::current() into the body
           // would therefore quietly make every message point here, which
           // is generally the opposite of what somebody looking at a log
           // wants.
