@@ -1,5 +1,7 @@
 #include <libiw4x/gdk/identity.hxx>
 
+#include <charconv>
+
 #include <windows.h>
 #include <bcrypt.h>
 
@@ -44,43 +46,26 @@ namespace iw4x
         if (!f.size (n) || n == 0)
           return false;
 
-        if (n > sizeof (b) - 1)
-          n = sizeof (b) - 1;
+        if (n > sizeof (b))
+          n = sizeof (b);
 
         if (!f.read (b, static_cast<size_t> (n)))
           return false;
 
-        b[n] = '\0';
+        string_view s (b, static_cast<size_t> (n));
 
-        uint64_t r (0);
-        unsigned d (0);
-
-        const char* p (b);
-
-        if (p[0] == '0' && (p[1] == 'x' || p[1] == 'X'))
-          p += 2;
-
-        for (; *p != '\0'; ++p)
+        if (s.starts_with ("0x") || s.starts_with ("0X"))
         {
-          unsigned x;
-
-          if (*p >= '0' && *p <= '9')
-            x = static_cast<unsigned> (*p - '0');
-          else if (*p >= 'a' && *p <= 'f')
-            x = static_cast<unsigned> (*p - 'a') + 10;
-          else if (*p >= 'A' && *p <= 'F')
-            x = static_cast<unsigned> (*p - 'A') + 10;
-          else
-            break;
-
-          r = (r << 4) | x;
-
-          if (++d > 16)
-            return false;
+          s.remove_prefix (2);
         }
 
-        if (d == 0 || r == 0)
+        uint64_t r (0);
+
+        if (from_chars (s.data (), s.data () + s.size (), r, 16).ec != errc () ||
+            r == 0)
+        {
           return false;
+        }
 
         v = r;
         return true;
