@@ -123,6 +123,12 @@ namespace iw4x
         return b_;
       }
 
+      const char*
+      data () const noexcept
+      {
+        return b_;
+      }
+
       operator std::string_view () const noexcept
       {
         return std::string_view (b_, n_);
