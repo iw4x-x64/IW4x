@@ -103,8 +103,8 @@ namespace iw4x
         string_view target (parameter (url, "target"));
 
         l1 ("privacy: {} of {} allowed",
-            setting.size () != 0 ? setting.data () : "<none>",
-            target.size () != 0 ? target.data () : "<none>");
+            !setting.empty () ? setting : "<none>",
+            !target.empty () ? target : "<none>");
 
         r.status = 200;
         r.type = text<type_limit> ("application/json");
