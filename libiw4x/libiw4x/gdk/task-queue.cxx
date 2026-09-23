@@ -5,6 +5,7 @@
 #include <new>
 
 #include <libiw4x/logger.hxx>
+#include <libiw4x/contract.hxx>
 
 #include <libiw4x/gdk/error.hxx>
 
@@ -41,6 +42,8 @@ namespace iw4x
     void task_port::
     open (dispatch_mode m) noexcept
     {
+      LIBIW4X_PRE (worker_count_ == 0);
+
       {
         scope_lock l (mutex_);
 
@@ -79,6 +82,8 @@ namespace iw4x
     bool task_port::
     submit (uint32_t delay, task run, void* context) noexcept
     {
+      LIBIW4X_PRE (run != nullptr);
+
       if (mode_ == dispatch_mode::immediate)
       {
         run (context, false);
@@ -141,6 +146,8 @@ namespace iw4x
     uint64_t task_port::
     earliest () const noexcept
     {
+      LIBIW4X_PRE (count_ != 0);
+
       uint64_t r (items_[head_].due);
 
       for (uint32_t i (1); i != count_; ++i)
@@ -170,6 +177,8 @@ namespace iw4x
       {
         if (due () == 0)
         {
+          LIBIW4X_ASSERT (count_ != 0);
+
           item i (items_[head_]);
           bool c (canceled_);
 
@@ -360,6 +369,9 @@ namespace iw4x
         if (i == max_ports)
           return;
 
+        LIBIW4X_PRE (i < max_ports && p.port_used[i]);
+        LIBIW4X_ASSERT (p.ports != 0);
+
         p.port_used[i] = false;
         --p.ports;
       }
@@ -421,6 +433,8 @@ namespace iw4x
           p.made_ports[i] = queue_pool::held_ports ();
           p.made_owns[i]  = false;
           p.made_used[i]  = false;
+
+          LIBIW4X_ASSERT (p.queues != 0);
 
           --p.queues;
           break;
@@ -587,6 +601,8 @@ namespace iw4x
       {
         auto* a (static_cast<adapted*> (p));
 
+        LIBIW4X_PRE (a != nullptr);
+
         a->run (a->context, canceled);
 
         delete a;
@@ -603,6 +619,8 @@ namespace iw4x
       {
         auto* c (static_cast<completion*> (p));
 
+        LIBIW4X_PRE (c != nullptr);
+
         c->run (c->context);
 
         delete c;
@@ -614,6 +632,8 @@ namespace iw4x
                       void* context,
                       void (*f) (void*, bool)) noexcept
       {
+        LIBIW4X_PRE (f != nullptr);
+
         auto* a (new (nothrow) adapted {f, context});
 
         if (a == nullptr)

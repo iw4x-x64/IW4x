@@ -4,6 +4,8 @@
 #include <cstdint>
 #include <cstddef>
 
+#include <libiw4x/contract.hxx>
+
 #include <libiw4x/gdk/sync.hxx>
 #include <libiw4x/gdk/types.hxx>
 
@@ -125,7 +127,11 @@ namespace iw4x
       task_port&
       operator[] (port p) noexcept
       {
-        return *ports_[static_cast<std::uint32_t> (p) & 1];
+        task_port* r (ports_[static_cast<std::uint32_t> (p) & 1]);
+
+        LIBIW4X_PRE (r != nullptr);
+
+        return *r;
       }
 
       unsigned
