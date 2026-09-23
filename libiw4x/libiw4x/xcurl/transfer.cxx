@@ -1,6 +1,7 @@
 #include <libiw4x/xcurl/transfer.hxx>
 
 #include <libiw4x/logger.hxx>
+#include <libiw4x/contract.hxx>
 
 using namespace std;
 
@@ -52,6 +53,8 @@ namespace iw4x
     CURLcode transfer::
     set (int o, long v) noexcept
     {
+      LIBIW4X_PRE (easy_ != nullptr);
+
       switch (static_cast<option> (o))
       {
       case option::httpget:  method_ = text<method_limit> ("GET");  break;
@@ -67,6 +70,8 @@ namespace iw4x
     CURLcode transfer::
     set (int o, void* v) noexcept
     {
+      LIBIW4X_PRE (easy_ != nullptr);
+
       switch (static_cast<option> (o))
       {
       case option::url:
@@ -93,6 +98,8 @@ namespace iw4x
     CURLcode transfer::
     set (int o, generic_function v) noexcept
     {
+      LIBIW4X_PRE (easy_ != nullptr);
+
       switch (static_cast<option> (o))
       {
       case option::writefunction:
@@ -112,6 +119,8 @@ namespace iw4x
     CURLcode transfer::
     get (int i, long& v) const noexcept
     {
+      LIBIW4X_PRE (easy_ != nullptr);
+
       if (local_ && static_cast<easy_info> (i) == easy_info::response_code)
       {
         v = answer_.status;
@@ -130,6 +139,8 @@ namespace iw4x
     bool transfer::
     begin () noexcept
     {
+      LIBIW4X_PRE (easy_ != nullptr);
+
       local_ = false;
       delivered_ = false;
       outcome_ = CURLE_OK;
