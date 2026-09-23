@@ -3,6 +3,7 @@
 #include <algorithm>
 
 #include <libiw4x/logger.hxx>
+#include <libiw4x/contract.hxx>
 
 #include <libiw4x/gdk/sync.hxx>
 
@@ -52,6 +53,8 @@ namespace iw4x
     text<url_limit>
     redirect (string_view url, const destination& d) noexcept
     {
+      LIBIW4X_PRE (d.port > 0 && d.port <= 65535);
+
       size_t a (url.find ("://"));
 
       if (a != string_view::npos)
@@ -144,6 +147,9 @@ namespace iw4x
     void
     serve_platform_at (string_view host, int port) noexcept
     {
+      LIBIW4X_PRE (!host.empty ());
+      LIBIW4X_PRE (port > 0 && port <= 65535);
+
       platform_endpoint& p (installed ());
       scope_lock         l (p.mutex_);
 
