@@ -6,6 +6,8 @@
 
 #include <windows.h>
 
+#include <libiw4x/contract.hxx>
+
 namespace iw4x
 {
   namespace gdk
@@ -128,6 +130,9 @@ namespace iw4x
       bool
       start (void (*body) (void*), void* context) noexcept
       {
+        LIBIW4X_PRE (body != nullptr);
+        LIBIW4X_PRE (!started ());
+
         handle_ = CreateThread (nullptr, 0, &run, new_entry (body, context), 0,
                                 nullptr);
 
