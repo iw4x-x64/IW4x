@@ -16,6 +16,8 @@ namespace iw4x
     void text_writer::
     write (string_view v) noexcept
     {
+      LIBIW4X_INVARIANT (n_ < c_ && b_[n_] == '\0');
+
       size_t n (v.size ());
 
       if (n > c_ - n_ - 1)
@@ -59,7 +61,10 @@ namespace iw4x
     {
       char s[16];
 
-      to_hex_chars (s, s + sizeof (s), v.value, hex_case::upper);
+      const hex_to_chars_result r (
+        to_hex_chars (s, s + sizeof (s), v.value, hex_case::upper));
+
+      LIBIW4X_ASSERT (r.ec == errc ());
 
       size_t z (0);
 
@@ -79,6 +84,8 @@ namespace iw4x
 
       to_chars_result r (to_chars (s, s + sizeof (s), v));
 
+      LIBIW4X_ASSERT (r.ec == errc ());
+
       write (string_view (s, r.ptr));
     }
 
@@ -89,12 +96,16 @@ namespace iw4x
 
       to_chars_result r (to_chars (s, s + sizeof (s), v));
 
+      LIBIW4X_ASSERT (r.ec == errc ());
+
       write (string_view (s, r.ptr));
     }
 
     const char*
     write_literal (text_writer& w, const char* f) noexcept
     {
+      LIBIW4X_PRE (f != nullptr);
+
       const char* p (f);
 
       for (; p[0] != '\0'; ++p)
@@ -113,6 +124,8 @@ namespace iw4x
     void
     write_rest (text_writer& w, const char* f) noexcept
     {
+      LIBIW4X_PRE (f != nullptr);
+
       w.write (string_view (f));
     }
   }

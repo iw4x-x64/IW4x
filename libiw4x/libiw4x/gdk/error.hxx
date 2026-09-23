@@ -5,6 +5,8 @@
 #include <concepts>
 #include <string_view>
 
+#include <libiw4x/contract.hxx>
+
 #include <libiw4x/gdk/text.hxx>
 #include <libiw4x/gdk/types.hxx>
 
@@ -45,6 +47,8 @@ namespace iw4x
       void
       append (const char* f, const A&... a) noexcept
       {
+        LIBIW4X_ASSERT (size_ < description_size);
+
         text_writer w (what_ + size_, description_size - size_);
 
         format (w, f, a...);

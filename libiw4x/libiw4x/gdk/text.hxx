@@ -1,9 +1,12 @@
 #pragma once
 
+#include <limits>
 #include <cstdint>
 #include <cstddef>
 #include <concepts>
 #include <string_view>
+
+#include <libiw4x/contract.hxx>
 
 namespace iw4x
 {
@@ -25,6 +28,8 @@ namespace iw4x
       explicit
       text_writer (char* b, std::size_t c) noexcept: b_ (b), c_ (c), n_ (0)
       {
+        LIBIW4X_PRE (b != nullptr && c != 0);
+
         terminate ();
       }
 
@@ -90,6 +95,8 @@ namespace iw4x
     inline void
     format (text_writer& w, const char* f, const A&... a) noexcept
     {
+      LIBIW4X_PRE (f != nullptr);
+
       const char* p (f);
 
       ((p = write_literal (w, p), w.write (a)), ...);
@@ -100,6 +107,10 @@ namespace iw4x
     template <std::size_t N>
     class text
     {
+      static_assert (N != 0, "room for the terminator");
+      static_assert (N <= std::numeric_limits<std::uint32_t>::max (),
+                     "a size that fits the recorded length");
+
     public:
       text () noexcept: n_ (0)
       {
