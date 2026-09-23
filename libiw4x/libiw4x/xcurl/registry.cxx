@@ -1,5 +1,7 @@
 #include <libiw4x/xcurl/registry.hxx>
 
+#include <functional>
+
 #include <libiw4x/logger.hxx>
 
 using namespace std;
@@ -83,8 +85,12 @@ namespace iw4x
 
       auto* t (static_cast<transfer*> (h));
 
-      if (t < p.transfers || t >= p.transfers + max_transfers)
+      less<> before;
+
+      if (before (t, p.transfers) || !before (t, p.transfers + max_transfers))
+      {
         return nullptr;
+      }
 
       return t->ours () ? t : nullptr;
     }
@@ -159,8 +165,12 @@ namespace iw4x
 
       auto* m (static_cast<multi*> (h));
 
-      if (m < p.multis || m >= p.multis + max_multis)
+      less<> before;
+
+      if (before (m, p.multis) || !before (m, p.multis + max_multis))
+      {
         return nullptr;
+      }
 
       return m->ours () ? m : nullptr;
     }
