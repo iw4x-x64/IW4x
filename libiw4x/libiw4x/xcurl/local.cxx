@@ -2,6 +2,8 @@
 
 #include <libiw4x/logger.hxx>
 
+using namespace std;
+
 namespace iw4x
 {
   namespace xcurl
@@ -12,7 +14,7 @@ namespace iw4x
       if (n.size () > h.size ())
         return false;
 
-      for (std::size_t i (0); i + n.size () <= h.size (); ++i)
+      for (size_t i (0); i + n.size () <= h.size (); ++i)
       {
         if (__builtin_memcmp (h.data () + i, n.data (), n.size ()) == 0)
           return true;
@@ -24,7 +26,7 @@ namespace iw4x
     chars
     parameter (chars url, chars name) noexcept
     {
-      std::size_t q (0);
+      size_t q (0);
 
       for (; q != url.size () && url.data ()[q] != '?'; ++q)
         ;
@@ -32,14 +34,14 @@ namespace iw4x
       if (q == url.size ())
         return chars ();
 
-      for (std::size_t i (q + 1); i < url.size ();)
+      for (size_t i (q + 1); i < url.size ();)
       {
-        std::size_t e (i);
+        size_t e (i);
 
         for (; e != url.size () && url.data ()[e] != '&'; ++e)
           ;
 
-        std::size_t v (i);
+        size_t v (i);
 
         for (; v != e && url.data ()[v] != '='; ++v)
           ;
@@ -58,7 +60,7 @@ namespace iw4x
     text<url_limit>
     redirect (chars url, const destination& d) noexcept
     {
-      std::size_t a (0);
+      size_t a (0);
 
       for (; a + 3 <= url.size (); ++a)
       {
@@ -72,7 +74,7 @@ namespace iw4x
       if (a + 3 > url.size ())
         a = 0;
 
-      std::size_t p (a);
+      size_t p (a);
 
       for (; p != url.size (); ++p)
       {

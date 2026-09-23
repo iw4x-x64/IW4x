@@ -4,6 +4,8 @@
 
 #include <libiw4x/xcurl/registry.hxx>
 
+using namespace std;
+
 namespace iw4x
 {
   namespace xcurl
@@ -26,24 +28,24 @@ namespace iw4x
     close () noexcept
     {
       transfer* ls[capacity];
-      std::uint32_t n (0);
+      uint32_t n (0);
 
       {
         scope_lock l (mutex_);
 
         n = locals_;
 
-        for (std::uint32_t i (0); i != n; ++i)
+        for (uint32_t i (0); i != n; ++i)
           ls[i] = local_[i];
 
         locals_ = 0;
         head_ = 0;
         count_ = 0;
 
-        answered_.store (0, std::memory_order_release);
+        answered_.store (0, memory_order_release);
       }
 
-      for (std::uint32_t i (0); i != n; ++i)
+      for (uint32_t i (0); i != n; ++i)
         curl_multi_remove_handle (handle_, ls[i]->easy ());
 
       if (handle_ != nullptr)
@@ -74,7 +76,7 @@ namespace iw4x
 
       local_[locals_++] = &t;
 
-      answered_.store (locals_, std::memory_order_release);
+      answered_.store (locals_, memory_order_release);
 
       return CURLM_OK;
     }
@@ -87,14 +89,14 @@ namespace iw4x
 
       scope_lock l (mutex_);
 
-      for (std::uint32_t i (0); i != locals_; ++i)
+      for (uint32_t i (0); i != locals_; ++i)
       {
         if (local_[i] != &t)
           continue;
 
         local_[i] = local_[--locals_];
 
-        answered_.store (locals_, std::memory_order_release);
+        answered_.store (locals_, memory_order_release);
         break;
       }
 
@@ -120,22 +122,22 @@ namespace iw4x
     int multi::
     answered () noexcept
     {
-      transfer*     ls[capacity];
-      std::uint32_t k (0);
+      transfer* ls[capacity];
+      uint32_t  k (0);
 
       {
         scope_lock l (mutex_);
 
-        for (std::uint32_t i (0); i != locals_; ++i)
+        for (uint32_t i (0); i != locals_; ++i)
           ls[k++] = local_[i];
       }
 
-      for (std::uint32_t i (0); i != k; ++i)
+      for (uint32_t i (0); i != k; ++i)
         ls[i]->deliver ();
 
       scope_lock l (mutex_);
 
-      for (std::uint32_t i (0); i != locals_;)
+      for (uint32_t i (0); i != locals_;)
       {
         transfer& t (*local_[i]);
 
@@ -155,7 +157,7 @@ namespace iw4x
         local_[i] = local_[--locals_];
       }
 
-      answered_.store (locals_, std::memory_order_release);
+      answered_.store (locals_, memory_order_release);
 
       return static_cast<int> (locals_);
     }
@@ -167,7 +169,7 @@ namespace iw4x
 
       CURLMcode r (curl_multi_perform (handle_, &n));
 
-      if (answered_.load (std::memory_order_acquire) != 0)
+      if (answered_.load (memory_order_acquire) != 0)
         n += answered ();
 
       if (running != nullptr)
@@ -223,7 +225,7 @@ namespace iw4x
           int timeout,
           int* ready) noexcept
     {
-      if (answered_.load (std::memory_order_acquire) != 0)
+      if (answered_.load (memory_order_acquire) != 0)
         timeout = 0;
 
       return curl_multi_poll (handle_, extra, count, timeout, ready);

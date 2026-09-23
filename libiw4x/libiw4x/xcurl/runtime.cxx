@@ -4,6 +4,8 @@
 
 #include <libiw4x/xcurl/local.hxx>
 
+using namespace std;
+
 namespace iw4x
 {
   namespace xcurl

@@ -5,6 +5,8 @@
 #include <libiw4x/xcurl/xcurl.hxx>
 #include <libiw4x/xcurl/registry.hxx>
 
+using namespace std;
+
 namespace iw4x
 {
   namespace xcurl

@@ -2,6 +2,8 @@
 
 #include <libiw4x/logger.hxx>
 
+using namespace std;
+
 namespace iw4x
 {
   namespace xcurl
@@ -33,7 +35,7 @@ namespace iw4x
       pool&      p (handles ());
       scope_lock l (p.mutex_);
 
-      for (std::uint32_t i (0); i != max_transfers; ++i)
+      for (uint32_t i (0); i != max_transfers; ++i)
       {
         if (p.transfer_used[i])
           continue;
@@ -59,7 +61,7 @@ namespace iw4x
 
       t.disown ();
 
-      for (std::uint32_t i (0); i != max_transfers; ++i)
+      for (uint32_t i (0); i != max_transfers; ++i)
       {
         if (&p.transfers[i] == &t)
         {
@@ -94,7 +96,7 @@ namespace iw4x
       pool&      p (handles ());
       scope_lock l (p.mutex_);
 
-      for (std::uint32_t i (0); i != max_transfers; ++i)
+      for (uint32_t i (0); i != max_transfers; ++i)
       {
         if (p.transfer_used[i] && p.transfers[i].easy () == easy)
           return &p.transfers[i];
@@ -109,7 +111,7 @@ namespace iw4x
       pool&      p (handles ());
       scope_lock l (p.mutex_);
 
-      for (std::uint32_t i (0); i != max_multis; ++i)
+      for (uint32_t i (0); i != max_multis; ++i)
       {
         if (p.multi_used[i])
           continue;
@@ -135,7 +137,7 @@ namespace iw4x
 
       m.disown ();
 
-      for (std::uint32_t i (0); i != max_multis; ++i)
+      for (uint32_t i (0); i != max_multis; ++i)
       {
         if (&p.multis[i] == &m)
         {

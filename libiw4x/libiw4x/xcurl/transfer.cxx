@@ -2,6 +2,8 @@
 
 #include <libiw4x/logger.hxx>
 
+using namespace std;
+
 namespace iw4x
 {
   namespace xcurl
@@ -201,7 +203,7 @@ namespace iw4x
         return true;
       }
 
-      std::size_t n (write_ (const_cast<char*> (answer_.body.c_str ()),
+      size_t n (write_ (const_cast<char*> (answer_.body.c_str ()),
                              1,
                              answer_.body.size (),
                              write_data_));
