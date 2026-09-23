@@ -83,7 +83,7 @@ namespace iw4x
 
     struct xgame_save
     {
-      static constexpr char name[] = "XGameSave";
+      static constexpr char label[] = "XGameSave";
 
       static constexpr guid api
       {

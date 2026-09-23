@@ -21,7 +21,7 @@ namespace iw4x
         bool r (provides (x));
 
         l1 ("XGameRuntimeIsFeatureAvailable ({}) -> {}",
-            gdk::name (x),
+            name (x),
             r ? "available" : "absent");
 
         return r ? char (1) : char (0);

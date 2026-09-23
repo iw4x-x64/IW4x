@@ -82,7 +82,7 @@ namespace iw4x
 
     struct xasync
     {
-      static constexpr char name[] = "XAsync/XTaskQueue";
+      static constexpr char label[] = "XAsync/XTaskQueue";
 
       static constexpr guid api
       {

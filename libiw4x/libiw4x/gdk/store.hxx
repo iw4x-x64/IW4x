@@ -37,7 +37,7 @@ namespace iw4x
 
     struct xstore
     {
-      static constexpr char name[] = "XStore";
+      static constexpr char label[] = "XStore";
 
       static constexpr guid api
       {

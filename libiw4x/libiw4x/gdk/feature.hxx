@@ -11,7 +11,7 @@ namespace iw4x
   {
     struct xruntime_feature
     {
-      static constexpr char name[] = "XGameRuntimeFeature";
+      static constexpr char label[] = "XGameRuntimeFeature";
 
       static constexpr guid api
       {

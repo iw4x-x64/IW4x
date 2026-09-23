@@ -11,7 +11,7 @@ namespace iw4x
   {
     struct xpackage
     {
-      static constexpr char name[] = "XPackage";
+      static constexpr char label[] = "XPackage";
 
       static constexpr guid api
       {
@@ -40,7 +40,7 @@ namespace iw4x
 
     struct xgame_event
     {
-      static constexpr char name[] = "XGameEvent";
+      static constexpr char label[] = "XGameEvent";
 
       static constexpr guid api
       {
@@ -55,7 +55,7 @@ namespace iw4x
 
     struct xunidentified
     {
-      static constexpr char name[] = "unidentified 2549F142";
+      static constexpr char label[] = "unidentified 2549F142";
 
       static constexpr guid api
       {

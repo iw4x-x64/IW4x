@@ -52,7 +52,7 @@ namespace iw4x
       constexpr std::size_t n (sizeof... (I));
 
       const binding bs[n] {{I::api, I::id, nullptr} ...};
-      const char*   ns[n] {I::name ...};
+      const char*   ns[n] {I::label ...};
 
       std::string r;
 

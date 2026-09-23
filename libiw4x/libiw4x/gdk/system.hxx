@@ -11,7 +11,7 @@ namespace iw4x
   {
     struct xsystem
     {
-      static constexpr char name[] = "XSystem";
+      static constexpr char label[] = "XSystem";
 
       static constexpr guid api
       {

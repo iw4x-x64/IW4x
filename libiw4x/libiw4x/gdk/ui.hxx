@@ -25,7 +25,7 @@ namespace iw4x
 
     struct xgame_ui
     {
-      static constexpr char name[] = "XGameUi";
+      static constexpr char label[] = "XGameUi";
 
       static constexpr guid api
       {

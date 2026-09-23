@@ -34,9 +34,9 @@ namespace iw4x
     template <typename I>
     concept published_interface = requires
     {
-      { I::name } -> std::convertible_to<const char*>;
-      { I::api }  -> std::convertible_to<const guid&>;
-      { I::id }   -> std::convertible_to<const guid&>;
+      { I::label } -> std::convertible_to<const char*>;
+      { I::api }   -> std::convertible_to<const guid&>;
+      { I::id }    -> std::convertible_to<const guid&>;
     };
 
     template <typename I>
@@ -187,7 +187,7 @@ namespace iw4x
         for (std::size_t v (o); v != 0; v >>= 4)
           h.insert (h.begin (), digits[v & 0xF]);
 
-        r += I::name;
+        r += I::label;
         r += ": slot 0x";
         r += h.empty () ? std::string ("0") : h;
         r += ' ';
@@ -232,7 +232,7 @@ namespace iw4x
           if (!r.empty ())
             r += ", ";
 
-          r += I::name;
+          r += I::label;
           r += ": a slot is claimed by something that is not a static member "
                "function";
           continue;
@@ -303,7 +303,7 @@ namespace iw4x
     inline const interface_object object_of
     {
       table_of<I>::entries,
-      I::name
+      I::label
     };
 
     template <published_interface I>

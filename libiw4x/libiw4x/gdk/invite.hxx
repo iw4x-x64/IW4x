@@ -22,7 +22,7 @@ namespace iw4x
 
     struct xgame_invite
     {
-      static constexpr char name[] = "XGameInvite";
+      static constexpr char label[] = "XGameInvite";
 
       static constexpr guid api
       {

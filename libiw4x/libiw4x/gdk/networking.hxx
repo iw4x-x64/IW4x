@@ -47,7 +47,7 @@ namespace iw4x
 
     struct xnetworking
     {
-      static constexpr char name[] = "XNetworking";
+      static constexpr char label[] = "XNetworking";
 
       static constexpr guid api
       {

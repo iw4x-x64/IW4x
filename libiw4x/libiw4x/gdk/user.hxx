@@ -62,7 +62,7 @@ namespace iw4x
 
     struct xuser
     {
-      static constexpr char name[] = "XUser";
+      static constexpr char label[] = "XUser";
 
       static constexpr guid api
       {
@@ -166,7 +166,7 @@ namespace iw4x
 
     struct xuser_gamertag
     {
-      static constexpr char name[] = "XUser (gamertag)";
+      static constexpr char label[] = "XUser (gamertag)";
 
       static constexpr guid api {xuser::api};
 
