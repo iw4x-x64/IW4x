@@ -7,6 +7,8 @@
 #include <utility>
 #include <concepts>
 
+#include <libiw4x/hexadecimal.hxx>
+
 #include <libiw4x/gdk/types.hxx>
 
 namespace iw4x
@@ -180,16 +182,14 @@ namespace iw4x
         if (!r.empty ())
           r += ", ";
 
-        constexpr char digits[] = "0123456789ABCDEF";
+        char h[2 * sizeof (std::size_t)];
 
-        std::string h;
-
-        for (std::size_t v (o); v != 0; v >>= 4)
-          h.insert (h.begin (), digits[v & 0xF]);
+        const hex_to_chars_result x (
+          to_hex_chars_minimal (h, h + sizeof (h), o, hex_case::upper));
 
         r += I::label;
         r += ": slot 0x";
-        r += h.empty () ? std::string ("0") : h;
+        r.append (h, x.ptr);
         r += ' ';
         r += what;
       });

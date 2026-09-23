@@ -1,6 +1,7 @@
 #include <libiw4x/gdk/invite.hxx>
 
 #include <libiw4x/logger.hxx>
+#include <libiw4x/hexadecimal.hxx>
 
 #include <libiw4x/gdk/async.hxx>
 #include <libiw4x/gdk/error.hxx>
@@ -70,12 +71,11 @@ namespace iw4x
           continue;
         }
 
-        w.write (string_view ("%"));
+        char e[3] = {'%'};
 
-        static const char digits[] = "0123456789ABCDEF";
+        to_hex_chars (e + 1, e + sizeof (e), x, hex_case::upper);
 
-        w.write (digits[x >> 4]);
-        w.write (digits[x & 0xF]);
+        w.write (string_view (e, sizeof (e)));
       }
 
       return activation ("ms-xbl-multiplayer://activity?connectionString={}",

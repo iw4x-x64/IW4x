@@ -1,6 +1,9 @@
 #include <libiw4x/gdk/text.hxx>
 
 #include <charconv>
+#include <algorithm>
+
+#include <libiw4x/hexadecimal.hxx>
 
 using namespace std;
 
@@ -54,29 +57,19 @@ namespace iw4x
     void text_writer::
     write (hex_number v) noexcept
     {
-      static const char table[] = "0123456789ABCDEF";
+      char s[16];
 
-      char  s[16];
-      char* p (s + sizeof (s));
+      to_hex_chars (s, s + sizeof (s), v.value, hex_case::upper);
 
-      uint64_t r (v.value);
-      unsigned w (v.width);
+      size_t z (0);
 
-      do
-      {
-        *--p = table[r & 0xF];
-        r >>= 4;
+      while (z != sizeof (s) - 1 && s[z] == '0')
+        ++z;
 
-        if (w != 0)
-          --w;
-      }
-      while (r != 0);
-
-      for (; w != 0 && p != s; --w)
-        *--p = '0';
+      size_t n (max (sizeof (s) - z, min<size_t> (v.width, sizeof (s))));
 
       write (string_view ("0x"));
-      write (string_view (p, static_cast<size_t> (s + sizeof (s) - p)));
+      write (string_view (s + sizeof (s) - n, n));
     }
 
     void text_writer::
