@@ -260,7 +260,10 @@ namespace iw4x
             b[i].info.name = reinterpret_cast<const char*> (p);
             p += n.size () + 1;
 
-            __builtin_memcpy (p, d.data (), d.size ());
+            if (!d.empty ())
+            {
+              __builtin_memcpy (p, d.data (), d.size ());
+            }
 
             b[i].info.size = static_cast<uint32_t> (d.size ());
             b[i].data = p;
