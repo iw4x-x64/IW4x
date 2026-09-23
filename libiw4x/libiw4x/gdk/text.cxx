@@ -1,5 +1,7 @@
 #include <libiw4x/gdk/text.hxx>
 
+#include <charconv>
+
 using namespace std;
 
 namespace iw4x
@@ -80,30 +82,21 @@ namespace iw4x
     void text_writer::
     write_unsigned (uint64_t v) noexcept
     {
-      char  s[digits];
-      char* p (s + sizeof (s));
+      char s[digits];
 
-      do
-      {
-        *--p = static_cast<char> ('0' + (v % 10));
-        v /= 10;
-      }
-      while (v != 0);
+      to_chars_result r (to_chars (s, s + sizeof (s), v));
 
-      write (string_view (p, static_cast<size_t> (s + sizeof (s) - p)));
+      write (string_view (s, r.ptr));
     }
 
     void text_writer::
     write_signed (int64_t v) noexcept
     {
-      if (v < 0)
-      {
-        write (string_view ("-"));
-        write_unsigned (~static_cast<uint64_t> (v) + 1);
-        return;
-      }
+      char s[digits];
 
-      write_unsigned (static_cast<uint64_t> (v));
+      to_chars_result r (to_chars (s, s + sizeof (s), v));
+
+      write (string_view (s, r.ptr));
     }
 
     const char*
