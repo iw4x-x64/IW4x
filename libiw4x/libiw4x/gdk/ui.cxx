@@ -162,7 +162,7 @@ namespace iw4x
 
         begin (b,
                pick_id,
-               make<pick_operation> (p, xuids, count, maximum));
+               make_unique<pick_operation> (p, xuids, count, maximum));
 
         return S_OK;
       });

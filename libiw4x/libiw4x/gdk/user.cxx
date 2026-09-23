@@ -254,7 +254,7 @@ namespace iw4x
       {
         l1 ("XUserAddAsync (options {:#x})", options);
 
-        begin (b, add_id, make<add_operation> (options));
+        begin (b, add_id, make_unique<add_operation> (options));
         return S_OK;
       });
     }
@@ -371,7 +371,7 @@ namespace iw4x
 
         user_of (u);
 
-        begin (b, resolve_id, make<resolve_operation> ());
+        begin (b, resolve_id, make_unique<resolve_operation> ());
         return S_OK;
       });
     }
@@ -415,7 +415,7 @@ namespace iw4x
           return E_NOTIMPL;
         }
 
-        begin (b, token_id, make<token_operation> ());
+        begin (b, token_id, make_unique<token_operation> ());
         return S_OK;
       });
     }

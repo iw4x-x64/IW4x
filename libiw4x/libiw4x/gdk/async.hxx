@@ -2,8 +2,8 @@
 
 #include <cstdint>
 #include <cstddef>
+#include <memory>
 
-#include <libiw4x/gdk/owner.hxx>
 #include <libiw4x/gdk/types.hxx>
 #include <libiw4x/gdk/vtable.hxx>
 #include <libiw4x/gdk/task-queue.hxx>
@@ -48,7 +48,7 @@ namespace iw4x
       result (std::size_t size, void* buffer);
     };
 
-    using operation_ptr = owner<operation>;
+    using operation_ptr = std::unique_ptr<operation>;
 
     class event
     {
@@ -60,7 +60,7 @@ namespace iw4x
       deliver () = 0;
     };
 
-    using event_ptr = owner<event>;
+    using event_ptr = std::unique_ptr<event>;
 
     void
     begin (async_block*, const operation_id&, operation_ptr);

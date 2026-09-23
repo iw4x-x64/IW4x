@@ -84,7 +84,7 @@ namespace iw4x
         if (c == nullptr)
           raise_invalid ("no store context");
 
-        begin (b, license_id, make<license_operation> ());
+        begin (b, license_id, make_unique<license_operation> ());
         return S_OK;
       });
     }

@@ -81,7 +81,7 @@ namespace iw4x
       {
         l1 ("no pinning information for this url");
 
-        begin (b, security_id, make<security_operation> ());
+        begin (b, security_id, make_unique<security_operation> ());
         return S_OK;
       });
     }
@@ -174,7 +174,7 @@ namespace iw4x
 
         l1 ("connectivity handler {} registered", t);
 
-        if (!post (nullptr, make<notification> (h)))
+        if (!post (nullptr, make_unique<notification> (h)))
           warn ("no queue for the initial connectivity notification");
 
         return S_OK;

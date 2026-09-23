@@ -359,7 +359,7 @@ namespace iw4x
             scid != nullptr ? scid : "<none>",
             sync_on_demand);
 
-        begin (b, initialize_id, make<initialize_operation> ());
+        begin (b, initialize_id, make_unique<initialize_operation> ());
         return S_OK;
       });
     }
@@ -527,7 +527,9 @@ namespace iw4x
               t.name.c_str (),
               storable_name (names[i]));
 
-        begin (b, read_id, make<read_operation> (t.location, names, count));
+        begin (b,
+               read_id,
+               make_unique<read_operation> (t.location, names, count));
         return S_OK;
       });
     }
@@ -647,9 +649,9 @@ namespace iw4x
 
         begin (b,
                submit_id,
-               make<submit_operation> (t.target->location,
-                                       t.writes,
-                                       t.count));
+               make_unique<submit_operation> (t.target->location,
+                                              t.writes,
+                                              t.count));
 
         t.count = 0;
 

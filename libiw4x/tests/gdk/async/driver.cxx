@@ -1,6 +1,7 @@
 #undef NDEBUG
 #include <cassert>
 
+#include <memory>
 #include <cstring>
 
 #include <libiw4x/gdk/async.hxx>
@@ -101,7 +102,7 @@ main ()
     async_block b {};
     b.queue = q;
 
-    begin (&b, counted, make<counting> (42u));
+    begin (&b, counted, std::make_unique<counting> (42u));
 
     assert (xasync::get_status (nullptr, &b, false) == pending);
 
@@ -139,7 +140,7 @@ main ()
     async_block b {};
     b.queue = q;
 
-    begin (&b, counted, make<counting> (7u));
+    begin (&b, counted, std::make_unique<counting> (7u));
 
     assert (xasync::cancel (nullptr, &b) == S_OK);
 
@@ -155,7 +156,7 @@ main ()
     async_block b {};
     b.queue = q;
 
-    begin (&b, counted, make<failing> ());
+    begin (&b, counted, std::make_unique<failing> ());
 
     assert ((*q)[port::work].dispatch (0));
 
@@ -169,7 +170,7 @@ main ()
     b.queue = q;
     b.callback = &announce;
 
-    begin (&b, counted, make<counting> (1u));
+    begin (&b, counted, std::make_unique<counting> (1u));
 
     assert ((*q)[port::work].dispatch (0));
     assert (announced == 0);
@@ -238,7 +239,7 @@ main ()
   {
     delivered = 0;
 
-    assert (post (q, make<note> ()));
+    assert (post (q, std::make_unique<note> ()));
     assert (delivered == 0);
 
     assert ((*q)[port::completion].dispatch (0));

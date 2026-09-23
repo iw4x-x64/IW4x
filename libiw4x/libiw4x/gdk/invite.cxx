@@ -99,7 +99,7 @@ namespace iw4x
 
       for (size_t i (0); i != n; ++i)
       {
-        if (!post (nullptr, make<invitation> (hs[i], u)))
+        if (!post (nullptr, make_unique<invitation> (hs[i], u)))
           warn ("no queue for an invitation, which was dropped");
       }
     }
