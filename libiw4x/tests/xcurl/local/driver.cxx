@@ -59,6 +59,8 @@ main ()
   assert (to ("https://h.com", "http://platform.iw4x:8080"));
   assert (to ("https://h.com/", "http://platform.iw4x:8080/"));
   assert (to ("https://h.com/p#f", "http://platform.iw4x:8080/p#f"));
+  assert (to ("https://h/p", "http://platform.iw4x:8080/p"));
+  assert (to ("https://h", "http://platform.iw4x:8080"));
 
   {
     response r;

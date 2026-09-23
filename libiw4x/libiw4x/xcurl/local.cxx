@@ -70,13 +70,11 @@ namespace iw4x
       {
         if (__builtin_memcmp (url.data () + a, "://", 3) == 0)
         {
-          a += 3;
           break;
         }
       }
 
-      if (a + 3 > url.size ())
-        a = 0;
+      a = a + 3 <= url.size () ? a + 3 : 0;
 
       size_t p (a);
 
