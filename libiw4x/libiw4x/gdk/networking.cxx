@@ -1,6 +1,7 @@
 #include <libiw4x/gdk/networking.hxx>
 
 #include <libiw4x/logger.hxx>
+#include <libiw4x/contract.hxx>
 
 #include <libiw4x/gdk/error.hxx>
 #include <libiw4x/gdk/handler.hxx>
@@ -44,7 +45,10 @@ namespace iw4x
       {
       public:
         explicit
-        notification (const connectivity_handler& h) noexcept: handler_ (h) {}
+        notification (const connectivity_handler& h) noexcept: handler_ (h)
+        {
+          LIBIW4X_PRE (h.callback != nullptr);
+        }
 
         void
         deliver () override

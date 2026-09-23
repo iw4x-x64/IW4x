@@ -1,6 +1,7 @@
 #include <libiw4x/gdk/invite.hxx>
 
 #include <libiw4x/logger.hxx>
+#include <libiw4x/contract.hxx>
 #include <libiw4x/hexadecimal.hxx>
 
 #include <libiw4x/gdk/async.hxx>
@@ -34,7 +35,10 @@ namespace iw4x
       {
       public:
         invitation (const invite_handler& h, const activation& u) noexcept
-            : handler_ (h), uri_ (u) {}
+            : handler_ (h), uri_ (u)
+        {
+          LIBIW4X_PRE (h.callback != nullptr);
+        }
 
         void
         deliver () override
@@ -73,7 +77,10 @@ namespace iw4x
 
         char e[3] = {'%'};
 
-        to_hex_chars (e + 1, e + sizeof (e), x, hex_case::upper);
+        const hex_to_chars_result r (
+          to_hex_chars (e + 1, e + sizeof (e), x, hex_case::upper));
+
+        LIBIW4X_ASSERT (r.ec == errc ());
 
         w.write (string_view (e, sizeof (e)));
       }
