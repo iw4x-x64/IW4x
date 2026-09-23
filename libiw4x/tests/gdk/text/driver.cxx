@@ -2,6 +2,7 @@
 #include <cassert>
 
 #include <cstring>
+#include <string_view>
 
 #include <libiw4x/gdk/text.hxx>
 
@@ -10,21 +11,6 @@ using namespace iw4x::gdk;
 int
 main ()
 {
-  {
-    chars c;
-
-    assert (c.empty () && c.size () == 0);
-    assert (chars ("abc").size () == 3);
-    assert (chars ("abcdef", 3).size () == 3);
-
-    assert (chars ("abc") == chars ("abc"));
-    assert (!(chars ("abc") == chars ("abd")));
-    assert (!(chars ("abc") == chars ("ab")));
-
-    assert (chars::length ("") == 0);
-    assert (chars::length ("abcd") == 4);
-  }
-
   {
     text<64> t;
 
@@ -37,7 +23,7 @@ main ()
 
     assert (std::strcmp (t.c_str (), "1 and 2") == 0);
     assert (t.size () == 7);
-    assert (!(chars (t) == chars ("1 and 7")));
+    assert (std::string_view (t) != "1 and 7");
   }
 
   {
@@ -71,7 +57,7 @@ main ()
     text<64> n ("{}", static_cast<const char*> (nullptr));
     assert (std::strcmp (n.c_str (), "(null)") == 0);
 
-    text<64> v ("{}", chars ("view"));
+    text<64> v ("{}", std::string_view ("view"));
     assert (std::strcmp (v.c_str (), "view") == 0);
   }
 
@@ -129,10 +115,10 @@ main ()
 
     assert (w.size () == 0 && w.whole ());
 
-    w.write (chars ("0123456789"));
+    w.write (std::string_view ("0123456789"));
     assert (w.whole () && w.size () == 10);
 
-    w.write (chars ("0123456789"));
+    w.write (std::string_view ("0123456789"));
     assert (!w.whole () && w.size () == 15);
     assert (b[15] == '\0');
   }

@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <string_view>
 
 #include <libiw4x/gdk/text.hxx>
 
@@ -82,13 +83,13 @@ namespace iw4x
         return outcome_;
       }
 
-      gdk::chars
+      std::string_view
       url () const noexcept
       {
         return url_;
       }
 
-      gdk::chars
+      std::string_view
       method () const noexcept
       {
         return method_;

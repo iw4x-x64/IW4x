@@ -70,16 +70,15 @@ namespace iw4x
       switch (static_cast<option> (o))
       {
       case option::url:
-        url_ = text<url_limit> ("{}",
-                                static_cast<const char*> (v) != nullptr
-                                  ? chars (static_cast<const char*> (v))
-                                  : chars ());
+        url_ = text<url_limit> (
+          "{}",
+          v != nullptr ? string_view (static_cast<const char*> (v))
+                       : string_view ());
         break;
 
       case option::customrequest:
         if (v != nullptr)
-          method_ = text<method_limit> ("{}",
-                                        chars (static_cast<const char*> (v)));
+          method_ = text<method_limit> ("{}", static_cast<const char*> (v));
         break;
 
       case option::writedata:  write_data_ = v;  break;

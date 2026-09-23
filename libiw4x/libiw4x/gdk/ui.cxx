@@ -35,7 +35,7 @@ namespace iw4x
       class pick_operation: public operation
       {
       public:
-        pick_operation (chars prompt,
+        pick_operation (string_view prompt,
                         const uint64_t* candidates,
                         size_t count,
                         size_t maximum)
@@ -145,12 +145,12 @@ namespace iw4x
     {
       return guard (pick_id.name, [&] () -> HRESULT
       {
-        chars p (prompt != nullptr ? prompt : "");
+        string_view p (prompt != nullptr ? prompt : "");
 
         l1 ("XGameUiShowPlayerPickerAsync for user {}: \"{}\", {} to choose "
             "from, at most {}",
             user,
-            p.data (),
+            p,
             count,
             maximum);
 

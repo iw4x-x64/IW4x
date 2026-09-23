@@ -9,7 +9,7 @@ namespace iw4x
     static constexpr size_t digits (21);
 
     void text_writer::
-    write (chars v) noexcept
+    write (string_view v) noexcept
     {
       size_t n (v.size ());
 
@@ -19,7 +19,7 @@ namespace iw4x
         truncated_ = true;
       }
 
-      __builtin_memcpy (b_ + n_, v.data (), n);
+      v.copy (b_ + n_, n);
 
       n_ += n;
       terminate ();
@@ -28,19 +28,19 @@ namespace iw4x
     void text_writer::
     write (const char* v) noexcept
     {
-      write (chars (v != nullptr ? v : "(null)"));
+      write (string_view (v != nullptr ? v : "(null)"));
     }
 
     void text_writer::
     write (char v) noexcept
     {
-      write (chars (&v, 1));
+      write (string_view (&v, 1));
     }
 
     void text_writer::
     write (bool v) noexcept
     {
-      write (chars (v ? "true" : "false"));
+      write (string_view (v ? "true" : "false"));
     }
 
     void text_writer::
@@ -73,8 +73,8 @@ namespace iw4x
       for (; w != 0 && p != s; --w)
         *--p = '0';
 
-      write (chars ("0x"));
-      write (chars (p, static_cast<size_t> (s + sizeof (s) - p)));
+      write (string_view ("0x"));
+      write (string_view (p, static_cast<size_t> (s + sizeof (s) - p)));
     }
 
     void text_writer::
@@ -90,7 +90,7 @@ namespace iw4x
       }
       while (v != 0);
 
-      write (chars (p, static_cast<size_t> (s + sizeof (s) - p)));
+      write (string_view (p, static_cast<size_t> (s + sizeof (s) - p)));
     }
 
     void text_writer::
@@ -98,7 +98,7 @@ namespace iw4x
     {
       if (v < 0)
       {
-        write (chars ("-"));
+        write (string_view ("-"));
         write_unsigned (~static_cast<uint64_t> (v) + 1);
         return;
       }
@@ -115,19 +115,19 @@ namespace iw4x
       {
         if (p[0] == '{' && p[1] == '}')
         {
-          w.write (chars (f, static_cast<size_t> (p - f)));
+          w.write (string_view (f, static_cast<size_t> (p - f)));
           return p + 2;
         }
       }
 
-      w.write (chars (f, static_cast<size_t> (p - f)));
+      w.write (string_view (f, static_cast<size_t> (p - f)));
       return p;
     }
 
     void
     write_rest (text_writer& w, const char* f) noexcept
     {
-      w.write (chars (f));
+      w.write (string_view (f));
     }
   }
 }

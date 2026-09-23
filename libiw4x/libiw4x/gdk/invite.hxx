@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <string_view>
 
 #include <libiw4x/gdk/text.hxx>
 #include <libiw4x/gdk/types.hxx>
@@ -15,10 +16,10 @@ namespace iw4x
     using activation = text<activation_capacity>;
 
     activation
-    activation_uri (chars connection) noexcept;
+    activation_uri (std::string_view connection) noexcept;
 
     void
-    deliver_invite (chars connection) noexcept;
+    deliver_invite (std::string_view connection) noexcept;
 
     struct xgame_invite
     {

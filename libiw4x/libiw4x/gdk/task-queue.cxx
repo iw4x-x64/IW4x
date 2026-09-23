@@ -537,7 +537,8 @@ namespace iw4x
                                        dispatch_mode::thread_pool));
 
           if (q == nullptr)
-            fatal (chars ("unable to create the default process task queue"));
+            fatal (
+              string_view ("unable to create the default process task queue"));
 
           info ("default process task queue created");
           return q;

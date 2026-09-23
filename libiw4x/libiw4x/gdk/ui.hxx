@@ -2,8 +2,8 @@
 
 #include <cstdint>
 #include <cstddef>
+#include <string_view>
 
-#include <libiw4x/gdk/text.hxx>
 #include <libiw4x/gdk/types.hxx>
 #include <libiw4x/gdk/async.hxx>
 #include <libiw4x/gdk/vtable.hxx>
@@ -12,7 +12,7 @@ namespace iw4x
 {
   namespace gdk
   {
-    using player_picker = std::size_t (*) (chars prompt,
+    using player_picker = std::size_t (*) (std::string_view prompt,
                                            const std::uint64_t* candidates,
                                            std::size_t count,
                                            std::uint64_t* chosen,

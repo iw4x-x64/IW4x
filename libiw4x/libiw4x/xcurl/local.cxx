@@ -13,7 +13,7 @@ namespace iw4x
     using namespace gdk;
 
     bool
-    contains (chars h, chars n) noexcept
+    contains (string_view h, string_view n) noexcept
     {
       if (n.size () > h.size ())
         return false;
@@ -27,8 +27,8 @@ namespace iw4x
       return false;
     }
 
-    chars
-    parameter (chars url, chars name) noexcept
+    string_view
+    parameter (string_view url, string_view name) noexcept
     {
       size_t q (0);
 
@@ -36,7 +36,7 @@ namespace iw4x
         ;
 
       if (q == url.size ())
-        return chars ();
+        return string_view ();
 
       for (size_t i (q + 1); i < url.size ();)
       {
@@ -53,16 +53,16 @@ namespace iw4x
         if (v != e &&
             v - i == name.size () &&
             __builtin_memcmp (url.data () + i, name.data (), name.size ()) == 0)
-          return chars (url.data () + v + 1, e - v - 1);
+          return string_view (url.data () + v + 1, e - v - 1);
 
         i = e + 1;
       }
 
-      return chars ();
+      return string_view ();
     }
 
     text<url_limit>
-    redirect (chars url, const destination& d) noexcept
+    redirect (string_view url, const destination& d) noexcept
     {
       size_t a (0);
 
@@ -91,16 +91,16 @@ namespace iw4x
       return text<url_limit> ("http://{}:{}{}",
                               d.host,
                               d.port,
-                              chars (url.data () + p, url.size () - p));
+                              string_view (url.data () + p, url.size () - p));
     }
 
     namespace
     {
       bool
-      privacy (chars url, response& r) noexcept
+      privacy (string_view url, response& r) noexcept
       {
-        chars setting (parameter (url, chars ("setting")));
-        chars target (parameter (url, chars ("target")));
+        string_view setting (parameter (url, "setting"));
+        string_view target (parameter (url, "target"));
 
         l1 ("privacy: {} of {} allowed",
             setting.size () != 0 ? setting.data () : "<none>",
@@ -119,7 +119,7 @@ namespace iw4x
         const char* host;
         const char* path;
 
-        bool (*serve) (chars url, response&) noexcept;
+        bool (*serve) (string_view url, response&) noexcept;
       };
 
       constexpr endpoint endpoints[]
@@ -128,14 +128,14 @@ namespace iw4x
       };
 
       const endpoint*
-      lookup (chars method, chars url) noexcept
+      lookup (string_view method, string_view url) noexcept
       {
 #pragma GCC unroll 8
         for (const endpoint& e: endpoints)
         {
-          if (method == chars (e.method) &&
-              contains (url, chars (e.host)) &&
-              contains (url, chars (e.path)))
+          if (method == e.method &&
+              contains (url, e.host) &&
+              contains (url, e.path))
             return &e;
         }
 
@@ -157,18 +157,18 @@ namespace iw4x
       }
 
       bool
-      redirected (chars url) noexcept
+      redirected (string_view url) noexcept
       {
-        if (contains (url, chars ("social.xboxlive.com")) &&
-            contains (url, chars ("/people")))
+        if (contains (url, "social.xboxlive.com") &&
+            contains (url, "/people"))
           return true;
 
-        return contains (url, chars ("multiplayeractivity.xboxlive.com"));
+        return contains (url, "multiplayeractivity.xboxlive.com");
       }
     }
 
     void
-    serve_platform_at (chars host, int port) noexcept
+    serve_platform_at (string_view host, int port) noexcept
     {
       platform_endpoint& p (installed ());
       scope_lock         l (p.mutex_);
@@ -180,7 +180,7 @@ namespace iw4x
     }
 
     bool
-    answer (chars method, chars url, response& r) noexcept
+    answer (string_view method, string_view url, response& r) noexcept
     {
       const endpoint* e (lookup (method, url));
 
@@ -188,13 +188,13 @@ namespace iw4x
     }
 
     bool
-    answered (chars method, chars url) noexcept
+    answered (string_view method, string_view url) noexcept
     {
       return lookup (method, url) != nullptr;
     }
 
     bool
-    platform (chars url, destination& d) noexcept
+    platform (string_view url, destination& d) noexcept
     {
       if (!redirected (url))
         return false;
@@ -204,8 +204,7 @@ namespace iw4x
 
       if (p.port == 0)
       {
-        warn ("{} is the platform's to answer and none is installed",
-              url.data ());
+        warn ("{} is the platform's to answer and none is installed", url);
 
         return false;
       }
@@ -217,7 +216,7 @@ namespace iw4x
     }
 
     bool
-    served (chars method, chars url) noexcept
+    served (string_view method, string_view url) noexcept
     {
       destination d;
 

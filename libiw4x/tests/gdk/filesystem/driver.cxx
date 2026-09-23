@@ -16,7 +16,7 @@ namespace
   {
     path r;
 
-    r.extend (chars (p));
+    r.extend (p);
 
     return r;
   }
@@ -113,9 +113,11 @@ namespace
     {
       char b[512];
 
+      narrow (d.name (), b, sizeof (b));
+
       std::printf ("%s %s %llu\n",
                    d.is_directory () ? "dir" : "reg",
-                   narrow (d.name (), b, sizeof (b)).data (),
+                   b,
                    static_cast<unsigned long long> (
                      d.is_directory () ? 0 : d.size ()));
     }

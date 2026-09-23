@@ -158,15 +158,15 @@ main ()
     char        b[16];
     std::size_t used (0);
 
-    copy_out (chars ("value"), sizeof (b), b, &used);
+    copy_out ("value", sizeof (b), b, &used);
 
     assert (std::strcmp (b, "value") == 0);
     assert (used == 6);
 
-    copy_out (chars ("value"), sizeof (b), b, nullptr);
+    copy_out ("value", sizeof (b), b, nullptr);
     assert (std::strcmp (b, "value") == 0);
 
-    copy_out (chars (""), sizeof (b), b, &used);
+    copy_out ("", sizeof (b), b, &used);
     assert (b[0] == '\0' && used == 1);
   }
 
@@ -177,7 +177,7 @@ main ()
 
     try
     {
-      copy_out (chars ("value"), sizeof (b), b, nullptr);
+      copy_out ("value", sizeof (b), b, nullptr);
     }
     catch (const failure& e)
     {
@@ -191,7 +191,7 @@ main ()
 
     try
     {
-      copy_out (chars ("value"), 16, nullptr, nullptr);
+      copy_out ("value", 16, nullptr, nullptr);
     }
     catch (const failure& e)
     {

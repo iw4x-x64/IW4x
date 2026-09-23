@@ -2,6 +2,7 @@
 #include <cassert>
 
 #include <cstring>
+#include <string_view>
 
 #include <libiw4x/gdk/ui.hxx>
 #include <libiw4x/gdk/user.hxx>
@@ -42,13 +43,13 @@ namespace
   }
 
   bool
-  ours (chars, chars url)
+  ours (std::string_view, std::string_view url)
   {
-    return url.size () >= 5 && std::strncmp (url.data (), "http:", 5) == 0;
+    return url.starts_with ("http:");
   }
 
   std::size_t
-  first_two (chars, const std::uint64_t* c, std::size_t n,
+  first_two (std::string_view, const std::uint64_t* c, std::size_t n,
              std::uint64_t* out, std::size_t max)
   {
     std::size_t k (n < max ? n : max);
@@ -243,7 +244,7 @@ main ()
   }
 
   {
-    set_gamertag (chars ("a-very-long-player-name-indeed"));
+    set_gamertag ("a-very-long-player-name-indeed");
 
     char        b[128];
     std::size_t n (0);
@@ -375,7 +376,7 @@ main ()
   }
 
   {
-    activation u (activation_uri (chars ("a b&c=d")));
+    activation u (activation_uri ("a b&c=d"));
 
     assert (std::strcmp (u.c_str (),
                          "ms-xbl-multiplayer://activity?connectionString="
@@ -394,7 +395,7 @@ main ()
               },
               &token) == S_OK);
 
-    deliver_invite (chars ("hello"));
+    deliver_invite ("hello");
     drain ();
 
     assert (xgame_invite::unregister_for_event (nullptr, token, false) == 1);
@@ -464,22 +465,22 @@ main ()
   }
 
   {
-    assert (storable (chars ("settings")));
-    assert (storable (chars ("a.b")));
-    assert (storable (chars (".hidden")));
+    assert (storable ("settings"));
+    assert (storable ("a.b"));
+    assert (storable (".hidden"));
 
-    assert (!storable (chars ("")));
-    assert (!storable (chars (".")));
-    assert (!storable (chars ("..")));
-    assert (!storable (chars ("a/b")));
-    assert (!storable (chars ("a\\b")));
-    assert (!storable (chars ("c:")));
-    assert (!storable (chars ("a*")));
-    assert (!storable (chars ("a?")));
-    assert (!storable (chars ("a\"")));
-    assert (!storable (chars ("a<")));
-    assert (!storable (chars ("a>")));
-    assert (!storable (chars ("a|")));
+    assert (!storable (""));
+    assert (!storable ("."));
+    assert (!storable (".."));
+    assert (!storable ("a/b"));
+    assert (!storable ("a\\b"));
+    assert (!storable ("c:"));
+    assert (!storable ("a*"));
+    assert (!storable ("a?"));
+    assert (!storable ("a\""));
+    assert (!storable ("a<"));
+    assert (!storable ("a>"));
+    assert (!storable ("a|"));
   }
 
   {

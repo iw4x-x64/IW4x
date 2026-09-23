@@ -96,7 +96,7 @@ namespace iw4x
       }
 
       bool
-      served (chars method, chars url) noexcept
+      served (string_view method, string_view url) noexcept
       {
         audience&  a (claimed ());
         scope_lock l (a.mutex_);
@@ -126,7 +126,7 @@ namespace iw4x
 
           token_ = text<token_capacity> ("IW4x1.0 xuid={} gamertag={}",
                                          hex (xuid (), 16),
-                                         chars (n, k));
+                                         string_view (n, k));
 
           return sizeof (token_and_signature) + token_.size () + 1;
         }
@@ -399,19 +399,19 @@ namespace iw4x
     {
       return guard (token_id.name, [&] () -> HRESULT
       {
-        chars m (method != nullptr ? method : "");
-        chars x (url != nullptr ? url : "");
+        string_view m (method != nullptr ? method : "");
+        string_view x (url != nullptr ? url : "");
 
         l1 ("token requested for {} {} (options {:#x})",
-            m.data (),
-            x.data (),
+            m,
+            x,
             options);
 
         user_of (u);
 
         if (!served (m, x))
         {
-          l1 ("no token for {}, which is not a service of ours", x.data ());
+          l1 ("no token for {}, which is not a service of ours", x);
           return E_NOTIMPL;
         }
 
@@ -527,7 +527,7 @@ namespace iw4x
 
         size_t k (bound != 0 ? gamertag (n, bound + 1) : 0);
 
-        copy_out (chars (n, k), size, buffer, used);
+        copy_out (string_view (n, k), size, buffer, used);
         return S_OK;
       });
     }

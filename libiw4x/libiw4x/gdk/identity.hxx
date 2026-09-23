@@ -2,8 +2,7 @@
 
 #include <cstdint>
 #include <cstddef>
-
-#include <libiw4x/gdk/text.hxx>
+#include <string_view>
 
 namespace iw4x
 {
@@ -26,7 +25,7 @@ namespace iw4x
     gamertag (char* buffer, std::size_t size) noexcept;
 
     void
-    set_gamertag (chars) noexcept;
+    set_gamertag (std::string_view) noexcept;
 
     bool
     component_bound (gamertag_component, std::size_t&) noexcept;

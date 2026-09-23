@@ -2,8 +2,8 @@
 
 #include <cstdint>
 #include <cstddef>
+#include <string_view>
 
-#include <libiw4x/gdk/text.hxx>
 #include <libiw4x/gdk/types.hxx>
 #include <libiw4x/gdk/async.hxx>
 #include <libiw4x/gdk/vtable.hxx>
@@ -13,7 +13,8 @@ namespace iw4x
 {
   namespace gdk
   {
-    using service_predicate = bool (*) (chars method, chars url);
+    using service_predicate = bool (*) (std::string_view method,
+                                        std::string_view url);
 
     inline constexpr std::size_t max_claimants (4);
 

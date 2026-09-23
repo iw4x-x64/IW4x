@@ -2,10 +2,9 @@
 
 #include <cstdint>
 #include <cstddef>
+#include <string_view>
 
 #include <windows.h>
-
-#include <libiw4x/gdk/text.hxx>
 
 namespace iw4x
 {
@@ -68,18 +67,18 @@ namespace iw4x
       extend (const wchar_t*, std::size_t) noexcept;
 
       bool
-      extend (chars) noexcept;
+      extend (std::string_view) noexcept;
 
       bool
       append (const wchar_t*) noexcept;
 
       bool
-      append (chars) noexcept;
+      append (std::string_view) noexcept;
 
       void
       to_directory () noexcept;
 
-      chars
+      std::string_view
       narrow (char* buffer, std::size_t size) const noexcept;
 
     private:
@@ -88,7 +87,7 @@ namespace iw4x
       wchar_t     value_[capacity];
     };
 
-    chars
+    std::string_view
     narrow (const wchar_t*, char* buffer, std::size_t size) noexcept;
 
     bool

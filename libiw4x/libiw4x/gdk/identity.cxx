@@ -199,17 +199,17 @@ namespace iw4x
     }
 
     void
-    set_gamertag (chars v) noexcept
+    set_gamertag (string_view v) noexcept
     {
       local_name& n (name ());
       scope_lock  l (n.mutex_);
 
       size_t k (bounded (v.data (), v.size (), gamertag_capacity - 1));
 
-      if (k == n.size && __builtin_memcmp (n.value, v.data (), k) == 0)
+      if (string_view (n.value, n.size) == v.substr (0, k))
         return;
 
-      __builtin_memcpy (n.value, v.data (), k);
+      v.copy (n.value, k);
 
       n.value[k] = '\0';
       n.size = k;

@@ -43,7 +43,7 @@ namespace iw4x
     }
 
     bool path::
-    extend (chars p) noexcept
+    extend (string_view p) noexcept
     {
       if (p.empty ())
         return whole ();
@@ -76,7 +76,7 @@ namespace iw4x
     }
 
     bool path::
-    append (chars p) noexcept
+    append (string_view p) noexcept
     {
       if (size_ != 0 && value_[size_ - 1] != L'\\')
         extend (L"\\", 1);
@@ -96,11 +96,11 @@ namespace iw4x
       value_[size_] = L'\0';
     }
 
-    chars path::
+    string_view path::
     narrow (char* b, size_t n) const noexcept
     {
       if (n == 0)
-        return chars ();
+        return string_view ();
 
       int r (WideCharToMultiByte (CP_UTF8,
                                   0,
@@ -116,14 +116,14 @@ namespace iw4x
 
       b[r] = '\0';
 
-      return chars (b, static_cast<size_t> (r));
+      return string_view (b, static_cast<size_t> (r));
     }
 
-    chars
+    string_view
     narrow (const wchar_t* w, char* b, size_t n) noexcept
     {
       if (n == 0)
-        return chars ();
+        return string_view ();
 
       int r (WideCharToMultiByte (CP_UTF8,
                                   0,
@@ -137,10 +137,10 @@ namespace iw4x
       if (r <= 0)
       {
         b[0] = '\0';
-        return chars ();
+        return string_view ();
       }
 
-      return chars (b, static_cast<size_t> (r) - 1);
+      return string_view (b, static_cast<size_t> (r) - 1);
     }
 
     namespace

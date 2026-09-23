@@ -34,7 +34,7 @@ main ()
     p.append (L"two");
     assert (std::wcscmp (p.c_str (), L"C:\\one\\two") == 0);
 
-    p.append (chars ("three"));
+    p.append ("three");
     assert (std::wcscmp (p.c_str (), L"C:\\one\\two\\three") == 0);
   }
 
@@ -89,13 +89,13 @@ main ()
 
     char b[64];
 
-    assert (chars (p.narrow (b, sizeof (b))) == chars ("C:\\caf\xC3\xA9"));
+    assert (p.narrow (b, sizeof (b)) == "C:\\caf\xC3\xA9");
   }
 
   {
     path p;
 
-    p.extend (chars ("caf\xC3\xA9"));
+    p.extend ("caf\xC3\xA9");
 
     assert (std::wcscmp (p.c_str (), L"caf\u00e9") == 0);
   }
@@ -103,7 +103,7 @@ main ()
   {
     char b[64];
 
-    assert (narrow (L"one", b, sizeof (b)) == chars ("one"));
+    assert (narrow (L"one", b, sizeof (b)) == "one");
     assert (std::strcmp (b, "one") == 0);
   }
 

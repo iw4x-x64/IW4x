@@ -3,8 +3,8 @@
 #include <cstddef>
 #include <concepts>
 #include <type_traits>
+#include <string_view>
 
-#include <libiw4x/gdk/text.hxx>
 #include <libiw4x/gdk/error.hxx>
 
 namespace iw4x
@@ -25,6 +25,9 @@ namespace iw4x
     }
 
     void
-    copy_out (chars value, std::size_t size, char* buffer, std::size_t* used);
+    copy_out (std::string_view value,
+              std::size_t size,
+              char* buffer,
+              std::size_t* used);
   }
 }

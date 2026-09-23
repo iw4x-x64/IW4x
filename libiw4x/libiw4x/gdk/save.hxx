@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <cstddef>
+#include <string_view>
 
 #include <libiw4x/gdk/path.hxx>
 #include <libiw4x/gdk/text.hxx>
@@ -79,7 +80,7 @@ namespace iw4x
     };
 
     bool
-    storable (chars) noexcept;
+    storable (std::string_view) noexcept;
 
     struct xgame_save
     {

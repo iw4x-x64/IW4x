@@ -68,16 +68,16 @@ main ()
   assert (token_for (user, microsoft_url) == E_NOTIMPL);
 
   xcurl::install ();
-  xcurl::serve_platform_at (chars ("platform.iw4x"), 3074);
+  xcurl::serve_platform_at ("platform.iw4x", 3074);
 
   assert (token_for (user, privacy_url) == S_OK);
   assert (token_for (user, social_url) == S_OK);
 
   assert (token_for (user, microsoft_url) == E_NOTIMPL);
 
-  assert (xcurl::served (chars ("GET"), chars (privacy_url)));
-  assert (xcurl::served (chars ("GET"), chars (social_url)));
-  assert (!xcurl::served (chars ("GET"), chars (microsoft_url)));
+  assert (xcurl::served ("GET", privacy_url));
+  assert (xcurl::served ("GET", social_url));
+  assert (!xcurl::served ("GET", microsoft_url));
 
   while ((*queue)[port::work].dispatch (0))
     ;

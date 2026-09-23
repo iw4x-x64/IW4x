@@ -37,7 +37,7 @@ main ()
     assert (n != 0 && std::strlen (b) == n);
     assert (std::strncmp (b, "IW4x-", 5) == 0);
 
-    set_gamertag (chars ("Someone"));
+    set_gamertag ("Someone");
 
     n = gamertag (b, sizeof (b));
     assert (std::strcmp (b, "Someone") == 0 && n == 7);
@@ -58,7 +58,7 @@ main ()
   }
 
   {
-    set_gamertag (chars ("\xC3\xA9\xC3\xA9\xC3\xA9"));
+    set_gamertag ("\xC3\xA9\xC3\xA9\xC3\xA9");
 
     char b[gamertag_capacity];
 

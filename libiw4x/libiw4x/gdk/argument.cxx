@@ -7,7 +7,7 @@ namespace iw4x
   namespace gdk
   {
     void
-    copy_out (chars v, size_t size, char* buffer, size_t* used)
+    copy_out (string_view v, size_t size, char* buffer, size_t* used)
     {
       if (buffer == nullptr)
         raise (E_POINTER, "no buffer");
@@ -20,7 +20,7 @@ namespace iw4x
                size,
                n);
 
-      __builtin_memcpy (buffer, v.data (), v.size ());
+      v.copy (buffer, v.size ());
 
       buffer[v.size ()] = '\0';
 

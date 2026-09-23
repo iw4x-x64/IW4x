@@ -39,7 +39,7 @@ namespace iw4x
 
         char b[path::capacity];
 
-        info ("storage root is {}", r.narrow (b, sizeof (b)).data ());
+        info ("storage root is {}", r.narrow (b, sizeof (b)));
 
         return r;
       }

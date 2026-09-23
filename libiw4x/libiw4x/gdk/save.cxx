@@ -15,14 +15,14 @@ namespace iw4x
   namespace gdk
   {
     bool
-    storable (chars n) noexcept
+    storable (string_view n) noexcept
     {
-      if (n.empty () || n == chars (".") || n == chars (".."))
+      if (n.empty () || n == "." || n == "..")
         return false;
 
-      for (size_t i (0); i != n.size (); ++i)
+      for (char c: n)
       {
-        switch (n.data ()[i])
+        switch (c)
         {
         case '/':
         case '\\':
@@ -42,13 +42,13 @@ namespace iw4x
 
     namespace
     {
-      chars
+      string_view
       storable_name (const char* n)
       {
-        chars v (n != nullptr ? n : "");
+        string_view v (n != nullptr ? n : "");
 
         if (!storable (v))
-          raise_invalid ("'{}' is not a name this store can use", v.data ());
+          raise_invalid ("'{}' is not a name this store can use", v);
 
         return v;
       }
@@ -157,7 +157,7 @@ namespace iw4x
           path r (storage_root ());
 
           r.append (L"cloud");
-          r.append (chars (text<32> ("{}", hex (xuid (), 16))));
+          r.append (text<32> ("{}", hex (xuid (), 16)));
 
           if (!r.whole ())
             raise (E_FAIL, "the game save root does not fit in a path");
@@ -169,7 +169,7 @@ namespace iw4x
 
           char b[path::capacity];
 
-          info ("game save store at {}", r.narrow (b, sizeof (b)).data ());
+          info ("game save store at {}", r.narrow (b, sizeof (b)));
 
           return sizeof (save_provider*);
         }
@@ -210,7 +210,7 @@ namespace iw4x
           {
             path p (location_);
 
-            p.append (chars (names_[i]));
+            p.append (names_[i]);
 
             file f;
 
@@ -304,7 +304,7 @@ namespace iw4x
             const pending_write& w (writes_[i]);
 
             path p (location_);
-            p.append (chars (w.name));
+            p.append (w.name);
 
             path t (p);
             t.extend (L".part");
@@ -398,7 +398,7 @@ namespace iw4x
     {
       return guard ("XGameSaveCreateContainer", [&] () -> HRESULT
       {
-        chars n (storable_name (name));
+        string_view n (storable_name (name));
 
         path location (provider_of (p).root);
 
@@ -461,7 +461,7 @@ namespace iw4x
             continue;
 
           char  b[blob_name_capacity * 4];
-          chars n (narrow (d.name (), b, sizeof (b)));
+          string_view n (narrow (d.name (), b, sizeof (b)));
 
           if (!storable (n))
             continue;
@@ -525,7 +525,7 @@ namespace iw4x
         for (uint32_t i (0); i != count; ++i)
           l1 ("XGameSaveReadBlobDataAsync {}/{}",
               t.name.c_str (),
-              storable_name (names[i]).data ());
+              storable_name (names[i]));
 
         begin (b, read_id, make<read_operation> (t.location, names, count));
         return S_OK;
@@ -604,7 +604,7 @@ namespace iw4x
       {
         save_update& t (updates ().lookup (u));
 
-        chars n (storable_name (name));
+        string_view n (storable_name (name));
 
         if (data == nullptr && size != 0)
           raise (E_POINTER, "no blob data");

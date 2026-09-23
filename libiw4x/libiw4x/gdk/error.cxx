@@ -37,15 +37,15 @@ namespace iw4x
                         b[n - 1] == '.'))
         --n;
 
-      r.append (": {}", chars (b, n));
+      r.append (": {}", string_view (b, n));
 
       LocalFree (b);
     }
 
     void
-    fatal (chars what) noexcept
+    fatal (string_view what) noexcept
     {
-      fail ("{}", string_view (what.data (), what.size ()));
+      fail ("{}", what);
 
       logger::stop ();
 

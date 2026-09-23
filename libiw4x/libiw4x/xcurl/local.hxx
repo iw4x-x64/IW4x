@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <string_view>
 
 #include <libiw4x/gdk/text.hxx>
 
@@ -28,27 +29,27 @@ namespace iw4x
     };
 
     bool
-    answer (gdk::chars method, gdk::chars url, response&) noexcept;
+    answer (std::string_view method, std::string_view url, response&) noexcept;
 
     bool
-    answered (gdk::chars method, gdk::chars url) noexcept;
+    answered (std::string_view method, std::string_view url) noexcept;
 
     bool
-    platform (gdk::chars url, destination&) noexcept;
+    platform (std::string_view url, destination&) noexcept;
 
     bool
-    served (gdk::chars method, gdk::chars url) noexcept;
+    served (std::string_view method, std::string_view url) noexcept;
 
     void
-    serve_platform_at (gdk::chars host, int port) noexcept;
+    serve_platform_at (std::string_view host, int port) noexcept;
 
     gdk::text<url_limit>
-    redirect (gdk::chars url, const destination&) noexcept;
+    redirect (std::string_view url, const destination&) noexcept;
 
-    gdk::chars
-    parameter (gdk::chars url, gdk::chars name) noexcept;
+    std::string_view
+    parameter (std::string_view url, std::string_view name) noexcept;
 
     bool
-    contains (gdk::chars haystack, gdk::chars needle) noexcept;
+    contains (std::string_view haystack, std::string_view needle) noexcept;
   }
 }

@@ -52,17 +52,15 @@ namespace iw4x
     }
 
     activation
-    activation_uri (chars c) noexcept
+    activation_uri (string_view c) noexcept
     {
       activation r ("ms-xbl-multiplayer://activity?connectionString=");
 
       char        b[activation_capacity];
       text_writer w (b, sizeof (b));
 
-      for (size_t i (0); i != c.size (); ++i)
+      for (unsigned char x: c)
       {
-        unsigned char x (static_cast<unsigned char> (c.data ()[i]));
-
         if ((x >= 'a' && x <= 'z') ||
             (x >= 'A' && x <= 'Z') ||
             (x >= '0' && x <= '9') ||
@@ -72,7 +70,7 @@ namespace iw4x
           continue;
         }
 
-        w.write (chars ("%"));
+        w.write (string_view ("%"));
 
         static const char digits[] = "0123456789ABCDEF";
 
@@ -81,11 +79,11 @@ namespace iw4x
       }
 
       return activation ("ms-xbl-multiplayer://activity?connectionString={}",
-                         chars (b, w.size ()));
+                         string_view (b, w.size ()));
     }
 
     void
-    deliver_invite (chars c) noexcept
+    deliver_invite (string_view c) noexcept
     {
       if (!initialized ())
       {

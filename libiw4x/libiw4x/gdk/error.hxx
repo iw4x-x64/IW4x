@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <cstddef>
 #include <concepts>
+#include <string_view>
 
 #include <libiw4x/gdk/text.hxx>
 #include <libiw4x/gdk/types.hxx>
@@ -88,13 +89,13 @@ namespace iw4x
     }
 
     [[noreturn]] void
-    fatal (chars) noexcept;
+    fatal (std::string_view) noexcept;
 
     template <writable... A>
     [[noreturn]] inline void
     fatal (const char* f, const A&... a) noexcept
     {
-      fatal (chars (text<description_size> (f, a...)));
+      fatal (text<description_size> (f, a...));
     }
 
     HRESULT

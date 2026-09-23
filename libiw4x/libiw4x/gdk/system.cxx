@@ -19,7 +19,7 @@ namespace iw4x
     {
       return guard ("XSystemGetXboxLiveSandboxId", [&] () -> HRESULT
       {
-        copy_out (chars (sandbox, sizeof (sandbox) - 1), size, buffer, used);
+        copy_out (sandbox, size, buffer, used);
 
         l1 ("XSystemGetXboxLiveSandboxId -> {}", sandbox);
 
