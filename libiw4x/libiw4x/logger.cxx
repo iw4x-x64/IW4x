@@ -83,7 +83,10 @@ namespace iw4x
         text (const argument& a) noexcept
         {
           if (a.string == nullptr)
-            return null_string;
+          {
+            return a.size == argument::unmeasured ? null_string
+                                                  : std::string_view ();
+          }
 
           return std::string_view (a.string,
                                    a.size == argument::unmeasured
