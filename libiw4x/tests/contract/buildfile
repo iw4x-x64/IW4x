@@ -1,0 +1,8 @@
+import libs = libiw4x%liba{iw4x}
+
+exe{driver}: {hxx ixx txx cxx}{**} $libs testscript{** testscript}
+
+# The driver reports a violation from another thread (see driver.cxx).
+#
+if ($cxx.target.class != 'windows')
+  cxx.libs += -pthread

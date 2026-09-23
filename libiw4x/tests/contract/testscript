@@ -1,0 +1,264 @@
+: kind-name
+: Names of the contract kinds
+:
+: The last line is for a value that is not part of the enumeration.
+:
+$* kinds >>EOO
+precondition
+postcondition
+invariant
+assertion
+unreachable
+contract
+EOO
+
+: level
+: Checking levels the checks are built at
+:
+: The last line is the level of a translation unit that does not specify
+: one, which must be the default level.
+:
+$* levels >>EOO
+off 0
+default 1
+audit 2
+undefined 1
+EOO
+
+: handler
+:
+{{
+  : install
+  : The previously installed handler is returned
+  :
+  $* handler >>EOO
+  <null>
+  first
+  second
+  <null>
+  EOO
+
+  : thread
+  : The handler is process-wide
+  :
+  $* thread >'assertion|thread.cxx|1|thread_func|handled|<null>'
+}}
+
+: fail
+: The violation is passed to the handler as specified
+:
+{{
+  test.arguments += fail
+
+  : complete
+  :
+  $* precondition foo/bar.cxx 123 f 'x != 0' 'x must be positive' \
+     >'precondition|foo/bar.cxx|123|f|x != 0|x must be positive'
+
+  : no-message
+  :
+  $* assertion bar.cxx 1 f x >'assertion|bar.cxx|1|f|x|<null>'
+
+  : null
+  : NULL fields are passed through rather than being substituted
+  :
+  $* unreachable '<null>' 0 '<null>' '<null>' '<null>' \
+     >'unreachable|<null>|0|<null>|<null>|<null>'
+}}
+
+: report
+: Default violation reporting
+:
+: Note that a violation that is not handled terminates the process by
+: calling abort(). The driver catches the resulting signal and exits
+: with the 42 status instead (see driver.cxx).
+:
+{{
+  test.arguments += report
+
+  : precondition
+  :
+  $* precondition bar.cxx 123 f 'x != 0' 2>>EOE == 42
+  bar.cxx:123: error: precondition violated: x != 0
+  bar.cxx:123: note: in 'f'
+  EOE
+
+  : postcondition
+  :
+  $* postcondition bar.cxx 123 f 'x != 0' 2>>EOE == 42
+  bar.cxx:123: error: postcondition violated: x != 0
+  bar.cxx:123: note: in 'f'
+  EOE
+
+  : invariant
+  :
+  $* invariant bar.cxx 123 f 'valid ()' 'on exit' 2>>EOE == 42
+  bar.cxx:123: error: invariant violated: valid ()
+  bar.cxx:123: note: in 'f'
+  bar.cxx:123: note: on exit
+  EOE
+
+  : assertion
+  :
+  $* assertion bar.cxx 123 f 'x != 0' 'must not happen' 2>>EOE == 42
+  bar.cxx:123: error: assertion failed: x != 0
+  bar.cxx:123: note: in 'f'
+  bar.cxx:123: note: must not happen
+  EOE
+
+  : unreachable
+  : The expression is not part of the diagnostics for this kind
+  :
+  $* unreachable bar.cxx 123 f 'control reached this point' 2>>EOE == 42
+  bar.cxx:123: error: control reached unreachable code
+  bar.cxx:123: note: in 'f'
+  EOE
+
+  : file-name
+  : Only the file name is printed, for either directory separator
+  :
+  {{
+    test.arguments += assertion
+
+    : posix
+    :
+    $* /tmp/foo/bar.cxx 1 f x 2>>EOE == 42
+    bar.cxx:1: error: assertion failed: x
+    bar.cxx:1: note: in 'f'
+    EOE
+
+    : windows
+    :
+    $* 'c:\foo\bar.cxx' 1 f x 2>>EOE == 42
+    bar.cxx:1: error: assertion failed: x
+    bar.cxx:1: note: in 'f'
+    EOE
+  }}
+
+  : null
+  : Unknown fields are reported as such
+  :
+  $* precondition '<null>' 0 '<null>' '<null>' 2>>EOE == 42
+  <unknown>:0: error: precondition violated: <unknown>
+  <unknown>:0: note: in '<unknown>'
+  EOE
+
+  : handler-returns
+  : Returning from the handler does not discharge the violation
+  :
+  $* -r assertion bar.cxx 1 f x >'handled' 2>>EOE == 42
+  bar.cxx:1: error: assertion failed: x
+  bar.cxx:1: note: in 'f'
+  EOE
+}}
+
+: check
+: Contract macros at each checking level
+:
+{{
+  test.arguments += check
+
+  : off
+  : Nothing is checked at this level
+  :
+  : Note that a failed assertion as well as reaching an unreachable
+  : statement is undefined behavior at this level, so those checks are
+  : only exercised here in a way that cannot fail.
+  :
+  {{
+    test.arguments += off
+
+    $* pre             false : pre
+    $* pre-msg         false : pre-msg
+    $* assertion       true  : assertion
+    $* post            false : post
+    $* post-final      false : post-final
+    $* invariant-entry false : invariant-entry
+    $* invariant-exit  false : invariant-exit
+  }}
+
+  : default
+  :
+  {{
+    test.arguments += default
+
+    : pre
+    :
+    {{
+      $* pre     false >'precondition|pre|ok|<null>'        : fail
+      $* pre     true                                       : hold
+      $* pre-msg false >'precondition|pre_msg|ok|must hold' : message
+    }}
+
+    : assertion
+    :
+    {{
+      $* assertion     false >'assertion|assertion|ok|<null>'        : fail
+      $* assertion     true                                          : hold
+      $* assertion-msg false >'assertion|assertion_msg|ok|must hold' : message
+    }}
+
+    : unreachable
+    :
+    $* unreachable false \
+       >'unreachable|unreachable|control reached this point|<null>'
+
+    : audit
+    : The audit checks are not performed at this level
+    :
+    {{
+      $* post            false : post
+      $* post-final      false : post-final
+      $* post-unwinding  false : post-unwinding
+      $* invariant-entry false : invariant-entry
+      $* invariant-exit  false : invariant-exit
+    }}
+  }}
+
+  : audit
+  :
+  {{
+    test.arguments += audit
+
+    : pre
+    : The lower level checks are still performed
+    :
+    $* pre false >'precondition|pre|ok|<null>'
+
+    : post
+    :
+    {{
+      $* post        false >'postcondition|post|ok|<null>'      : fail
+      $* post        true                                       : hold
+      $* post-final  false >'postcondition|post_final|v|<null>' : final-fail
+      $* post-unwind false >'unwound'                           : unwind
+
+      : final
+      : The expression is evaluated when the scope is left
+      :
+      : Note that it does not hold where the check is written, so it
+      : would have failed if it were evaluated there.
+      :
+      $* post-final true
+
+      : unwinding
+      : A scope that is entered and left while an exception is in flight
+      : is still left normally
+      :
+      $* post-unwinding false >'postcondition|unwinding_check|ok|<null>'
+    }}
+
+    : invariant
+    :
+    {{
+      : entry
+      : The invariant is checked on entry, and only once
+      :
+      $* invariant-entry false >'invariant|invariant_entry|ok|on entry'
+
+      $* invariant-entry  true                                        : hold
+      $* invariant-exit   false >'invariant|invariant_exit|v|on exit' : exit
+      $* invariant-unwind false >'unwound'                            : unwind
+    }}
+  }}
+}}
