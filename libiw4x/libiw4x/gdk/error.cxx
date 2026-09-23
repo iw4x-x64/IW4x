@@ -108,7 +108,9 @@ namespace iw4x
         // Note that every other status here belongs to a call that
         // could not be carried out.
         //
-        if (c == insufficient_buffer || c == E_ABORT)
+        if (c == insufficient_buffer ||
+            c == blob_not_found      ||
+            c == E_ABORT)
           l1 ("{}: {} ({:#010x})",
               p,
               e.what (),

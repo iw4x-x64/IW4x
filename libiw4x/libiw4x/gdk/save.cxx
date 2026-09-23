@@ -218,8 +218,16 @@ namespace iw4x
             file f;
 
             if (!f.open_read (p))
-              raise (HRESULT_FROM_WIN32 (ERROR_FILE_NOT_FOUND),
-                     "unable to read '{}'", names_[i].c_str ());
+            {
+              DWORD e (GetLastError ());
+
+              if (e == ERROR_FILE_NOT_FOUND || e == ERROR_PATH_NOT_FOUND)
+                raise (blob_not_found,
+                       "nothing stored as '{}' yet",
+                       names_[i].c_str ());
+
+              raise_win32 ("unable to read '{}'", names_[i].c_str ());
+            }
 
             uint64_t s (0);
 

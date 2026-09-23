@@ -77,5 +77,6 @@ namespace iw4x
 
     inline constexpr HRESULT pending (static_cast<HRESULT> (0x8000000AL));
     inline constexpr HRESULT insufficient_buffer (HRESULT_FROM_WIN32 (ERROR_INSUFFICIENT_BUFFER));
+    inline constexpr HRESULT blob_not_found (static_cast<HRESULT> (0x80830008L));
   }
 }
