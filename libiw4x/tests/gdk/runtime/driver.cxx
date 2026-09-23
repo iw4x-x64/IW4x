@@ -35,6 +35,16 @@ main ()
 
     assert (m == image ());
 
+    m = LoadLibraryExA ("C:/somewhere/xgameruntime.dll",
+                        nullptr,
+                        LOAD_LIBRARY_SEARCH_SYSTEM32);
+
+    assert (m == image ());
+
+    m = LoadLibraryExA ("xgameruntime.dll\\kernel32.dll", nullptr, 0);
+
+    assert (m != image ());
+
     m = LoadLibraryExA ("kernel32.dll", nullptr, 0);
 
     assert (m != nullptr && m != image ());
