@@ -3,6 +3,7 @@
 #include <cstring>
 
 #include <libiw4x/logger.hxx>
+#include <libiw4x/contract.hxx>
 
 #include <libiw4x/gdk/path.hxx>
 #include <libiw4x/gdk/sync.hxx>
@@ -43,6 +44,9 @@ namespace iw4x
                         size_t maximum)
             : prompt_ ("{}", prompt), count_ (count), maximum_ (maximum)
         {
+          LIBIW4X_PRE (count <= max_candidates);
+          LIBIW4X_PRE (candidates != nullptr || count == 0);
+
           if (count_ == 0)
             return;
 
