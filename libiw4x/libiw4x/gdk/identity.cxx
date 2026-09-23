@@ -60,10 +60,13 @@ namespace iw4x
           s.remove_prefix (2);
         }
 
-        uint64_t r (0);
+        uint64_t          r (0);
+        from_chars_result x (from_chars (s.data (),
+                                         s.data () + s.size (),
+                                         r,
+                                         16));
 
-        if (from_chars (s.data (), s.data () + s.size (), r, 16).ec != errc () ||
-            r == 0)
+        if (x.ec != errc () || r == 0)
         {
           return false;
         }
