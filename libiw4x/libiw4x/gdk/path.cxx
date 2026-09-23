@@ -1,8 +1,11 @@
 #include <libiw4x/gdk/path.hxx>
 
 #include <new>
+#include <limits>
 #include <cwchar>
 #include <cstring>
+
+#include <libiw4x/contract.hxx>
 
 using namespace std;
 
@@ -13,6 +16,8 @@ namespace iw4x
     bool path::
     extend (const wchar_t* p, size_t n) noexcept
     {
+      LIBIW4X_INVARIANT (size_ < capacity && value_[size_] == L'\0');
+
       if (p == nullptr || n == 0)
         return whole ();
 
@@ -84,6 +89,8 @@ namespace iw4x
     void path::
     to_directory () noexcept
     {
+      LIBIW4X_INVARIANT (size_ < capacity && value_[size_] == L'\0');
+
       while (size_ != 0 && value_[size_ - 1] != L'\\')
         --size_;
 
@@ -99,6 +106,9 @@ namespace iw4x
       if (n == 0)
         return string_view ();
 
+      LIBIW4X_PRE (b != nullptr);
+      LIBIW4X_PRE (n - 1 <= static_cast<size_t> (numeric_limits<int>::max ()));
+
       int r (WideCharToMultiByte (CP_UTF8,
                                   0,
                                   value_,
@@ -111,6 +121,8 @@ namespace iw4x
       if (r < 0)
         r = 0;
 
+      LIBIW4X_ASSERT (static_cast<size_t> (r) < n);
+
       b[r] = '\0';
 
       return string_view (b, static_cast<size_t> (r));
@@ -121,6 +133,9 @@ namespace iw4x
     {
       if (n == 0)
         return string_view ();
+
+      LIBIW4X_PRE (w != nullptr && b != nullptr);
+      LIBIW4X_PRE (n <= static_cast<size_t> (numeric_limits<int>::max ()));
 
       int r (WideCharToMultiByte (CP_UTF8,
                                   0,
@@ -136,6 +151,8 @@ namespace iw4x
         b[0] = '\0';
         return string_view ();
       }
+
+      LIBIW4X_ASSERT (static_cast<size_t> (r) <= n);
 
       return string_view (b, static_cast<size_t> (r) - 1);
     }
@@ -271,6 +288,8 @@ namespace iw4x
     bool file::
     size (uint64_t& n) const noexcept
     {
+      LIBIW4X_PRE (opened ());
+
       LARGE_INTEGER v;
 
       if (!GetFileSizeEx (handle_, &v))
@@ -283,6 +302,8 @@ namespace iw4x
     int64_t file::
     last_write_seconds () const noexcept
     {
+      LIBIW4X_PRE (opened ());
+
       FILETIME t;
 
       if (!GetFileTime (handle_, nullptr, nullptr, &t))
@@ -294,6 +315,9 @@ namespace iw4x
     bool file::
     read (void* b, size_t n) noexcept
     {
+      LIBIW4X_PRE (opened ());
+      LIBIW4X_PRE (b != nullptr || n == 0);
+
       auto* p (static_cast<uint8_t*> (b));
 
       while (n != 0)
@@ -314,6 +338,9 @@ namespace iw4x
     bool file::
     write (const void* b, size_t n) noexcept
     {
+      LIBIW4X_PRE (opened ());
+      LIBIW4X_PRE (b != nullptr || n == 0);
+
       auto* p (static_cast<const uint8_t*> (b));
 
       while (n != 0)
