@@ -86,7 +86,7 @@ namespace iw4x
                                      BCRYPT_USE_SYSTEM_PREFERRED_RNG));
 
         if (s < 0)
-          raise (E_FAIL, "unable to draw a local user id, status {}",
+          raise (E_FAIL, "unable to generate local user ID, status {}",
                  hex_number (static_cast<uint32_t> (s), 8));
 
         return xuid_shape | (v & 0x0000FFFFFFFFFFFFULL);
@@ -103,7 +103,7 @@ namespace iw4x
 
         if (!f.open_write (identity_file ()) ||
             !f.write (s.c_str (), s.size ()))
-          raise_win32 ("unable to write the local user id");
+          raise_win32 ("unable to write local user ID");
 
         return v;
       }
@@ -204,7 +204,7 @@ namespace iw4x
       n.value[k] = '\0';
       n.size = k;
 
-      info ("local user name is {}", n.value);
+      info ("local user name is '{}'", string_view (n.value, n.size));
     }
 
     bool
