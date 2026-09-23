@@ -22,9 +22,19 @@ main ()
   }
 
   {
+    path p (storage_root ());
+    p.append (L"identity");
+
+    file f;
+
+    assert (f.open_write (p));
+    assert (f.write ("0x0009000012345678\r\n", 20));
+  }
+
+  {
     std::uint64_t x (xuid ());
 
-    assert (x != 0);
+    assert (x == 0x0009000012345678ULL);
     assert ((x >> 48) == 9);
     assert (xuid () == x);
   }
