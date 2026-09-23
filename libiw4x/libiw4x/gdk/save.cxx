@@ -4,6 +4,7 @@
 #include <cstring>
 
 #include <libiw4x/logger.hxx>
+#include <libiw4x/contract.hxx>
 
 #include <libiw4x/gdk/sync.hxx>
 #include <libiw4x/gdk/error.hxx>
@@ -199,6 +200,9 @@ namespace iw4x
                         size_t count)
             : location_ (location), count_ (count)
         {
+          LIBIW4X_PRE (count <= max_blob_reads);
+          LIBIW4X_PRE (names != nullptr || count == 0);
+
           for (size_t i (0); i != count_; ++i)
             names_[i] = text<blob_name_capacity> ("{}",
                                                   storable_name (names[i]));
@@ -285,6 +289,8 @@ namespace iw4x
             b[i].data = p;
             p += d.size ();
           }
+
+          LIBIW4X_ASSERT (p <= e);
         }
 
         size_t
@@ -310,6 +316,9 @@ namespace iw4x
                           size_t count) noexcept
             : location_ (location), count_ (count)
         {
+          LIBIW4X_PRE (count <= max_blob_writes);
+          LIBIW4X_PRE (writes != nullptr || count == 0);
+
           for (size_t i (0); i != count_; ++i)
           {
             writes_[i].name = writes[i].name;
