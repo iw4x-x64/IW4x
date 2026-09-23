@@ -4,6 +4,8 @@
 #include <cstddef>
 #include <string_view>
 
+#include <libiw4x/gdk/text.hxx>
+
 namespace iw4x
 {
   namespace gdk
@@ -20,6 +22,12 @@ namespace iw4x
 
     std::uint64_t
     xuid ();
+
+    inline text<19>
+    xuid_text (std::uint64_t v) noexcept
+    {
+      return text<19> ("{}", hex_number (v, 16));
+    }
 
     std::size_t
     gamertag (char* buffer, std::size_t size) noexcept;

@@ -97,7 +97,7 @@ namespace iw4x
       {
         uint64_t v (random_identity ());
 
-        text<32> s ("{}", hex_number (v, 16));
+        text<19> s (xuid_text (v));
 
         file f;
 
@@ -146,13 +146,13 @@ namespace iw4x
 
           if (read_identity (r))
           {
-            info ("local user {:#x}", r);
+            info ("local user ID is {}", xuid_text (r));
             return r;
           }
 
           r = mint_identity ();
 
-          info ("local user {:#x} minted", r);
+          info ("local user ID {} is created", xuid_text (r));
           return r;
         } ());
 
