@@ -734,6 +734,9 @@ namespace iw4x
         if (!r)
           raise_invalid ("not an operation of ours");
 
+        if (r->provider == nullptr)
+          raise_invalid ("not an operation with a provider");
+
         return submit (r.get (), (*r->queue)[port::work], delay, &do_work)
                  ? S_OK
                  : E_ABORT;
