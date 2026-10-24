@@ -1,8 +1,17 @@
 : 1
 name: libiw4x
 version: 0.1.0-a.0.z
-summary: iw4x client
+type: lib
+language: c++
+project: iw4x
+summary: Multiplayer client for Call of Duty: Modern Warfare 2 (2009).
 license: other: GPL-3.0-only with IW4x Linking Exception 1.1
+topics: game, Call of Duty, Modern Warfare 2, multiplayer
+description-file: README.md
+url: https://github.com/iw4x-x64/iw4x
+src-url: https://github.com/iw4x-x64/iw4x
+builds: default : &windows ; Windows DLL.
+builds: &gcc-16+           ; C++26 reflection and GNU linker options.
 depends: * build2 >= 0.18.0
 depends: * bpkg >= 0.18.0
 depends: libcurl ^8.8.0

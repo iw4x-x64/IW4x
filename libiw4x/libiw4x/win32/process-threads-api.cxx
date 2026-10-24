@@ -1,3 +1,6 @@
+// Copyright (c) the IW4x authors (see the AUTHORS file).
+// SPDX-License-Identifier: GPL-3.0-only WITH AdditionRef-IW4x-Exception-1.1
+
 #include <libiw4x/win32/process-threads-api.hxx>
 
 #include <libiw4x/iw4x.hxx>

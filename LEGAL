@@ -1,0 +1,34 @@
+This file contains additional (to the LICENSE.md and LICENSE-EXCEPTION.md
+files) notes and details on the copyright and/or license for the code.
+
+The upstream/ directory contains the third-party packages that libiw4x
+builds from source. Each of them is licensed under its own terms, which the
+files of the package state:
+
+upstream/libz/
+
+  The zlib compression library, licensed under the zlib license (see
+  upstream/libz/LICENSE). The package comes from the build2 packaging of
+  zlib:
+
+  https://git.build2.org/cgit/packaging/zlib/
+
+upstream/libcurl/
+
+  The libcurl URL transfer library, licensed under the curl license, an
+  MIT/X derivative (see upstream/libcurl/COPYING). The package comes from
+  the build2 packaging of curl, with its build configuration reduced to the
+  parts of the library that libiw4x uses:
+
+  https://git.build2.org/cgit/packaging/curl/
+
+upstream/libquill/
+
+  The Quill logging library, licensed under the MIT license, which the
+  header of each of its source files states. It bundles the {fmt}
+  formatting library in upstream/libquill/include/quill/bundled/fmt/,
+  licensed under the MIT license with the optional exception for object
+  code (see the header of format.h in that directory). The package comes
+  from the build2 packaging of Quill:
+
+  https://github.com/build2-packaging/quill

@@ -1,0 +1,16 @@
+# This file contains the register of the identities that appear in the
+# revision history. We generate the .mailmap and AUTHORS files from it, so to
+# change how a contributor is identified or credited, we change their entry
+# here and regenerate both files.
+#
+# Each manifest describes one contributor. The name and email values are the
+# preferred identity. Each alias value is another identity of the same
+# contributor in the history, in the 'Name <email>' form. The authors value
+# selects the AUTHORS entry: name (the default) lists the preferred name,
+# email also lists the email, and none leaves the contributor out (this is
+# how we exclude bots).
+#
+: 1
+name: William Roy
+email: wroy@proton.me
+authors: name

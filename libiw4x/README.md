@@ -1,9 +1,1 @@
-## Configuration variables
-
-This package provides the following configuration variables:
-
-```
-[bool] config.libiw4x.<VARIABLE> ?= false
-```
-
-<DESCRIPTION-OF-CONFIG-VARIABLES>
+# libiw4x - Multiplayer client for Call of Duty: Modern Warfare 2 (2009).

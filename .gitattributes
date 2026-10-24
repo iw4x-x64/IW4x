@@ -1,11 +1,11 @@
-# This is a good default: files that are auto-detected by git to be text are
-# converted to the platform-native line ending (LF on Unix, CRLF on Windows)
-# in the working tree and to LF in the repository.
+# This is a good default: files that are auto-detected by git to be text
+# are converted to the platform-native line ending (LF on Unix, CRLF on
+# Windows) in the working tree and to LF in the repository.
 #
 * text=auto
 
-# Use `eol=crlf` for files that should have the CRLF line ending both in the
-# working tree (even on Unix) and in the repository.
+# Use `eol=crlf` for files that should have the CRLF line ending both in
+# the working tree (even on Unix) and in the repository.
 #
 # *.bat text eol=crlf
 
@@ -14,6 +14,34 @@
 #
 # *.sh text eol=lf
 
-# Use `binary` to make sure certain files are never auto-detected as text.
+# Use `binary` to make sure certain files are never auto-detected as
+# text.
 #
 # *.png binary
+
+# Use `-spdx` to keep the headers tool from adding the SPDX source
+# header to certain files.
+#
+# The third-party packages in upstream/ come with their own licenses.
+# And neither the identity register nor the module definition files have
+# a comment syntax that the tool knows about, so we rely on the license
+# files of the repository to cover them.
+#
+upstream/** -spdx
+identities  -spdx
+*.def       -spdx
+
+# Linguist, which GitHub's syntax highlighting and language statistics
+# come from, has no build2 language and takes a buildfile for Ruby
+# (Buildr's Buildfile). So we keep the build2 files out of the
+# statistics and highlight each as the language it is closest to.
+#
+buildfile    linguist-detectable=false linguist-language=Makefile
+build2file   linguist-detectable=false linguist-language=Makefile
+*.build      linguist-detectable=false linguist-language=Makefile
+*.build2     linguist-detectable=false linguist-language=Makefile
+testscript   linguist-detectable=false linguist-language=Shell
+*.testscript linguist-detectable=false linguist-language=Shell
+manifest     linguist-detectable=false linguist-language=YAML
+*.manifest   linguist-detectable=false linguist-language=YAML
+identities   linguist-detectable=false linguist-language=YAML
